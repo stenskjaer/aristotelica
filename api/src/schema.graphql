@@ -4,8 +4,10 @@ type Text {
   authors: [Person!]! @cypher(statement: "MATCH (this)<--(:Attribution)-->(p:Person) RETURN DISTINCT p")
   authorName: String! @cypher(statement: "MATCH (this)<--(:Attribution)-->(p:Person) RETURN p.name")
   title: String!
+  title_addon: String
   created: String!
   modified: String
+  date: String
   note: String
   type: [TextType]! @relation(name: "Type", direction: "OUT")
 }
@@ -57,5 +59,6 @@ type Category {
 
 type Query {
   textByTitle(substring: String): [Text] @cypher(statement: "MATCH (t:Text) WHERE lower(t.title) CONTAINS lower($substring) RETURN t")
+  textById(ID: String!): Text @cypher(statement: "MATCH (t:Text) WHERE t.text_id = $ID RETURN t")
   usersBySubstring(substring: String, first: Int = 10, offset: Int = 0): [User] @cypher(statement: "MATCH (u:User) WHERE u.name CONTAINS $substring RETURN u")
 }
