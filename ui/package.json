@@ -5,6 +5,7 @@
   "dependencies": {
     "@material-ui/core": "^1.5.0",
     "@material-ui/icons": "^1.1.0",
+    "antd": "^3.10.2",
     "apollo-boost": "^0.1.13",
     "graphql": "^0.13.2",
     "graphql-tag": "^2.9.2",

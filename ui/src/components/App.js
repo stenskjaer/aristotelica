@@ -1,6 +1,7 @@
-import React, { Component } from 'react';
-import '../style/App.css';
-import TextList from './TextList';
+import React, { Component } from 'react'
+// Layout 
+import { Layout } from 'antd';
+const { Content } = Layout;
 
 class App extends Component {
   render() {

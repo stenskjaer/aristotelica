@@ -1,7 +1,6 @@
 import React from "react";
 import { Query } from "react-apollo";
 import gql from "graphql-tag";
-import "../style/UserList.css";
 import { withStyles } from "@material-ui/core/styles";
 import {
   Table,
@@ -34,7 +33,7 @@ class TextList extends React.Component {
       order: "asc",
       orderBy: "authorName",
       page: 0,
-      rowsPerPage: 100
+      rowsPerPage: 10
     };
   }
 
