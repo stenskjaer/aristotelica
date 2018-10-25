@@ -5,7 +5,7 @@ type Text {
   authorName: String! @cypher(statement: "MATCH (this)<--(:Attribution)-->(p:Person) RETURN p.name")
   title: String!
   title_addon: String
-  created: String!
+  created: DateTime!
   modified: String
   date: String
   note: String
@@ -56,6 +56,8 @@ type Category {
   name: ID!
   businesses: [Business] @relation(name: "IN_CATEGORY", direction: "IN")
 }
+
+scalar DateTime
 
 type Query {
   textByTitle(substring: String): [Text] @cypher(statement: "MATCH (t:Text) WHERE lower(t.title) CONTAINS lower($substring) RETURN t")

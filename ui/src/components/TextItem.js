@@ -43,9 +43,9 @@ class TextItem extends Component {
                 <dt>Type</dt>
                 <dd>{types.join(', ')}</dd>
                 <dt>Created</dt>
-                <dd>{item.created}</dd>
+                <dd>{Date(item.created)}</dd>
                 <dt>Modified</dt>
-                <dd>{item.modified}</dd>
+                <dd>{Date(item.modified)}</dd>
                 <dt>Date</dt>
                 <dd>{item.date}</dd>
                 <dt>Note</dt>
