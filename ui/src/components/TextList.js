@@ -3,19 +3,6 @@ import { Query } from "react-apollo";
 import gql from "graphql-tag";
 import { Table } from 'antd'
 
-
-const styles = theme => ({
-  root: {
-    maxWidth: 700,
-    marginTop: theme.spacing.unit * 3,
-    overflowX: "auto",
-    margin: "auto"
-  },
-  table: {
-    minWidth: 700
-  }
-});
-
 class TextList extends React.Component {
   constructor(props) {
     super(props);
