@@ -1,22 +1,27 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
+import { Switch, Route, Redirect } from 'react-router-dom'
 import { Layout } from 'antd';
-import TextItem from './TextItem'
+import TextItem from './TextItem';
 import TextList from './TextList';
+import Menu from './Menu';
 
 const { Content } = Layout;
 
 class App extends Component {
   render() {
     return (
-        <Layout>
-          <Content style={{ padding: '0 50px' }}>
-            <div style={{ background: '#fff', padding: 12, minHeight: 280 }}>
-              <h1>Welcome to Commentaria Aristotelica</h1>
-              <TextItem item="86"/>
-              <TextList />
-            </div>
-          </Content>
-        </Layout>
+      <Layout>
+        <Menu />
+        <Content style={{ padding: '0 50px' }}>
+          <div style={{ background: '#fff', padding: 12, minHeight: 280 }}>
+            <Switch>
+              <Route exact path='/' render={() => <Redirect to='/texts' />} />
+              <Route exact path="/texts" component={TextList} />
+              <Route exact path="/detail/:id" component={TextItem} />
+            </Switch>
+          </div>
+        </Content>
+      </Layout>
     );
   }
 }

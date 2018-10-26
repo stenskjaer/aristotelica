@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { BrowserRouter } from 'react-router-dom'
 import App from './components/App';
 import registerServiceWorker from './registerServiceWorker';
 import ApolloClient from 'apollo-boost';
@@ -12,9 +13,11 @@ const client = new ApolloClient({
 })
 
 const Main = () => (
-  <ApolloProvider client={client}>
-    <App />
-  </ApolloProvider>
+  <BrowserRouter>
+    <ApolloProvider client={client}>
+      <App />
+    </ApolloProvider>
+  </BrowserRouter>
 )
 
 ReactDOM.render(<Main />, document.getElementById('root'));

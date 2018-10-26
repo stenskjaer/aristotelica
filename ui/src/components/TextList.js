@@ -35,7 +35,7 @@ class TextList extends React.Component {
       {
         title: 'Title',
         dataIndex: 'title',
-        render: (text, record) => <a href={record.text_id}>{text}</a>
+        render: (text, record) => <a href={`detail/${record.text_id}`}>{text}</a>
       },
       {
         title: 'ID',
