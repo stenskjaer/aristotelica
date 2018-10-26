@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "./node_modules/.bin/nodemon --exec babel-node src/index.js",
+    "start": "./node_modules/.bin/nodemon -e js,graphql --exec babel-node src/index.js",
     "seedDb": "./node_modules/.bin/babel-node src/seed/seed-db.js"
   },
   "author": "William Lyon",
