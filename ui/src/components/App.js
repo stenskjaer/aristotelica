@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Switch, Route, Redirect } from 'react-router-dom'
 import { Layout } from 'antd';
 import TextItem from './TextItem';
+import EditText from './EditText';
 import TextList from './TextList';
 import Menu from './Menu';
 

@@ -29,5 +29,5 @@ scalar DateTime
 
 type Query {
   textByTitle(substring: String): [Text] @cypher(statement: "MATCH (t:Text) WHERE lower(t.title) CONTAINS lower($substring) RETURN t")
-  textById(ID: String!): Text @cypher(statement: "MATCH (t:Text) WHERE t.text_id = $ID RETURN t")
+  textById(id: String!): Text @cypher(statement: "MATCH (t:Text) WHERE t.text_id = $id RETURN t")
 }
