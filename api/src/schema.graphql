@@ -1,5 +1,6 @@
 type Text {
   id: ID!
+  text_id: String!
   # This is a clear ontology conflict between these two things!
   authors: [Person!]! @cypher(statement: "MATCH (this)<--(:Attribution)-->(p:Person) RETURN DISTINCT p")
   authorName: String! @cypher(statement: "MATCH (this)<--(:Attribution)-->(p:Person) RETURN p.name")
