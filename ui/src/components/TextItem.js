@@ -5,7 +5,7 @@ import { withRouter } from "react-router";
 
 const ITEM_QUERY = gql`
   query Text($id: String!) {
-    textById(ID: $id) {
+    textById(id: $id) {
       title
       title_addon
       created

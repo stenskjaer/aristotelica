@@ -1,13 +1,34 @@
 import React, { Component } from "react";
-import { Mutation } from "react-apollo";
+import { Mutation, Query } from "react-apollo";
 import gql from "graphql-tag";
 import { withRouter } from "react-router";
+import { Formik } from 'formik';
 
 const UPDATE_ITEM_QUERY = gql`
-  mutation UpdateText($id: ID!, $title: String!){
-    UpdateText(text_id: $id, title: $title) {
+  mutation UpdateText($text_id: ID!, $title: String!){
+    UpdateText(text_id: $text_id, title: $title) {
       title
       text_id
+    }
+  }
+`
+
+const GET_ITEM_QUERY = gql`
+  query Text($id: String!) {
+    textById(id: $id) {
+      text_id
+      title
+      title_addon
+      created
+      modified
+      date
+      note
+      authors {
+        name
+      }
+      type {
+        name
+      }
     }
   }
 `
@@ -23,27 +44,40 @@ class TextItem extends Component {
     const { title, id } = this.state
 
     return (
-      <Mutation mutation={UPDATE_ITEM_QUERY}>
-        {(updateText, { data }) => (
-          <div>
-            <form
-              onSubmit={e => {
-                e.preventDefault();
-                updateText({ variables: { title, id } });
-              }}
-            >
-              <input
-                value={title}
-                onChange={e => this.setState({ title: e.target.value })}
-                type="text"
-                placeholder="Input title"
-              />
-              <button type="submit">Add Todo</button>
-            </form>
-          </div>
-        )}
+      <Query query={GET_ITEM_QUERY} variables={{ id: this.props.match.params.id }}>
+        {({ loading, error, data }) => {
 
-      </Mutation>
+          if (loading) return <div>Fetching</div>
+          if (error) return <div>Error: {this.props.data.error.message}</div>
+
+          const item = data.textById
+
+          return (
+            <Mutation mutation={UPDATE_ITEM_QUERY}>
+              {(updateText) => (
+                <Formik
+                  initialValues={item}
+                  onSubmit={values => updateText({ variables: values })}
+                >
+                  {({ values, handleSubmit, handleChange, isSubmitting }) => (
+                    <form onSubmit={handleSubmit}>
+                      <input
+                        type="text"
+                        name="title"
+                        onChange={handleChange}
+                        value={values.title}
+                      />
+                      <button type="submit" disabled={isSubmitting}>
+                        Submit
+                      </button>
+                    </form>
+                  )}
+                </Formik>
+              )}
+            </Mutation>
+          )
+        }}
+      </Query >
     );
   }
 }
