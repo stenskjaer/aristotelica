@@ -1,12 +1,10 @@
 type Text {
   text_id: ID! 
-  # This is a clear ontology conflict between these two things!
-  authors: [Person!]! @cypher(statement: "MATCH (this)<--(:Attribution)-->(p:Person) RETURN DISTINCT p")
-  authorName: String! @cypher(statement: "MATCH (this)<--(:Attribution)-->(p:Person) RETURN p.name")
-  title: String!
-  title_addon: String
   created: DateTime!
-  modified: String
+  modified: DateTime
+  authors: [Person!]! @cypher(statement: "MATCH (this)<--(:Attribution)-->(p:Person) RETURN DISTINCT p")
+  title: String
+  title_addon: String
   date: String
   note: String
   type: [TextType]! @relation(name: "Type", direction: "OUT")
@@ -30,4 +28,15 @@ scalar DateTime
 type Query {
   textByTitle(substring: String): [Text] @cypher(statement: "MATCH (t:Text) WHERE lower(t.title) CONTAINS lower($substring) RETURN t")
   textById(id: String!): Text @cypher(statement: "MATCH (t:Text) WHERE t.text_id = $id RETURN t")
+}
+
+type Mutation {
+  UpdateText(
+      text_id: ID!, 
+      modified: DateTime,
+      title: String,
+      title_addon: String,
+      note: String,
+      date: String,
+    ): Text
 }

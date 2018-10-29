@@ -15,7 +15,7 @@ const UPDATE_ITEM_QUERY = gql`
       $title_addon: String,
       $note: String,
       $date: String,
-      $modified: String,
+      $modified: DateTime,
     ){
     UpdateText(
         text_id: $text_id, 
