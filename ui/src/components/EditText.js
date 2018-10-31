@@ -55,6 +55,24 @@ const GET_ITEM_QUERY = gql`
   }
 `
 
+const ADD_TYPE = gql`
+  mutation AddTextType(
+    $texttext_id: String!,
+    $texttypeid: String!
+  ){
+    AddTextType(
+      texttext_id: $texttext_id, 
+      texttypeid: $texttypeid
+    ) {
+      title
+      type {
+        name
+        id
+      }
+    }
+  }
+`
+
 class TextItem extends Component {
 
   render() {
@@ -66,6 +84,14 @@ class TextItem extends Component {
           if (error) return <div>Error: {this.props.data.error.message}</div>
 
           const item = data.textById
+
+          const handleTypeUpdate = (event) => {
+            return (
+              client.mutate({
+                variables: event.target.value
+              })
+            )
+          }
 
           if (!item) {
             return <div>Error: The item does not exist.</div>
@@ -97,6 +123,9 @@ class TextItem extends Component {
                           placeholder="Note" name="note"
                           onChange={handleChange} value={values.note}
                         />
+                      </FormItem>
+                      <FormItem>
+                        <Input type="checkbox" onClick={(e) => handleTypeUpdate(e)} />
                       </FormItem>
                       <Button type="primary" htmlType="submit" className="edit-form-button">
                         Submit
