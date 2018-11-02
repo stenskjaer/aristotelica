@@ -95,12 +95,14 @@ class EditText extends Component {
                 >
                   {({ values, handleSubmit, handleChange, isSubmitting }) => (
                     <Form onSubmit={handleSubmit} className="edit-form">
-                      <TypeSelector {...typeProps} />
                       <FormItem label="Title">
                         <Input placeholder="Title" name="title" onChange={handleChange} value={values.title} />
                       </FormItem>
                       <FormItem label="Title suffix">
                         <Input placeholder="Title suffix" name="title_addon" onChange={handleChange} value={values.title_addon} />
+                      </FormItem>
+                      <FormItem label="Text type">
+                        <TypeSelector {...typeProps} />
                       </FormItem>
                       <FormItem label="Dating">
                         <Input placeholder="Dating" name="date" onChange={handleChange} value={values.date} />
