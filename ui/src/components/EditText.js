@@ -50,6 +50,7 @@ const GET_ITEM_QUERY = gql`
       }
       type {
         name
+        id
       }
     }
   }
@@ -57,8 +58,8 @@ const GET_ITEM_QUERY = gql`
 
 const ADD_TYPE = gql`
   mutation AddTextType(
-    $texttext_id: String!,
-    $texttypeid: String!
+    $texttext_id: ID!,
+    $texttypeid: ID!
   ){
     AddTextType(
       texttext_id: $texttext_id, 
@@ -73,28 +74,54 @@ const ADD_TYPE = gql`
   }
 `
 
-class TextItem extends Component {
+const REMOVE_TYPE = gql`
+  mutation RemoveTextType(
+    $texttext_id: ID!,
+    $texttypeid: ID!
+  ){
+    RemoveTextType(
+      texttext_id: $texttext_id, 
+      texttypeid: $texttypeid
+    ) {
+      type {
+        name
+        id
+      }
+    }
+  }
+`
+
+
+
+class EditText extends Component {
 
   render() {
+
     return (
-      <Query query={GET_ITEM_QUERY} variables={{ id: this.props.match.params.id }}>
-        {({ loading, error, data }) => {
+      <Query query={GET_ITEM_QUERY} variables={{ id: this.props.match.params.id }} >
+        {({ loading, error, data, client }) => {
 
           if (loading) return <div>Fetching</div>
           if (error) return <div>Error: {this.props.data.error.message}</div>
 
           const item = data.textById
 
-          const handleTypeUpdate = (event) => {
-            return (
-              client.mutate({
-                variables: event.target.value
-              })
-            )
-          }
-
           if (!item) {
             return <div>Error: The item does not exist.</div>
+          }
+
+          const handleTypeUpdate = async ({ hasRelation, variables }) => {
+            // Determine which mutation to use, based on `hasRelation` value.
+            const TYPE_MUTATION = hasRelation === true ? REMOVE_TYPE : ADD_TYPE
+            // Run the mutation.
+            const { data, errors } = await client.mutate({
+              mutation: TYPE_MUTATION,
+              variables: variables
+            });
+            if (errors) {
+              console.log(errors)
+            }
+            // WE SHOULD UPDATE THE CACHE AND REFLECT THE CHANGE IN CURRENT MEMORY
           }
 
           return (
@@ -125,7 +152,17 @@ class TextItem extends Component {
                         />
                       </FormItem>
                       <FormItem>
-                        <Input type="checkbox" onClick={(e) => handleTypeUpdate(e)} />
+                        <Input type="checkbox" value="bb102fbe-0319-4259-a471-df509d05860c" onClick={(e) => {
+                          return (handleTypeUpdate(
+                            {
+                              hasRelation: !e.target.checked,
+                              variables: {
+                                texttext_id: values.text_id,
+                                texttypeid: e.target.value
+                              }
+                            }
+                          ))
+                        }} />
                       </FormItem>
                       <Button type="primary" htmlType="submit" className="edit-form-button">
                         Submit
@@ -142,4 +179,4 @@ class TextItem extends Component {
   }
 }
 
-export default withRouter(TextItem)
+export default withRouter(EditText);
