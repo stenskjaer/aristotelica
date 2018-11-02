@@ -5,6 +5,8 @@ import { withRouter } from "react-router";
 import { Formik } from 'formik';
 import { Form, Input, Button } from 'antd';
 import FormItem from "antd/lib/form/FormItem";
+import { TreeSelect } from 'antd';
+
 
 const { TextArea } = Input
 
@@ -51,6 +53,20 @@ const GET_ITEM_QUERY = gql`
       type {
         name
         id
+        children {
+          name
+          id
+        }
+      }
+    }
+    TextType {
+      id
+      name
+      parent { id }
+      children {
+        id
+        name
+        parent { id }
       }
     }
   }
@@ -91,6 +107,69 @@ const REMOVE_TYPE = gql`
   }
 `
 
+class TypeTree extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      value: this.setCurrentTypes(props.currentTextTypes)
+    }
+  }
+
+
+  onChange = (value, node, extra) => {
+    console.log(extra)
+    this.setState({ value });
+    this.props.onChangeHandler(
+      {
+        hasRelation: !extra.checked,
+        variables: {
+          texttext_id: this.props.textId,
+          texttypeid: extra.triggerValue
+        }
+      }
+    )
+  }
+
+  setCurrentTypes = (data) => (
+    (data.map(item => (
+      {
+        label: item.name,
+        value: item.id
+      }
+    )))
+  )
+
+  render() {
+    const setAllTypes = (data) => {
+      return (
+        data.map(type => ({
+          title: type.name,
+          key: type.id,
+          value: type.id,
+          children: type.children && type.children.length > 0 ? setAllTypes(type.children) : [],
+        }))
+      )
+    }
+
+    // Build type tree from the root nodes.
+    const typeTree = setAllTypes(this.props.typeData.filter(x => x.parent === null))
+
+    return (
+      <TreeSelect
+        style={{ width: 300 }}
+        value={this.state.value}
+        dropdownStyle={{ maxHeight: 500, overflow: 'auto' }}
+        treeData={typeTree}
+        placeholder="Select type"
+        treeDefaultExpandAll
+        multiple
+        treeCheckable
+        treeCheckStrictly
+        onChange={(value, node, extra) => this.onChange(value, node, extra)}
+      />
+    );
+  }
+}
 
 
 class EditText extends Component {
@@ -105,12 +184,17 @@ class EditText extends Component {
           if (error) return <div>Error: {this.props.data.error.message}</div>
 
           const item = data.textById
+          const textTypes = data.TextType
 
           if (!item) {
             return <div>Error: The item does not exist.</div>
           }
 
           const handleTypeUpdate = async ({ hasRelation, variables }) => {
+            console.log("handleTypeUpdate")
+            console.log("hasRelation " + hasRelation)
+            console.log("variables ")
+            console.log(variables)
             // Determine which mutation to use, based on `hasRelation` value.
             const TYPE_MUTATION = hasRelation === true ? REMOVE_TYPE : ADD_TYPE
             // Run the mutation.
@@ -121,6 +205,7 @@ class EditText extends Component {
             if (errors) {
               console.log(errors)
             }
+            console.log(data)
             // WE SHOULD UPDATE THE CACHE AND REFLECT THE CHANGE IN CURRENT MEMORY
           }
 
@@ -136,6 +221,7 @@ class EditText extends Component {
                 >
                   {({ values, handleSubmit, handleChange, isSubmitting }) => (
                     <Form onSubmit={handleSubmit} className="edit-form">
+                      <TypeTree typeData={textTypes} currentTextTypes={item.type} onChangeHandler={handleTypeUpdate} textId={values.text_id} />
                       <FormItem label="Title">
                         <Input placeholder="Title" name="title" onChange={handleChange} value={values.title} />
                       </FormItem>
@@ -150,19 +236,6 @@ class EditText extends Component {
                           placeholder="Note" name="note"
                           onChange={handleChange} value={values.note}
                         />
-                      </FormItem>
-                      <FormItem>
-                        <Input type="checkbox" value="bb102fbe-0319-4259-a471-df509d05860c" onClick={(e) => {
-                          return (handleTypeUpdate(
-                            {
-                              hasRelation: !e.target.checked,
-                              variables: {
-                                texttext_id: values.text_id,
-                                texttypeid: e.target.value
-                              }
-                            }
-                          ))
-                        }} />
                       </FormItem>
                       <Button type="primary" htmlType="submit" className="edit-form-button">
                         Submit

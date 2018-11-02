@@ -21,6 +21,8 @@ type Person {
 type TextType {
   id: ID!
   name: String!
+  parent: TextType @relation(name: "HAS_CHILD", direction: "IN")
+  children: [TextType] @relation(name: "HAS_CHILD", direction: "OUT")
 }
 
 scalar DateTime
