@@ -3,6 +3,7 @@ type Text {
   created: DateTime!
   modified: DateTime
   authors: [Person!]! @cypher(statement: "MATCH (this)<--(:Attribution)-->(p:Person) RETURN DISTINCT p")
+  attributions: [Attribution!]! @relation(name: "OF", direction: "IN")
   title: String
   title_addon: String
   date: String
@@ -16,6 +17,22 @@ type Person {
   created: String!
   modified: String
   note: String 
+}
+
+type Attribution {
+  id: ID!
+  text: Text! @relation(name: "OF", direction: "OUT")
+  person: Person! @relation(name: "TO", direction: "OUT")
+  note: String
+  source: String
+  certainty: AttributionCertainty
+}
+
+enum AttributionCertainty {
+  CERTAIN
+  POSSIBLE
+  DUBIOUS
+  FALSE
 }
 
 type TextType {
