@@ -49,14 +49,6 @@ const GET_ITEM_QUERY = gql`
       authors {
         name
       }
-      type {
-        name
-        id
-        children {
-          name
-          id
-        }
-      }
     }
   }
 `
@@ -70,17 +62,11 @@ class EditText extends Component {
         {({ loading, error, data, client }) => {
 
           if (loading) return <div>Fetching</div>
-          if (error) return <div>Error: {this.props.data.error.message}</div>
+          if (error) return <div>{error.message}</div>
 
           const item = data.textById ? data.textById : null
           if (!item) {
             return <div>Error: The item does not exist.</div>
-          }
-
-          const typeProps = {
-            client: client,
-            currentTextTypes: item.type,
-            textId: item.text_id
           }
 
           return (
@@ -102,7 +88,7 @@ class EditText extends Component {
                         <Input placeholder="Title suffix" name="title_addon" onChange={handleChange} value={values.title_addon} />
                       </FormItem>
                       <FormItem label="Text type">
-                        <TypeSelector {...typeProps} />
+                        <TypeSelector client={client} textId={item.text_id} />
                       </FormItem>
                       <FormItem label="Dating">
                         <Input placeholder="Dating" name="date" onChange={handleChange} value={values.date} />
