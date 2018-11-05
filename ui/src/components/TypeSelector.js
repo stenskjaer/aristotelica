@@ -21,6 +21,7 @@ query TextType {
 const THIS_TEXT_TYPES = gql`
   query thisTextTypes($id: String!) {
     textById(id: $id) {
+      id
       type {
         name
         id
@@ -35,11 +36,11 @@ const THIS_TEXT_TYPES = gql`
 
 const ADD_TYPE = gql`
   mutation AddTextType(
-    $texttext_id: ID!,
+    $textid: ID!,
     $texttypeid: ID!
   ){
     AddTextType(
-      texttext_id: $texttext_id, 
+      textid: $textid, 
       texttypeid: $texttypeid
     ) {
       type {
@@ -52,11 +53,11 @@ const ADD_TYPE = gql`
 
 const REMOVE_TYPE = gql`
   mutation RemoveTextType(
-    $texttext_id: ID!,
+    $textid: ID!,
     $texttypeid: ID!
   ){
     RemoveTextType(
-      texttext_id: $texttext_id, 
+      textid: $textid, 
       texttypeid: $texttypeid
     ) {
       type {
@@ -74,7 +75,7 @@ class TypeSelector extends Component {
       {
         hasRelation: !extra.checked,
         variables: {
-          texttext_id: this.props.textId,
+          textid: this.props.textId,
           texttypeid: extra.triggerValue,
         }
       }

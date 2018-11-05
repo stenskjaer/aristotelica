@@ -1,5 +1,5 @@
 type Text {
-  text_id: ID! 
+  id: ID! 
   created: DateTime!
   modified: DateTime
   authors: [Person!]! @cypher(statement: "MATCH (this)<--(:Attribution)-->(p:Person) RETURN DISTINCT p")
@@ -46,12 +46,12 @@ scalar DateTime
 
 type Query {
   textByTitle(substring: String): [Text] @cypher(statement: "MATCH (t:Text) WHERE lower(t.title) CONTAINS lower($substring) RETURN t")
-  textById(id: String!): Text @cypher(statement: "MATCH (t:Text) WHERE t.text_id = $id RETURN t")
+  textById(id: String!): Text @cypher(statement: "MATCH (t:Text) WHERE t.id = $id RETURN t")
 }
 
 type Mutation {
   UpdateText(
-      text_id: ID!, 
+      id: ID!, 
       modified: DateTime,
       title: String,
       title_addon: String,

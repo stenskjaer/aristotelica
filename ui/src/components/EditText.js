@@ -11,7 +11,7 @@ const { TextArea } = Input
 
 const UPDATE_ITEM_QUERY = gql`
   mutation UpdateText(
-      $text_id: ID!, 
+      $id: ID!, 
       $title: String!,
       $title_addon: String,
       $note: String,
@@ -19,7 +19,7 @@ const UPDATE_ITEM_QUERY = gql`
       $modified: DateTime,
     ){
     UpdateText(
-        text_id: $text_id, 
+        id: $id, 
         title: $title,
         title_addon: $title_addon,
         note: $note,
@@ -28,7 +28,7 @@ const UPDATE_ITEM_QUERY = gql`
       ) {
       title
       title_addon
-      text_id
+      id
       note
       date
       modified
@@ -39,7 +39,7 @@ const UPDATE_ITEM_QUERY = gql`
 const GET_ITEM_QUERY = gql`
   query Text($id: String!) {
     textById(id: $id) {
-      text_id
+      id
       title
       title_addon
       created
@@ -88,7 +88,7 @@ class EditText extends Component {
                         <Input placeholder="Title suffix" name="title_addon" onChange={handleChange} value={values.title_addon} />
                       </FormItem>
                       <FormItem label="Text type">
-                        <TypeSelector client={client} textId={item.text_id} />
+                        <TypeSelector client={client} textId={item.id} />
                       </FormItem>
                       <FormItem label="Dating">
                         <Input placeholder="Dating" name="date" onChange={handleChange} value={values.date} />
