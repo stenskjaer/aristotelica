@@ -6,6 +6,7 @@ import { Formik } from 'formik';
 import { Form, Input, Button } from 'antd';
 import FormItem from "antd/lib/form/FormItem";
 import TypeSelector from './TypeSelector'
+import EditItemAuthors from './EditItemAuthors'
 
 const { TextArea } = Input
 
@@ -46,9 +47,6 @@ const GET_ITEM_QUERY = gql`
       modified
       date
       note
-      authors {
-        name
-      }
     }
   }
 `
@@ -81,6 +79,10 @@ class EditText extends Component {
                 >
                   {({ values, handleSubmit, handleChange, isSubmitting }) => (
                     <Form onSubmit={handleSubmit} className="edit-form">
+                      <h1>Update text</h1>
+                      <h2>Authorship</h2>
+                      <EditItemAuthors client={client} textId={values.id} />
+                      <h2>Text data</h2>
                       <FormItem label="Title">
                         <Input placeholder="Title" name="title" onChange={handleChange} value={values.title} />
                       </FormItem>

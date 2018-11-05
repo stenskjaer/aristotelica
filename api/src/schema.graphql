@@ -21,8 +21,8 @@ type Person {
 
 type Attribution {
   id: ID!
-  text: Text! @relation(name: "OF", direction: "OUT")
-  person: Person! @relation(name: "TO", direction: "OUT")
+  text: Text @relation(name: "OF", direction: "OUT")
+  person: Person @relation(name: "TO", direction: "OUT")
   note: String
   source: String
   certainty: AttributionCertainty
@@ -45,6 +45,7 @@ type TextType {
 scalar DateTime
 
 type Query {
+  Attribution(id: ID): Attribution
   textByTitle(substring: String): [Text] @cypher(statement: "MATCH (t:Text) WHERE lower(t.title) CONTAINS lower($substring) RETURN t")
   textById(id: String!): Text @cypher(statement: "MATCH (t:Text) WHERE t.id = $id RETURN t")
 }
@@ -58,4 +59,15 @@ type Mutation {
       note: String,
       date: String,
     ): Text
+  CreateTextAttribution(
+    id: ID!,
+    textid: ID!,
+    personid: ID!,
+    note: String,
+    source: String,
+    certainty: AttributionCertainty
+  ): Attribution @cypher(
+    statement: 
+    "MATCH (t:Text {id: {textid}}), (p:Person {id:{personid}}) MERGE (t)<-[:OF]-(a:Attribution {id: {id}, note: {note}, source: {source}, certainty: {certainty}})-[:TO]->(p) RETURN a"
+    )
 }
