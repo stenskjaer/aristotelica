@@ -18,8 +18,8 @@ class App extends Component {
             <Switch>
               <Route exact path='/' render={() => <Redirect to='/texts' />} />
               <Route exact path="/texts" component={TextList} />
-              <Route exact path="/detail/:id" component={TextItem} />
-              <Route exact path="/edit/:id" component={EditText} />
+              <Route exact path="/text/:id" component={TextItem} />
+              <Route exact path="/text/edit/:id" component={EditText} />
             </Switch>
           </div>
         </Content>
