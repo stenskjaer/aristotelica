@@ -87,7 +87,7 @@ class EditText extends Component {
                       <FormItem label="Title suffix">
                         <Input placeholder="Title suffix" name="title_addon" onChange={handleChange} value={values.title_addon} />
                       </FormItem>
-                      <FormItem label="Text type">
+                      <FormItem label="Text types">
                         <TypeSelector client={client} textId={item.id} />
                       </FormItem>
                       <FormItem label="Dating">

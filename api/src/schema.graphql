@@ -8,7 +8,7 @@ type Text {
   title_addon: String
   date: String
   note: String
-  type: [TextType]! @relation(name: "Type", direction: "OUT")
+  types: [TextType]! @relation(name: "Type", direction: "OUT")
 }
 
 type Person {

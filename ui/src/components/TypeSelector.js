@@ -22,7 +22,7 @@ const THIS_TEXT_TYPES = gql`
   query thisTextTypes($id: String!) {
     textById(id: $id) {
       id
-      type {
+      types {
         name
         id
         children {
@@ -35,15 +35,15 @@ const THIS_TEXT_TYPES = gql`
 `
 
 const ADD_TYPE = gql`
-  mutation AddTextType(
+  mutation AddTextTypes(
     $textid: ID!,
     $texttypeid: ID!
   ){
-    AddTextType(
+    AddTextTypes(
       textid: $textid, 
       texttypeid: $texttypeid
     ) {
-      type {
+      types {
         __typename
         id
       }
@@ -52,15 +52,15 @@ const ADD_TYPE = gql`
 `
 
 const REMOVE_TYPE = gql`
-  mutation RemoveTextType(
+  mutation RemoveTextTypes(
     $textid: ID!,
     $texttypeid: ID!
   ){
-    RemoveTextType(
+    RemoveTextTypes(
       textid: $textid, 
       texttypeid: $texttypeid
     ) {
-      type {
+      types {
         __typename
         id
       }
@@ -109,9 +109,9 @@ class TypeSelector extends Component {
         variables: variables,
         refetchQueries: ['thisTextTypes'],
         optimisticResponse: {
-          "RemoveTextType": {
+          "RemoveTextTypes": {
             __typename: "Text",
-            type: [
+            types: [
               {
                 id: variables.texttypeid,
                 __typename: 'TextType',
@@ -129,9 +129,9 @@ class TypeSelector extends Component {
         variables: variables,
         refetchQueries: ['thisTextTypes'],
         optimisticResponse: {
-          "AddTextType": {
+          "AddTextTypes": {
             __typename: "Text",
-            type: [
+            types: [
               {
                 id: variables.texttypeid,
                 __typename: 'TextType',
@@ -164,7 +164,7 @@ class TypeSelector extends Component {
               {({ loading, error, data }) => {
                 if (loading) return <div>Fetching</div>
                 if (error) return <div>Error: {error.message}</div>
-                const currentTypes = this.setCurrentTypes(data.textById.type)
+                const currentTypes = this.setCurrentTypes(data.textById.types)
 
                 return (
                   <TreeSelect
@@ -172,7 +172,7 @@ class TypeSelector extends Component {
                     value={currentTypes}
                     dropdownStyle={{ maxHeight: 500, overflow: 'auto' }}
                     treeData={typeTree}
-                    placeholder="Select type"
+                    placeholder="Select types"
                     treeDefaultExpandAll
                     multiple
                     treeCheckable
