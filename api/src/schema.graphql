@@ -68,6 +68,6 @@ type Mutation {
     certainty: AttributionCertainty
   ): Attribution @cypher(
     statement: 
-    "MATCH (t:Text {id: {textid}}), (p:Person {id:{personid}}) MERGE (t)<-[:OF]-(a:Attribution {id: {id}, note: {note}, source: {source}, certainty: {certainty}})-[:TO]->(p) RETURN a"
+    "MATCH (t:Text {id: {textid}}), (p:Person {id:{personid}}) MERGE (t)<-[:OF]-(a:Attribution {id: {id}})-[:TO]->(p) RETURN a"
     )
 }

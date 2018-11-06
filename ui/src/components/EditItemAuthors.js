@@ -1,8 +1,7 @@
 import React, { Component } from "react";
-import { Mutation, Query } from "react-apollo";
+import { Query } from "react-apollo";
 import gql from "graphql-tag";
-import { Form, Input, Button, List, Modal, Radio } from 'antd';
-import { Formik } from 'formik'
+import { Form, Input, Button, List, Modal, Radio, message } from 'antd';
 import { createGUID } from './utils'
 
 const ATTRIBUTIONS_QUERY = gql`
@@ -23,7 +22,7 @@ const ATTRIBUTIONS_QUERY = gql`
   }
 `
 
-const CREATE_TEXT_ATTRIBUTION = gql`
+const CREATE_ATTRIBUTION = gql`
   mutation CreateTextAttribution(
     $id: ID!,
     $textid: ID!,
@@ -36,13 +35,23 @@ const CREATE_TEXT_ATTRIBUTION = gql`
       id: $id,
       textid: $textid,
       personid: $personid,
+    ) {
+      __typename
+      id
+      person {id}
+      text {id}
+    }
+    UpdateAttribution(
+      id: $id
       note: $note,
       source: $source,
       certainty: $certainty
     ) {
+      __typename
       id
-      person {id}
-      text {title}
+      note
+      source
+      certainty
     }
   }
 `
@@ -73,35 +82,27 @@ const AuthorCreateForm = Form.create()(
           onCancel={onCancel}
           onOk={onCreate}
         >
-          <Mutation mutation={CREATE_TEXT_ATTRIBUTION}>
-            {(createAttribution) => (
+          <Form>
+            <Form.Item label="Source">
+              {getFieldDecorator('source')(<Input />)}
+            </Form.Item>
+            <Form.Item label="Note">
+              {getFieldDecorator('note')(<Input.TextArea rows={3} />)}
+            </Form.Item>
+            <Form.Item label="Certainty">
+              {getFieldDecorator('certainty', {
+                initialValue: 'POSSIBLE',
+              })(
+                <Radio.Group buttonStyle="solid">
+                  <Radio.Button value="CERTAIN">Certain</Radio.Button>
+                  <Radio.Button value="POSSIBLE">Possible</Radio.Button>
+                  <Radio.Button value="DUBIOUS">Dubious</Radio.Button>
+                  <Radio.Button value="FALSE">False</Radio.Button>
+                </Radio.Group>
+              )}
+            </Form.Item>
+          </Form>
 
-              <Formik onSubmit={values => { createAttribution({ variables: values }) }}>
-                {({ values, handleSubmit, handleChange, isSubmitting }) => (
-                  <Form>
-                    <Form.Item label="Source">
-                      {getFieldDecorator('source')(<Input />)}
-                    </Form.Item>
-                    <Form.Item label="Note">
-                      {getFieldDecorator('note')(<Input.TextArea rows={3} />)}
-                    </Form.Item>
-                    <Form.Item label="Certainty">
-                      {getFieldDecorator('certainty', {
-                        initialValue: 'POSSIBLE',
-                      })(
-                        <Radio.Group buttonStyle="solid">
-                          <Radio.Button value="CERTAIN">Certain</Radio.Button>
-                          <Radio.Button value="POSSIBLE">Possible</Radio.Button>
-                          <Radio.Button value="DUBIOUS">Dubious</Radio.Button>
-                          <Radio.Button value="FALSE">False</Radio.Button>
-                        </Radio.Group>
-                      )}
-                    </Form.Item>
-                  </Form>
-                )}
-              </Formik>
-            )}
-          </Mutation>
         </Modal>
       );
     }
@@ -121,19 +122,6 @@ class EditItemAuthors extends Component {
     this.setState({ visibleForm: false });
   }
 
-  // handleCreate = () => {
-  //   const form = this.formRef.props.form;
-  //   form.validateFields((err, values) => {
-  //     if (err) {
-  //       return;
-  //     }
-
-  //     console.log('Received values of form: ', values);
-  //     form.resetFields();
-  //     this.setState({ visibleForm: false });
-  //   });
-  // }
-
   handleCreate = async ({ variables }) => {
     const form = this.formRef.props.form;
 
@@ -145,49 +133,64 @@ class EditItemAuthors extends Component {
       values.id = createGUID()
       values.textid = this.props.textId
       values.personid = "2"
-      values.note = values.note ? values.note : ''
-      values.source = values.source ? values.source : ''
-      console.log('Received values of form: ', values);
+      // ANOTHER TODO:
+      // Add the author field. Use the select
 
-      const { data } = await this.props.client.mutate({
-        mutation: CREATE_TEXT_ATTRIBUTION,
+      const { error, data } = await this.props.client.mutate({
+        mutation: CREATE_ATTRIBUTION,
         variables: values,
         refetchQueries: ['attributionsQuery'],
-        // optimisticResponse: {
-        //   "RemoveTextTypes": {
-        //     __typename: "Text",
-        //     types: [
-        //       {
-        //         id: variables.texttypeid,
-        //         __typename: 'TextType',
-        //       }
-        //     ]
-        //   }
-        // }
+        optimisticResponse: {
+          "CreateTextAttribution": {
+            __typename: "Attribution",
+            id: values.id,
+            person: {
+              __typename: "Person",
+              id: values.personid
+            },
+            text: {
+              __typename: "Text",
+              id: values.textid
+            }
+          },
+          "UpdateAttribution": {
+            __typename: "Attribution",
+            certainty: values.certainty,
+            id: values.id,
+            note: values.note ? values.note : null,
+            source: values.source ? values.source : null,
+          }
+        }
       });
-      console.log(data)
+      if (error) {
+        message.error(error.message)
+      }
+      if (data.CreateTextAttribution === null) {
+        message.error("Text attribution was not created.")
+      }
+      if (data.UpdateAttribution === null) {
+        message.error("Properties were not given to the attribution.")
+      }
       form.resetFields();
       this.setState({ visibleForm: false });
     })
   }
 
   handleDelete = async (nodeId) => {
-    const { data, error } = await this.props.client.mutate({
+    const { error } = await this.props.client.mutate({
       mutation: DELETE_ATTRIBUTION,
       variables: { id: nodeId },
       refetchQueries: ['attributionsQuery'],
-      // optimisticResponse: {
-      //   "RemoveTextTypes": {
-      //     __typename: "Text",
-      //     types: [
-      //       {
-      //         id: variables.texttypeid,
-      //         __typename: 'TextType',
-      //       }
-      //     ]
-      //   }
-      // }
+      optimisticResponse: {
+        "DeleteAttribution": {
+          __typename: "Attribution",
+          id: nodeId
+        }
+      }
     });
+    if (error) {
+      message.error(error.message)
+    }
   }
 
   saveFormRef = (formRef) => {
@@ -223,7 +226,7 @@ class EditItemAuthors extends Component {
                 )}
               />
               <div>
-                <Button type="primary" onClick={this.showModal}>New Collection</Button>
+                <Button type="primary" onClick={this.showModal}>New attribution</Button>
                 <AuthorCreateForm
                   wrappedComponentRef={this.saveFormRef}
                   visible={this.state.visibleForm}
