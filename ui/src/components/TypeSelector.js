@@ -154,7 +154,7 @@ class TypeSelector extends Component {
       <Query query={TEXT_TYPES}>
         {({ loading, error, data }) => {
           if (loading) return <div>Fetching</div>
-          if (error) return <div>Error: {error.message}</div>
+          if (error) return <div>{error.message}</div>
 
           // Build type tree from the root nodes.
           const typeTree = this.setAllTypes(data.TextType.filter(x => x.parent === null));
@@ -163,7 +163,7 @@ class TypeSelector extends Component {
             <Query query={THIS_TEXT_TYPES} variables={{ id: this.props.textId }} >
               {({ loading, error, data }) => {
                 if (loading) return <div>Fetching</div>
-                if (error) return <div>Error: {error.message}</div>
+                if (error) return <div>{error.message}</div>
                 const currentTypes = this.setCurrentTypes(data.textById.types)
 
                 return (
