@@ -17,6 +17,8 @@ const UPDATE_ITEM_QUERY = gql`
       $title_addon: String,
       $note: String,
       $date: String,
+      $incipit: String,
+      $explicit: String,
       $modified: DateTime,
     ){
     UpdateText(
@@ -25,6 +27,8 @@ const UPDATE_ITEM_QUERY = gql`
         title_addon: $title_addon,
         note: $note,
         date: $date,
+        incipit: $incipit,
+        explicit: $explicit,
         modified: $modified
       ) {
       title
@@ -32,6 +36,8 @@ const UPDATE_ITEM_QUERY = gql`
       id
       note
       date
+      incipit
+      explicit
       modified
     }
   }
@@ -47,6 +53,8 @@ const GET_ITEM_QUERY = gql`
       modified
       date
       note
+      incipit
+      explicit
     }
   }
 `
@@ -102,12 +110,20 @@ class EditText extends Component {
                           <Input placeholder="Dating" name="date" onChange={handleChange} value={values.date} />
                         </FormItem>
                       </div>
-                      <FormItem label="Note">
-                        <TextArea row={4}
-                          placeholder="Note" name="note"
-                          onChange={handleChange} value={values.note}
-                        />
-                      </FormItem>
+                      <div className="form-group">
+                        <FormItem label="Incipit">
+                          <TextArea row="3" name="incipit" onChange={handleChange} value={values.incipit} />
+                        </FormItem>
+                        <FormItem label="Explicit">
+                          <TextArea row="3" name="explicit" onChange={handleChange} value={values.explicit} />
+                        </FormItem>
+                        <FormItem label="Note">
+                          <TextArea row={4}
+                            placeholder="Note" name="note"
+                            onChange={handleChange} value={values.note}
+                          />
+                        </FormItem>
+                      </div>
                       <Button type="primary" htmlType="submit" className="edit-form-button">
                         Submit
                       </Button>

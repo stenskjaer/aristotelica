@@ -8,6 +8,8 @@ type Text {
   title_addon: String
   date: String
   note: String
+  incipit: String
+  explicit: String
   types: [TextType]! @relation(name: "Type", direction: "OUT")
 }
 
@@ -62,8 +64,11 @@ type Mutation {
       title: String,
       title_addon: String,
       note: String,
+      incipit: String,
+      explicit: String,
       date: String,
     ): Text
+
   CreateTextAttribution(
     id: ID!,
     textid: ID!,
