@@ -1,0 +1,11 @@
+.ant-list-vertical .ant-list-item-meta {
+  margin-bottom: 0;
+}
+
+.ant-collapse>.ant-collapse-item>.ant-collapse-header {
+  padding: 6px 0 6px 40px;
+}
+
+.form-group {
+  margin-bottom: 32px;
+}

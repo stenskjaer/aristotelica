@@ -80,21 +80,28 @@ class EditText extends Component {
                   {({ values, handleSubmit, handleChange, isSubmitting }) => (
                     <Form onSubmit={handleSubmit} className="edit-form">
                       <h1>Update text</h1>
-                      <h2>Authorship</h2>
-                      <EditItemAuthors client={client} textId={values.id} />
-                      <h2>Text data</h2>
-                      <FormItem label="Title">
-                        <Input placeholder="Title" name="title" onChange={handleChange} value={values.title} />
-                      </FormItem>
-                      <FormItem label="Title suffix">
-                        <Input placeholder="Title suffix" name="title_addon" onChange={handleChange} value={values.title_addon} />
-                      </FormItem>
-                      <FormItem label="Text types">
-                        <TypeSelector client={client} textId={item.id} />
-                      </FormItem>
-                      <FormItem label="Dating">
-                        <Input placeholder="Dating" name="date" onChange={handleChange} value={values.date} />
-                      </FormItem>
+                      <div className="form-group">
+                        <h2>Authorship</h2>
+                        <EditItemAuthors client={client} textId={values.id} />
+                      </div>
+                      <div className="form-group">
+                        <h2>Base data</h2>
+                        <FormItem label="Title">
+                          <Input placeholder="Title" name="title" onChange={handleChange} value={values.title} />
+                        </FormItem>
+                        <FormItem label="Title suffix">
+                          <Input placeholder="Title suffix" name="title_addon" onChange={handleChange} value={values.title_addon} />
+                        </FormItem>
+                        <FormItem label="Text types">
+                          <TypeSelector client={client} textId={item.id} />
+                        </FormItem>
+                      </div>
+                      <div className="form-group">
+                        <h2>Dating</h2>
+                        <FormItem label="Dating">
+                          <Input placeholder="Dating" name="date" onChange={handleChange} value={values.date} />
+                        </FormItem>
+                      </div>
                       <FormItem label="Note">
                         <TextArea row={4}
                           placeholder="Note" name="note"
