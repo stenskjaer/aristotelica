@@ -76,15 +76,12 @@ class EditItemAuthors extends Component {
     visibleForm: false,
   };
 
-  showModal = () => {
-    this.setState({ visibleForm: true });
-  }
-
   handleCancel = () => {
     this.setState({ visibleForm: false });
+    this.formRef.props.form.resetFields();
   }
 
-  handleCreate = async () => {
+  handleCreateUpdate = async () => {
     const form = this.formRef.props.form;
 
     form.validateFields(async (err, values) => {
@@ -92,7 +89,9 @@ class EditItemAuthors extends Component {
         return;
       }
 
-      values.id = createGUID()
+      if (values.id === undefined) {
+        values.id = createGUID()
+      }
       values.textid = this.props.textId
 
       const { error, data } = await this.props.client.mutate({
@@ -166,6 +165,24 @@ class EditItemAuthors extends Component {
     this.formRef = formRef;
   }
 
+  showModal = () => {
+    this.setState({
+      visibleForm: true,
+    });
+  }
+
+  updateModal = (values) => {
+    const form = this.formRef.props.form;
+    form.setFieldsValue({
+      id: values.id,
+      personid: values.personid,
+      source: values.source,
+      note: values.note,
+      certainty: values.certainty
+    })
+    this.showModal()
+  }
+
   render() {
 
     return (
@@ -176,7 +193,7 @@ class EditItemAuthors extends Component {
           if (error) return <div>{error.message}</div>
 
           return (
-            [
+            <div>
               <List
                 itemLayout="vertical"
                 dataSource={data.Text[0].attributions}
@@ -184,7 +201,13 @@ class EditItemAuthors extends Component {
                   <List.Item
                     key={item.id}
                     actions={[
-                      <a onClick={this.showModal}>Edit</a>,
+                      <a onClick={() => this.updateModal({
+                        id: item.id,
+                        personid: item.person.id,
+                        certainty: item.certainty,
+                        source: item.source,
+                        note: item.note,
+                      })}>Edit</a>,
                       <a onClick={() => this.handleDelete(item.id)}>Delete</a>
                     ]}
                   >
@@ -198,22 +221,24 @@ class EditItemAuthors extends Component {
                       </Panel>
                     </Collapse>
                   </List.Item>
-                )}
-              />,
+                )
+                }
+              />
               <div style={{ margin: '10px 0 0 0' }}>
-                <Button type="primary" onClick={this.showModal}>New attribution</Button>
                 <AuthorCreateForm
-                  client={client}
+                  client={this.props.client}
                   wrappedComponentRef={this.saveFormRef}
                   visible={this.state.visibleForm}
                   onCancel={this.handleCancel}
-                  onCreate={this.handleCreate}
+                  onCreate={this.handleCreateUpdate}
                 />
+                <Button type="primary" onClick={this.showModal}>New attribution</Button>
               </div>
-            ]
+            </div>
           );
-        }}
-      </Query>
+        }
+        }
+      </Query >
     );
   }
 }

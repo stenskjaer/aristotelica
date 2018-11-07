@@ -50,13 +50,16 @@ export const AuthorCreateForm = Form.create()(
         <Modal
           visible={visible}
           title="Create new attribution"
-          okText="Create"
+          okText="Save"
           onCancel={onCancel}
           onOk={onCreate}
         >
           <Form>
+            {getFieldDecorator('id')(<Input disabled style={{ display: 'none' }} />)}
             <Form.Item label="Author">
-              {getFieldDecorator('personid')(
+              {getFieldDecorator(
+                'personid',
+              )(
                 <Select
                   showSearch
                   placeholder="Search for author"
@@ -80,11 +83,7 @@ export const AuthorCreateForm = Form.create()(
                         {d.name}
                       </Select.Option>
                     )
-                  }
-
-
-                  )
-                  }
+                  })}
                 </Select>
               )}
             </Form.Item>
