@@ -1,113 +1,73 @@
 import React, { Component } from "react";
 import { Query } from "react-apollo";
 import gql from "graphql-tag";
-import { Form, Input, Button, List, Modal, Radio, message } from 'antd';
+import { Button, List, message } from 'antd';
 import { createGUID } from './utils'
+import { AuthorCreateForm } from './CreateAttributionForm'
 
 const ATTRIBUTIONS_QUERY = gql`
-  query attributionsQuery($id: ID!) {
-    Text(id: $id) {
+query attributionsQuery($id: ID!) {
+  Text(id: $id) {
+    id
+    attributions {
       id
-      attributions {
+      person {
+        name
         id
-        person {
-          name
-          id
-        }
-        note
-        source
-        certainty
       }
-    }
-  }
-`
-
-const CREATE_ATTRIBUTION = gql`
-  mutation CreateTextAttribution(
-    $id: ID!,
-    $textid: ID!,
-    $personid: ID!,
-    $note: String,
-    $source: String,
-    $certainty: AttributionCertainty
-  ) {
-    CreateTextAttribution(
-      id: $id,
-      textid: $textid,
-      personid: $personid,
-    ) {
-      __typename
-      id
-      person {id}
-      text {id}
-    }
-    UpdateAttribution(
-      id: $id
-      note: $note,
-      source: $source,
-      certainty: $certainty
-    ) {
-      __typename
-      id
       note
       source
       certainty
     }
   }
+}
+`
+
+const CREATE_ATTRIBUTION = gql`
+mutation CreateTextAttribution(
+  $id: ID!,
+  $textid: ID!,
+  $personid: ID!,
+  $note: String,
+  $source: String,
+  $certainty: AttributionCertainty
+) {
+  CreateTextAttribution(
+    id: $id,
+    textid: $textid,
+    personid: $personid,
+  ) {
+    __typename
+    id
+    person {id}
+    text {id}
+  }
+  UpdateAttribution(
+    id: $id
+    note: $note,
+    source: $source,
+    certainty: $certainty
+  ) {
+    __typename
+    id
+    note
+    source
+    certainty
+  }
+}
 `
 
 const DELETE_ATTRIBUTION = gql`
-  mutation deleteAttribution(
-    $id: ID!
+mutation deleteAttribution(
+  $id: ID!
+) {
+  DeleteAttribution(
+    id: $id
   ) {
-    DeleteAttribution(
-      id: $id
-    ) {
-      id
-    }
+    id
   }
+}
 `
-
-const AuthorCreateForm = Form.create()(
-  class extends React.Component {
-    render() {
-      const { visible, onCancel, onCreate, form } = this.props;
-      const { getFieldDecorator } = form;
-
-      return (
-        <Modal
-          visible={visible}
-          title="Create new attribution"
-          okText="Create"
-          onCancel={onCancel}
-          onOk={onCreate}
-        >
-          <Form>
-            <Form.Item label="Source">
-              {getFieldDecorator('source')(<Input />)}
-            </Form.Item>
-            <Form.Item label="Note">
-              {getFieldDecorator('note')(<Input.TextArea rows={3} />)}
-            </Form.Item>
-            <Form.Item label="Certainty">
-              {getFieldDecorator('certainty', {
-                initialValue: 'POSSIBLE',
-              })(
-                <Radio.Group buttonStyle="solid">
-                  <Radio.Button value="CERTAIN">Certain</Radio.Button>
-                  <Radio.Button value="POSSIBLE">Possible</Radio.Button>
-                  <Radio.Button value="DUBIOUS">Dubious</Radio.Button>
-                  <Radio.Button value="FALSE">False</Radio.Button>
-                </Radio.Group>
-              )}
-            </Form.Item>
-          </Form>
-
-        </Modal>
-      );
-    }
-  }
-);
 
 class EditItemAuthors extends Component {
   state = {
@@ -122,7 +82,7 @@ class EditItemAuthors extends Component {
     this.setState({ visibleForm: false });
   }
 
-  handleCreate = async ({ variables }) => {
+  handleCreate = async () => {
     const form = this.formRef.props.form;
 
     form.validateFields(async (err, values) => {
@@ -132,9 +92,6 @@ class EditItemAuthors extends Component {
 
       values.id = createGUID()
       values.textid = this.props.textId
-      values.personid = "2"
-      // ANOTHER TODO:
-      // Add the author field. Use the select
 
       const { error, data } = await this.props.client.mutate({
         mutation: CREATE_ATTRIBUTION,
@@ -214,7 +171,10 @@ class EditItemAuthors extends Component {
                 renderItem={item => (
                   <List.Item
                     key={item.id}
-                    actions={[<a onClick={this.showModal}>Edit</a>, <a onClick={() => this.handleDelete(item.id)}>Delete</a>]}
+                    actions={[
+                      <a onClick={this.showModal}>Edit</a>,
+                      <a onClick={() => this.handleDelete(item.id)}>Delete</a>
+                    ]}
                   >
                     <List.Item.Meta
                       title={item.person.name}
@@ -228,6 +188,7 @@ class EditItemAuthors extends Component {
               <div>
                 <Button type="primary" onClick={this.showModal}>New attribution</Button>
                 <AuthorCreateForm
+                  client={client}
                   wrappedComponentRef={this.saveFormRef}
                   visible={this.state.visibleForm}
                   onCancel={this.handleCancel}
@@ -235,10 +196,10 @@ class EditItemAuthors extends Component {
                 />
               </div>
             </div>
-          )
+          );
         }}
-      </Query >
-    )
+      </Query>
+    );
   }
 }
 

@@ -111,7 +111,7 @@ class EditText extends Component {
             </Mutation>
           )
         }}
-      </Query >
+      </Query>
     );
   }
 }
