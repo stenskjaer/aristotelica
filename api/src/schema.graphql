@@ -14,6 +14,8 @@ type Text {
 type Person {
   id: ID!
   name: String!
+  name_en: String
+  name_la: String
   created: String!
   modified: String
   note: String 

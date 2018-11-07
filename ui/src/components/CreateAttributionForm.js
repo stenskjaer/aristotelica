@@ -7,6 +7,8 @@ query allAuthors {
   Person(orderBy: name_asc) {
     id
     name
+    name_la
+    name_en
   }
 }
 `
@@ -58,16 +60,31 @@ export const AuthorCreateForm = Form.create()(
                 <Select
                   showSearch
                   placeholder="Search for author"
-                  optionFilterProp="children"
+                  optionFilterProp="values"
                   defaultActiveFirstOption={false}
                   showArrow={true}
                   filterOption={
-                    (input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                    (input, option) => {
+                      return (option.props.values.toLowerCase().indexOf(input.toLowerCase()) >= 0)
+                    }
                   }
                   onChange={this.handleChange}
                 >
 
-                  {this.state.data.map(d => <Select.Option key={d.id}>{d.name}</Select.Option>)}
+                  {this.state.data.map(d => {
+                    const values = [d.name, d.name_la, d.name_en]
+                      .filter(i => i !== null)
+                      .join(';')
+                    return (
+                      <Select.Option key={d.id} values={values}>
+                        {d.name}
+                      </Select.Option>
+                    )
+                  }
+
+
+                  )
+                  }
                 </Select>
               )}
             </Form.Item>
