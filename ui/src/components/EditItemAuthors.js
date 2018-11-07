@@ -1,9 +1,11 @@
 import React, { Component } from "react";
 import { Query } from "react-apollo";
 import gql from "graphql-tag";
-import { Button, List, message } from 'antd';
+import { Button, List, Collapse, message } from 'antd';
 import { createGUID } from './utils'
 import { AuthorCreateForm } from './CreateAttributionForm'
+
+const Panel = Collapse.Panel
 
 const ATTRIBUTIONS_QUERY = gql`
 query attributionsQuery($id: ID!) {
@@ -150,6 +152,16 @@ class EditItemAuthors extends Component {
     }
   }
 
+  normCertainty = (cert) => {
+    const normalization = {
+      CERTAIN: 'Certain',
+      POSSIBLE: 'Possible',
+      DUBIOUS: 'Dubious',
+      FALSE: 'False'
+    }
+    return normalization[cert]
+  }
+
   saveFormRef = (formRef) => {
     this.formRef = formRef;
   }
@@ -164,7 +176,7 @@ class EditItemAuthors extends Component {
           if (error) return <div>{error.message}</div>
 
           return (
-            <div>
+            [
               <List
                 itemLayout="vertical"
                 dataSource={data.Text[0].attributions}
@@ -178,14 +190,17 @@ class EditItemAuthors extends Component {
                   >
                     <List.Item.Meta
                       title={item.person.name}
-                      description={item.certainty}
                     />
-                    {item.note ? <p>Note: {item.note}</p> : null}
-                    {item.source ? <p>Source: {item.source}</p> : null}
+                    <Collapse>
+                      <Panel showArrow={true} header={"Atribution: " + this.normCertainty(item.certainty)}>
+                        {item.note ? <p>Note: {item.note}</p> : null}
+                        {item.source ? <p>Source: {item.source}</p> : null}
+                      </Panel>
+                    </Collapse>
                   </List.Item>
                 )}
-              />
-              <div>
+              />,
+              <div style={{ margin: '10px 0 0 0' }}>
                 <Button type="primary" onClick={this.showModal}>New attribution</Button>
                 <AuthorCreateForm
                   client={client}
@@ -195,7 +210,7 @@ class EditItemAuthors extends Component {
                   onCreate={this.handleCreate}
                 />
               </div>
-            </div>
+            ]
           );
         }}
       </Query>
