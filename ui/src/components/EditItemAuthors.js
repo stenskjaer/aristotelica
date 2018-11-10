@@ -236,9 +236,8 @@ class EditItemAuthors extends Component {
               </div>
             </div>
           );
-        }
-        }
-      </Query >
+        }}
+      </Query>
     );
   }
 }

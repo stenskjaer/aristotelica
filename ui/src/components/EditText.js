@@ -7,6 +7,7 @@ import { Form, Input, Button } from 'antd';
 import FormItem from "antd/lib/form/FormItem";
 import TypeSelector from './TypeSelector'
 import EditItemAuthors from './EditItemAuthors'
+import EditItemDating from './EditItemDating'
 
 const { TextArea } = Input
 
@@ -106,9 +107,7 @@ class EditText extends Component {
                       </div>
                       <div className="form-group">
                         <h2>Dating</h2>
-                        <FormItem label="Dating">
-                          <Input placeholder="Dating" name="date" onChange={handleChange} value={values.date} />
-                        </FormItem>
+                        <EditItemDating client={client} textId={item.id} />
                       </div>
                       <div className="form-group">
                         <FormItem label="Incipit">

@@ -10,7 +10,15 @@ type Text {
   note: String
   incipit: String
   explicit: String
+  datings: [Dating!]! @relation(name: "OF", direction: "IN")
   types: [TextType]! @relation(name: "Type", direction: "OUT")
+}
+
+type TextType {
+  id: ID!
+  name: String!
+  parent: TextType @relation(name: "HAS_CHILD", direction: "IN")
+  children: [TextType] @relation(name: "HAS_CHILD", direction: "OUT")
 }
 
 type Person {
@@ -21,6 +29,51 @@ type Person {
   created: String!
   modified: String
   note: String 
+}
+
+type Date {
+  id: ID!
+  type: DateType!
+  dating: Dating! @relation(name: "OF", direction: "IN")
+  approximate: Boolean
+  uncertain: Boolean
+  edtf: String
+  year: Year @relation(name: "BELONGS_TO", direction: "OUT")
+  month: Month @relation(name: "BELONGS_TO", direction: "OUT")
+  day: Day @relation(name: "BELONGS_TO", direction: "OUT")
+}
+
+enum DateType {
+  START
+  END
+  SINGLE
+}
+
+type Dating {
+  id: ID!
+  source: String
+  note: String
+  dates: [Date!]! @relation(name: "TO", direction: "OUT")
+  text: Text @relation(name: "OF", direction: "OUT")
+}
+
+type Year {
+  id: ID!
+  value: Int!
+  months: [Month!]! @relation(name: "CONTAINS", direction: "OUT")
+}
+
+type Month {
+  id: ID!
+  value: Int!
+  year: Year! @relation(name: "CONTAINS", direction: "IN")
+  days: [Day!]! @relation(name: "CONTAINS", direction: "OUT")
+}
+
+type Day {
+  id: ID!
+  value: Int!
+  month: Month! @relation(name: "CONTAINS", direction: "IN")
 }
 
 type Attribution {
@@ -37,13 +90,6 @@ enum AttributionCertainty {
   POSSIBLE
   DUBIOUS
   FALSE
-}
-
-type TextType {
-  id: ID!
-  name: String!
-  parent: TextType @relation(name: "HAS_CHILD", direction: "IN")
-  children: [TextType] @relation(name: "HAS_CHILD", direction: "OUT")
 }
 
 scalar DateTime
@@ -67,7 +113,7 @@ type Mutation {
       incipit: String,
       explicit: String,
       date: String,
-    ): Text
+  ): Text
 
   CreateTextAttribution(
     id: ID!,
