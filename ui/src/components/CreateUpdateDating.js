@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Form, Input, Modal, InputNumber, Checkbox, Radio, Icon, Tooltip } from 'antd';
+import { Form, Input, Modal, InputNumber, Checkbox, Radio, Icon, Tooltip, Cascader } from 'antd';
 const moment = require('moment');
 
 export const CreateUpdateDating = Form.create()(
@@ -34,6 +34,39 @@ export const CreateUpdateDating = Form.create()(
       this.setState(this.validateDateRange())
     }
 
+    updateMonthDay = (type, e) => {
+      this.updateDate(type, 'month', e[0])
+      if (e.length === 2) {
+        this.updateDate(type, 'day', e[1])
+      }
+    }
+
+    buildYear = (year) => {
+      const fullYear = []
+      const buildMonths = (year, i) => {
+        const date = new Date(year, i, 1);
+        const result = [];
+        while (date.getMonth() === i) {
+          result.push({
+            value: date.getDate(),
+            label: moment(date).format('Do'),
+          });
+          date.setDate(date.getDate() + 1);
+        }
+        return result;
+      }
+      for ( let i = 0 ; i < 12 ; i++ ) {
+        const month = {
+          value: i,
+          label: moment([year, i]).format('MMMM'),
+          children: buildMonths(year, i)         
+        }
+        fullYear.push(month)
+      }
+      return fullYear
+    }
+    
+
     validateDateRange = () => {
       if (this.state.startDate.sum > this.state.endDate.sum) {
         return {
@@ -63,8 +96,13 @@ export const CreateUpdateDating = Form.create()(
 
     render() {
       const { visible, onCancel, onCreate, form } = this.props;
-      const { getFieldValue, getFieldDecorator } = form
-      const yearTips = "Dates must lie within the period from 1100 to 1600."
+      const { getFieldDecorator } = form
+      const cascaderOptions = {
+        displayRender: (label => label.join(' ')),
+        changeOnSelect: true,
+        placeholder: 'Month and date'
+      }
+      const dateTooltip = 'The date must be between 1100 and 1600.'
 
       return (
         <Modal
@@ -93,20 +131,27 @@ export const CreateUpdateDating = Form.create()(
             </div>
 
             <div className="form-group" style={{ display: this.state.datingRange === 'SINGLE' ? 'block' : 'none' }}>
-              <h3>Date details</h3>
-              <Form.Item label="Year" help="Between 1100 and 1600.">
+              <h3>
+                Date details 
+                <span style={{margin: '5px'}}/>
+                <Tooltip title={dateTooltip}>
+                  <Icon type="question-circle" />
+                </Tooltip>
+              </h3>
+              <Form.Item>
                 {getFieldDecorator('singleYear')(
-                  <InputNumber min={1100} max={1600} onChange={e => this.updateDate('singleDate', 'year', e)}/>
+                  <InputNumber 
+                    placeholder={'Year'} 
+                    min={1100} max={1600} 
+                    onChange={e => this.updateDate('singleDate', 'year', e)}
+                  />
                 )}
               </Form.Item>
-              <Form.Item label="Month">
-                {getFieldDecorator('singleMonth')(
-                  <InputNumber min={0} max={11} onChange={e => this.updateDate('singleDate', 'month', e)}/>
-                )}
-              </Form.Item>
-              <Form.Item label="Day">
-                {getFieldDecorator('singleDay')(
-                  <InputNumber min={1} max={31} onChange={e => this.updateDate('singleDate', 'day', e)}/>
+              <Form.Item>
+                {getFieldDecorator('singleMonthDate')(
+                  <Cascader options={this.buildYear(this.state.singleDate.year)} {...cascaderOptions} 
+                    onChange={e => this.updateMonthDay('singleDate', e)}
+                  />
                 )}
               </Form.Item>
               <Form.Item label="Certainty">
@@ -123,25 +168,37 @@ export const CreateUpdateDating = Form.create()(
 
             <div className="form-group" style={{ display: this.state.datingRange === 'RANGE' ? 'block' : 'none' }}>
               <h3>
-                Date range details<span style={{margin: '5px'}}/>
-                <Tooltip title="Tooltip text!">
+                Date range details 
+                <span style={{margin: '5px'}}/>
+                <Tooltip title={dateTooltip}>
                   <Icon type="question-circle" />
                 </Tooltip>
               </h3>
               
-              <Form.Item label="Start year" validateStatus={this.state.validateStatus}>
+              <h4>Start</h4>
+              <Form.Item>
+              {getFieldDecorator('datingType', { initialValue: "SINGLE" })(
+                  <Radio.Group onChange={e => this.toggleDatingRange(e.target.value)}>
+                    <Radio.Button value="DATE">Date</Radio.Button>
+                    <Radio.Button value="DECADE">Decade</Radio.Button>
+                    <Radio.Button value="QUARTER">Quarter</Radio.Button>
+                  </Radio.Group>
+                )}
+                </Form.Item>
+              <Form.Item validateStatus={this.state.validateStatus}>
                 {getFieldDecorator('startYear')(
-                  <InputNumber min={1100} max={1600} onChange={e => this.updateDate('startDate', 'year', e)}/>
+                  <InputNumber 
+                    placeholder={'Year'} 
+                    min={1100} max={1600} 
+                    onChange={e => this.updateDate('startDate', 'year', e)}
+                  />
                 )}
               </Form.Item>
-              <Form.Item label="Start month" validateStatus={this.state.validateStatus}>
-                {getFieldDecorator('startMonth')(
-                  <InputNumber min={0} max={11} onChange={e => this.updateDate('startDate', 'month', e)}/>
-                )}
-              </Form.Item>
-              <Form.Item label="Start day" validateStatus={this.state.validateStatus}>
-                {getFieldDecorator('startDay')(
-                  <InputNumber min={1} max={31} onChange={e => this.updateDate('startDate', 'day', e)}/>
+              <Form.Item validateStatus={this.state.validateStatus}>
+                {getFieldDecorator('startMonthDate')(
+                  <Cascader options={this.buildYear(this.state.startDate.year)} {...cascaderOptions} 
+                    onChange={e => this.updateMonthDay('startDate', e)}
+                  />
                 )}
               </Form.Item>
               
@@ -156,20 +213,21 @@ export const CreateUpdateDating = Form.create()(
                 )}
               </Form.Item>
               
-              <h4>End date</h4>
-              <Form.Item label="End date" validateStatus={this.state.validateStatus} help={this.state.errorMsg}>
+              <h4>End</h4>
+              <Form.Item validateStatus={this.state.validateStatus} help={this.state.errorMsg}>
                 {getFieldDecorator('endYear')(
-                  <InputNumber min={1100} max={1600} onChange={e => this.updateDate('endDate', 'year', e)}/>
+                  <InputNumber 
+                    placeholder={'Year'}
+                    min={1100} max={1600} 
+                    onChange={e => this.updateDate('endDate', 'year', e)}
+                  />
                 )}
               </Form.Item>
-              <Form.Item label="End month" validateStatus={this.state.validateStatus} help={this.state.errorMsg}>
-                {getFieldDecorator('endMonth')(
-                  <InputNumber min={0} max={11} onChange={e => this.updateDate('endDate', 'month', e)}/>
-                )}
-              </Form.Item>
-              <Form.Item label="End day" validateStatus={this.state.validateStatus} help={this.state.errorMsg}>
-                {getFieldDecorator('endDay')(
-                  <InputNumber min={1} max={31} onChange={e => this.updateDate('endDate', 'day', e)}/>
+              <Form.Item validateStatus={this.state.validateStatus} help={this.state.errorMsg}>
+                {getFieldDecorator('endMonthDate')(
+                  <Cascader options={this.buildYear(this.state.endDate.year)} {...cascaderOptions}
+                    onChange={e => this.updateMonthDay('endDate', e)}
+                  />
                 )}
               </Form.Item>
               <Form.Item label="Certainty" validateStatus={this.state.validateStatus}>
