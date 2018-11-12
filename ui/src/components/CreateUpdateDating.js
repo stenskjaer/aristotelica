@@ -34,8 +34,8 @@ export const CreateUpdateDating = Form.create()(
       this.setState(this.validateDateRange())
     }
 
-    resetDate = () => {
-      this.setState({
+    resetDate = (type) => {
+      const defaults = {
         singleDate: {
           year: 0,
           month: 0,
@@ -54,7 +54,8 @@ export const CreateUpdateDating = Form.create()(
           day: 1,
           sum: undefined
         },
-      })
+      }
+      this.setState(defaults[type])
     }
 
     updateMonthDay = (type, e) => {
@@ -71,7 +72,7 @@ export const CreateUpdateDating = Form.create()(
         copy['startDate'].sum = moment([copy['startDate'].year]).startOf('year')
       }
       if (type === 'endDate' || type === 'singleDate') {
-        copy['endDate'].year = unit === 'decade'? value + 9 : value + 24
+        copy['endDate'].year = unit === 'decade'? value + 9 : value
         copy['endDate'].month = 11
         copy['endDate'].day = 31
         copy['endDate'].sum = moment([copy['endDate'].year]).endOf('year')
@@ -105,7 +106,7 @@ export const CreateUpdateDating = Form.create()(
       return fullYear
     }
 
-    centuries = () => {
+    centuries = (end) => {
       const cents = []
       const buildDecades = (century) => {
         const decades =  []
@@ -127,22 +128,27 @@ export const CreateUpdateDating = Form.create()(
       }
       return cents
     }
+    
 
-    quarters = () => {
+    quarters = (end) => {
       const cents = []
-      const qNames = {
-        0: '1st quarter',
-        25: '2nd quarter',
-        50: '3rd quarter',
-        75: '4th quarter'
-      }
-      const buildQuarters = () => {
+      const quartNames = ['1st quarter', '2nd quarter', '3rd quarter', '4th quarter']
+
+      const buildQuarters = (cent) => {
         const quarters = []
-        for ( let i = 0 ; i < 100 ; i = i + 25 ) {
-          quarters.push({
-            value: i,
-            label: qNames[i]
-          })
+        for ( let i = 0 ; i < 4 ; i++ ) {
+          if (end) {
+            quarters.push({
+              value: cent * 100 + 24 + i * 25,
+              label: quartNames[i]
+            })
+          } else {
+            quarters.push({
+              value: cent * 100 + i * 25, 
+              label: quartNames[i]
+            })
+          }
+          
         }
         return quarters
       }
@@ -150,7 +156,7 @@ export const CreateUpdateDating = Form.create()(
         cents.push({
           value: i,
           label: `${i+1}th century`,
-          children: buildQuarters()
+          children: buildQuarters(i)
         })
       }
       return cents
@@ -187,7 +193,7 @@ export const CreateUpdateDating = Form.create()(
     }
 
     render() {
-      const { visible, onCancel, onCreate, form } = this.props;
+      const { visible, onCancel, form } = this.props;
       const { getFieldDecorator } = form
       const monthCascader = {
         displayRender: (label => label.join(' ')),
@@ -199,6 +205,10 @@ export const CreateUpdateDating = Form.create()(
         help: this.state.errorMsg
       }
       const dateTooltip = 'The date must be between 1100 and 1600.'     
+      const startCenturies = this.centuries()
+      const endCenturies = this.centuries({end: true})
+      const startQuarters = this.quarters()
+      const endQuarters = this.quarters({end:true})
 
       return (
         <Modal
@@ -238,8 +248,8 @@ export const CreateUpdateDating = Form.create()(
                 onChange={() => {
                   this.props.form.resetFields(
                     ['singleYear', 'singleMonthDate', 'singleDecade', 'singleQuarter']
-                  );
-                  this.resetDate()
+                  )
+                  this.resetDate('singleDate')
                 }}
               >
 
@@ -265,7 +275,7 @@ export const CreateUpdateDating = Form.create()(
                 <Tabs.TabPane tab="Decade" key="2">
                   <Form.Item>
                   {getFieldDecorator('singleDecade')(
-                      <Cascader options={this.centuries()} displayRender={labels => labels[1]} 
+                      <Cascader options={startCenturies} displayRender={labels => labels[1]} 
                         onChange={e => this.updateSegmentDate('singleDate', 'decade', e[1])}
                       />
                     )}
@@ -275,8 +285,8 @@ export const CreateUpdateDating = Form.create()(
                 <Tabs.TabPane tab="Quarter" key="3">
                   <Form.Item>
                     {getFieldDecorator('singleQuarter')(
-                      <Cascader options={this.quarters()} displayRender={labels => labels.join(', ')}
-                        onChange={e => this.updateSegmentDate('singleDate', 'quarter', e[0] * 100 + e[1])}
+                      <Cascader options={startQuarters} displayRender={labels => labels.join(', ')}
+                        onChange={e => this.updateSegmentDate('singleDate', 'quarter', e[1])}
                       />
                     )}
                   </Form.Item>
@@ -310,7 +320,7 @@ export const CreateUpdateDating = Form.create()(
                   this.props.form.resetFields(
                     ['startYear', 'startMonthDate', 'startDecade', 'startQuarter']
                   )
-                  this.resetDate()
+                  this.resetDate('startDate')
                   }}
                 >
 
@@ -336,7 +346,7 @@ export const CreateUpdateDating = Form.create()(
                 <Tabs.TabPane tab="Decade" key="2">
                   <Form.Item>
                   {getFieldDecorator('startDecade')(
-                      <Cascader options={this.centuries()} displayRender={labels => labels[1]} 
+                      <Cascader options={startCenturies} displayRender={labels => labels[1]} 
                         onChange={e => this.updateSegmentDate('startDate', 'decade', e[1])}
                       />
                     )}
@@ -347,8 +357,8 @@ export const CreateUpdateDating = Form.create()(
                 <Tabs.TabPane tab="Quarter" key="3">
                   <Form.Item>
                     {getFieldDecorator('startQuarter')(
-                      <Cascader options={this.quarters()} displayRender={labels => labels.join(', ')}
-                        onChange={e => this.updateSegmentDate('startDate', 'quarter', e[0] * 100 + e[1])}
+                      <Cascader options={startQuarters} displayRender={labels => labels.join(', ')}
+                        onChange={e => this.updateSegmentDate('startDate', 'quarter', e[1])}
                       />
                     )}
                   </Form.Item>
@@ -374,7 +384,7 @@ export const CreateUpdateDating = Form.create()(
                   this.props.form.resetFields(
                   ['endYear', 'endMonthDate', 'endDecade', 'endQuarter']
                 )
-                this.resetDate()
+                this.resetDate('endDate')
                 }}
               >
 
@@ -400,7 +410,7 @@ export const CreateUpdateDating = Form.create()(
                 <Tabs.TabPane tab="Decade" key="2">
                   <Form.Item {...endRangeItemOptions}>
                   {getFieldDecorator('endDecade')(
-                      <Cascader options={this.centuries()} displayRender={labels => labels[1]} 
+                      <Cascader options={endCenturies} displayRender={labels => labels[1]} 
                         onChange={e => this.updateSegmentDate('endDate', 'decade', e[1])}
                       />
                     )}
@@ -411,8 +421,8 @@ export const CreateUpdateDating = Form.create()(
                 <Tabs.TabPane tab="Quarter" key="3">
                 <Form.Item {...endRangeItemOptions}>
                   {getFieldDecorator('endQuarter')(
-                      <Cascader options={this.quarters()} displayRender={labels => labels.join(', ')} 
-                        onChange={e => this.updateSegmentDate('endDate', 'quarter', e[0] * 100 + e[1])}  
+                      <Cascader options={endQuarters} displayRender={labels => labels.join(', ')} 
+                        onChange={e => this.updateSegmentDate('endDate', 'quarter', e[1])}  
                       />
                     )}
                   </Form.Item>
