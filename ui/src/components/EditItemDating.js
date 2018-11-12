@@ -128,6 +128,7 @@ class EditItemDating extends Component {
         message.error(error.message)
       }
       form.resetFields();
+      this.setState()
       this.setState({ visibleForm: false });
     })
   }
@@ -189,8 +190,6 @@ class EditItemDating extends Component {
 
           if (loading) return <div>Fetching...</div>
           if (error) return <div>{error.message}</div>
-
-          console.log(data.Text[0])
 
           return (
             <div>

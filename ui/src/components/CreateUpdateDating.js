@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Form, Input, Modal, InputNumber, Checkbox, Radio, Icon, Tooltip, Cascader } from 'antd';
+import { Form, Input, Modal, InputNumber, Checkbox, Radio, Icon, Tooltip, Cascader, Tabs, message } from 'antd';
 const moment = require('moment');
 
 export const CreateUpdateDating = Form.create()(
@@ -20,7 +20,7 @@ export const CreateUpdateDating = Form.create()(
       endDate: {
         year: 0,
         month: 0,
-        day: 31,
+        day: 1,
         sum: undefined
       },
       datingRange: 'SINGLE',
@@ -34,11 +34,50 @@ export const CreateUpdateDating = Form.create()(
       this.setState(this.validateDateRange())
     }
 
+    resetDate = () => {
+      this.setState({
+        singleDate: {
+          year: 0,
+          month: 0,
+          day: 1,
+          sum: undefined
+        },
+        startDate: {
+          year: 0,
+          month: 0,
+          day: 1,
+          sum: undefined
+        },
+        endDate: {
+          year: 0,
+          month: 0,
+          day: 1,
+          sum: undefined
+        },
+      })
+    }
+
     updateMonthDay = (type, e) => {
       this.updateDate(type, 'month', e[0])
       if (e.length === 2) {
         this.updateDate(type, 'day', e[1])
       }
+    }
+
+    updateSegmentDate = (type, unit, value) => {
+      const copy = this.state
+      if (type === 'startDate' || type === 'singleDate') {
+        copy['startDate'].year = value
+        copy['startDate'].sum = moment([copy['startDate'].year]).startOf('year')
+      }
+      if (type === 'endDate' || type === 'singleDate') {
+        copy['endDate'].year = unit === 'decade'? value + 9 : value + 24
+        copy['endDate'].month = 11
+        copy['endDate'].day = 31
+        copy['endDate'].sum = moment([copy['endDate'].year]).endOf('year')
+      } 
+      this.setState(copy)
+      this.setState(this.validateDateRange())
     }
 
     buildYear = (year) => {
@@ -65,7 +104,57 @@ export const CreateUpdateDating = Form.create()(
       }
       return fullYear
     }
-    
+
+    centuries = () => {
+      const cents = []
+      const buildDecades = (century) => {
+        const decades =  []
+        for ( let i = century ; i < century + 100 ; i = i + 10 ) {
+          decades.push({
+            value: i,
+            label: `${i}–${i+9}`
+          })
+        }
+        return decades
+      }
+      for ( let i = 1100 ; i < 1600 ; i = i+100 ) {
+        const century = {
+          value: i,
+          label: i,
+          children: buildDecades(i)
+        }
+        cents.push(century)
+      }
+      return cents
+    }
+
+    quarters = () => {
+      const cents = []
+      const qNames = {
+        0: '1st quarter',
+        25: '2nd quarter',
+        50: '3rd quarter',
+        75: '4th quarter'
+      }
+      const buildQuarters = () => {
+        const quarters = []
+        for ( let i = 0 ; i < 100 ; i = i + 25 ) {
+          quarters.push({
+            value: i,
+            label: qNames[i]
+          })
+        }
+        return quarters
+      }
+      for ( let i = 11 ; i < 16 ; i++ ) {
+        cents.push({
+          value: i,
+          label: `${i+1}th century`,
+          children: buildQuarters()
+        })
+      }
+      return cents
+    }
 
     validateDateRange = () => {
       if (this.state.startDate.sum > this.state.endDate.sum) {
@@ -80,29 +169,36 @@ export const CreateUpdateDating = Form.create()(
       };
     }
 
-    handleChange = (value) => {
-      this.setState({ value });
-      console.log(this.state)
-    }
-
     toggleDatingRange = (value) => {
       this.props.form.resetFields();
       this.setState({ datingRange: value });
     }
 
-    onChange = (checkedValues) => {
-      console.log('checked = ', checkedValues);
+    handleChange = (value) => {
+      this.setState({ value });
+    }
+
+    handleSubmit = () => {
+      if (this.state.validateStatus === 'error') {
+        message.error("You cannot submit the form with validation errors.")
+      } else {
+        this.props.onCreate()
+      }
     }
 
     render() {
       const { visible, onCancel, onCreate, form } = this.props;
       const { getFieldDecorator } = form
-      const cascaderOptions = {
+      const monthCascader = {
         displayRender: (label => label.join(' ')),
         changeOnSelect: true,
         placeholder: 'Month and date'
       }
-      const dateTooltip = 'The date must be between 1100 and 1600.'
+      const endRangeItemOptions = {
+        validateStatus: this.state.validateStatus,
+        help: this.state.errorMsg
+      }
+      const dateTooltip = 'The date must be between 1100 and 1600.'     
 
       return (
         <Modal
@@ -110,7 +206,7 @@ export const CreateUpdateDating = Form.create()(
           title="Create new dating"
           okText="Save"
           onCancel={onCancel}
-          onOk={onCreate}
+          onOk={this.handleSubmit}
         >
           <Form>
             {getFieldDecorator('datingid')(<Input disabled style={{ display: 'none' }} />)}
@@ -138,22 +234,55 @@ export const CreateUpdateDating = Form.create()(
                   <Icon type="question-circle" />
                 </Tooltip>
               </h3>
-              <Form.Item>
-                {getFieldDecorator('singleYear')(
-                  <InputNumber 
-                    placeholder={'Year'} 
-                    min={1100} max={1600} 
-                    onChange={e => this.updateDate('singleDate', 'year', e)}
-                  />
-                )}
-              </Form.Item>
-              <Form.Item>
-                {getFieldDecorator('singleMonthDate')(
-                  <Cascader options={this.buildYear(this.state.singleDate.year)} {...cascaderOptions} 
-                    onChange={e => this.updateMonthDay('singleDate', e)}
-                  />
-                )}
-              </Form.Item>
+              <Tabs defaultActiveKey="1" 
+                onChange={() => {
+                  this.props.form.resetFields(
+                    ['singleYear', 'singleMonthDate', 'singleDecade', 'singleQuarter']
+                  );
+                  this.resetDate()
+                }}
+              >
+
+                <Tabs.TabPane tab="Date" key="1">
+                  <Form.Item>
+                    {getFieldDecorator('singleYear')(
+                      <InputNumber 
+                        placeholder={'Year'} 
+                        min={1100} max={1600} 
+                        onChange={e => this.updateDate('singleDate', 'year', e)}
+                      />
+                    )}
+                  </Form.Item>
+                  <Form.Item>
+                    {getFieldDecorator('singleMonthDate')(
+                      <Cascader options={this.buildYear(this.state.singleDate.year)} {...monthCascader} 
+                        onChange={e => this.updateMonthDay('singleDate', e)}
+                      />
+                    )}
+                  </Form.Item>
+                </Tabs.TabPane>
+
+                <Tabs.TabPane tab="Decade" key="2">
+                  <Form.Item>
+                  {getFieldDecorator('singleDecade')(
+                      <Cascader options={this.centuries()} displayRender={labels => labels[1]} 
+                        onChange={e => this.updateSegmentDate('singleDate', 'decade', e[1])}
+                      />
+                    )}
+                  </Form.Item>
+                </Tabs.TabPane>
+
+                <Tabs.TabPane tab="Quarter" key="3">
+                  <Form.Item>
+                    {getFieldDecorator('singleQuarter')(
+                      <Cascader options={this.quarters()} displayRender={labels => labels.join(', ')}
+                        onChange={e => this.updateSegmentDate('singleDate', 'quarter', e[0] * 100 + e[1])}
+                      />
+                    )}
+                  </Form.Item>
+                </Tabs.TabPane>
+              </Tabs>
+              
               <Form.Item label="Certainty">
                 {getFieldDecorator('singleCertainty')(
                   <Checkbox.Group
@@ -176,31 +305,55 @@ export const CreateUpdateDating = Form.create()(
               </h3>
               
               <h4>Start</h4>
-              <Form.Item>
-              {getFieldDecorator('datingType', { initialValue: "SINGLE" })(
-                  <Radio.Group onChange={e => this.toggleDatingRange(e.target.value)}>
-                    <Radio.Button value="DATE">Date</Radio.Button>
-                    <Radio.Button value="DECADE">Decade</Radio.Button>
-                    <Radio.Button value="QUARTER">Quarter</Radio.Button>
-                  </Radio.Group>
-                )}
-                </Form.Item>
-              <Form.Item validateStatus={this.state.validateStatus}>
-                {getFieldDecorator('startYear')(
-                  <InputNumber 
-                    placeholder={'Year'} 
-                    min={1100} max={1600} 
-                    onChange={e => this.updateDate('startDate', 'year', e)}
-                  />
-                )}
-              </Form.Item>
-              <Form.Item validateStatus={this.state.validateStatus}>
-                {getFieldDecorator('startMonthDate')(
-                  <Cascader options={this.buildYear(this.state.startDate.year)} {...cascaderOptions} 
-                    onChange={e => this.updateMonthDay('startDate', e)}
-                  />
-                )}
-              </Form.Item>
+              <Tabs defaultActiveKey="1" 
+                onChange={() => {
+                  this.props.form.resetFields(
+                    ['startYear', 'startMonthDate', 'startDecade', 'startQuarter']
+                  )
+                  this.resetDate()
+                  }}
+                >
+
+                <Tabs.TabPane tab="Date" key="1">
+                  <Form.Item validateStatus={this.state.validateStatus}>
+                    {getFieldDecorator('startYear')(
+                      <InputNumber 
+                        placeholder={'Year'} 
+                        min={1100} max={1600} 
+                        onChange={e => this.updateDate('startDate', 'year', e)}
+                      />
+                    )}
+                  </Form.Item>
+                  <Form.Item validateStatus={this.state.validateStatus}>
+                    {getFieldDecorator('startMonthDate')(
+                      <Cascader options={this.buildYear(this.state.startDate.year)} {...monthCascader} 
+                        onChange={e => this.updateMonthDay('startDate', e)}
+                      />
+                    )}
+                  </Form.Item>
+                </Tabs.TabPane>
+
+                <Tabs.TabPane tab="Decade" key="2">
+                  <Form.Item>
+                  {getFieldDecorator('startDecade')(
+                      <Cascader options={this.centuries()} displayRender={labels => labels[1]} 
+                        onChange={e => this.updateSegmentDate('startDate', 'decade', e[1])}
+                      />
+                    )}
+                  </Form.Item>
+                  
+                </Tabs.TabPane>
+
+                <Tabs.TabPane tab="Quarter" key="3">
+                  <Form.Item>
+                    {getFieldDecorator('startQuarter')(
+                      <Cascader options={this.quarters()} displayRender={labels => labels.join(', ')}
+                        onChange={e => this.updateSegmentDate('startDate', 'quarter', e[0] * 100 + e[1])}
+                      />
+                    )}
+                  </Form.Item>
+                </Tabs.TabPane>
+              </Tabs>
               
               <Form.Item label="Certainty">
                 {getFieldDecorator('startCertainty')(
@@ -213,23 +366,59 @@ export const CreateUpdateDating = Form.create()(
                 )}
               </Form.Item>
               
+              
+              
               <h4>End</h4>
-              <Form.Item validateStatus={this.state.validateStatus} help={this.state.errorMsg}>
-                {getFieldDecorator('endYear')(
-                  <InputNumber 
-                    placeholder={'Year'}
-                    min={1100} max={1600} 
-                    onChange={e => this.updateDate('endDate', 'year', e)}
-                  />
-                )}
-              </Form.Item>
-              <Form.Item validateStatus={this.state.validateStatus} help={this.state.errorMsg}>
-                {getFieldDecorator('endMonthDate')(
-                  <Cascader options={this.buildYear(this.state.endDate.year)} {...cascaderOptions}
-                    onChange={e => this.updateMonthDay('endDate', e)}
-                  />
-                )}
-              </Form.Item>
+              <Tabs defaultActiveKey="1"
+                onChange={() => {
+                  this.props.form.resetFields(
+                  ['endYear', 'endMonthDate', 'endDecade', 'endQuarter']
+                )
+                this.resetDate()
+                }}
+              >
+
+                <Tabs.TabPane tab="Date" key="1">      
+                  <Form.Item {...endRangeItemOptions}>
+                    {getFieldDecorator('endYear')(
+                      <InputNumber 
+                        placeholder={'Year'}
+                        min={1100} max={1600} 
+                        onChange={e => this.updateDate('endDate', 'year', e)}
+                      />
+                    )}
+                  </Form.Item>
+                  <Form.Item {...endRangeItemOptions}>
+                    {getFieldDecorator('endMonthDate')(
+                      <Cascader options={this.buildYear(this.state.endDate.year)} {...monthCascader}
+                        onChange={e => this.updateMonthDay('endDate', e)}
+                      />
+                    )}
+                  </Form.Item>
+                </Tabs.TabPane>
+
+                <Tabs.TabPane tab="Decade" key="2">
+                  <Form.Item {...endRangeItemOptions}>
+                  {getFieldDecorator('endDecade')(
+                      <Cascader options={this.centuries()} displayRender={labels => labels[1]} 
+                        onChange={e => this.updateSegmentDate('endDate', 'decade', e[1])}
+                      />
+                    )}
+                  </Form.Item>
+                  
+                </Tabs.TabPane>
+
+                <Tabs.TabPane tab="Quarter" key="3">
+                <Form.Item {...endRangeItemOptions}>
+                  {getFieldDecorator('endQuarter')(
+                      <Cascader options={this.quarters()} displayRender={labels => labels.join(', ')} 
+                        onChange={e => this.updateSegmentDate('endDate', 'quarter', e[0] * 100 + e[1])}  
+                      />
+                    )}
+                  </Form.Item>
+                </Tabs.TabPane>
+              </Tabs>
+              
               <Form.Item label="Certainty" validateStatus={this.state.validateStatus}>
                 {getFieldDecorator('endCertainty')(
                   <Checkbox.Group onChange={this.onChange}
@@ -241,6 +430,7 @@ export const CreateUpdateDating = Form.create()(
                 )}
               </Form.Item>
             </div>
+
             <div className="form-group">
               <h3>Dating metadata</h3>
               <Form.Item label="Note">
