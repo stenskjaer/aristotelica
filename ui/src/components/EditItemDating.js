@@ -96,41 +96,36 @@ class EditItemDating extends Component {
 
   handleCreateUpdate = async () => {
     const form = this.formRef.props.form;
+    const values = form.getFieldsValue()
 
-    form.validateFields(async (err, values) => {
-      if (err) {
-        console.log("Received values of form with error: ", values)
-        return;
-      }
+    console.log(values)
 
-      console.log(values)
+    if (values.datingid === undefined) {
+      values.datingid = createGUID()
+    }
+    values.textid = this.props.textId
+    values.dateid = createGUID()
 
-      if (values.datingid === undefined) {
-        values.datingid = createGUID()
-      }
-      values.textid = this.props.textId
-      values.dateid = createGUID()
-
-      const year = await this.props.client.query({
-        query: GET_YEAR,
-        variables: { value: values.year }
-      })
-      values.yearid = year.data.Year[0].id
-
-      const { error, data } = await this.props.client.mutate({
-        //mutation: CREATE_DATING,
-        variables: values,
-        refetchQueries: ['textDating'],
-        // optimisticResponse: {}
-      });
-      console.log("After mutation: ", data)
-      if (error) {
-        message.error(error.message)
-      }
-      form.resetFields();
-      this.setState()
-      this.setState({ visibleForm: false });
+    const year = await this.props.client.query({
+      query: GET_YEAR,
+      variables: { value: values.year }
     })
+    values.yearid = year.data.Year[0].id
+
+    const { error, data } = await this.props.client.mutate({
+      //mutation: CREATE_DATING,
+      variables: values,
+      refetchQueries: ['textDating'],
+      // optimisticResponse: {}
+    });
+    console.log("After mutation: ", data)
+    if (error) {
+      message.error(error.message)
+    }
+    form.resetFields();
+    this.setState()
+    this.setState({ visibleForm: false });
+
   }
 
   handleDelete = async (datingsObj) => {
