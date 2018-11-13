@@ -9,14 +9,27 @@ const DATING_QUERY = gql`
   query textDating($id: ID!) {
     Text(id: $id) {
       id
+      title
       datings {
         id
+        source
+        note
         dates {
           id
           type
+          approximate
+          uncertain
           year {
             id
             value
+            months {
+              id
+              value
+              days {
+                id 
+                value
+              }
+            }
           }
         }
       }
@@ -52,7 +65,7 @@ const createDating = async (datingid, values, client) => {
     },
     // optimisticResponse: {}
   });
-  console.log("After mutation: ", data)
+  console.log("Dating created: ", data)
   if (error) {
     message.error(error.message)
   }
@@ -179,7 +192,8 @@ const createDates = (datingid, dateDetails, client) => {
         datingid: datingid,
         yearid: year.id,
         type: dateInfo.datetype,
-      }
+      },
+      refetchQueries: ['textDating']
     })
 
     // Month and day creation and registration if applicable.
@@ -297,6 +311,7 @@ class EditItemDating extends Component {
     // Create date details list of objects to create details from
     let dateDetails = []
 
+    // DATA SORTING IN DIFFERENT BRANCHES ACCORDING TO INPUT DATA
     // Single year registration (including months and days)
     const uncertainty = (type) => {
       const field = values[type + 'Certainty']
