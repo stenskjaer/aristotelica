@@ -28,31 +28,229 @@ const CREATE_DATING = gql`
   mutation createDating(
     $textid: ID!
     $datingid: ID!
-    $dateid: ID!
-    $datetype: DateType!
-    $yearid: ID!
+    $note: String
+    $source: String
   ) {
     CreateDating(
       id:$datingid
-    ) {id}
-    CreateDate(
-      id:$dateid
-      type:$datetype
+      note: $note
+      source: $source
     ) {id}
     AddDatingText(
       datingid:$datingid
       textid:$textid
     ) {id}
+  }
+`
+
+const createDating = async (datingid, values, client) => {
+  const { error, data } = await client.mutate({
+    mutation: CREATE_DATING,
+    variables: {
+      ...values,
+      datingid: datingid,
+    },
+    // optimisticResponse: {}
+  });
+  console.log("After mutation: ", data)
+  if (error) {
+    message.error(error.message)
+  }
+  return data.CreateDating.id
+}
+
+const CREATE_DATE = gql`
+  mutation createDate(
+    $id: ID!
+    $datingid: ID!
+    $yearid: ID!
+    $type: DateType!
+  ) {
+    CreateDate(
+      id: $id
+      type: $type
+    ) {id}
     AddDatingDates(
-      datingid:$datingid
-      dateid:$dateid
+      datingid: $datingid
+      dateid: $id
     ) {id}
     AddDateYear(
-      dateid:$dateid
-      yearid:$yearid
+      dateid: $id
+      yearid: $yearid
     ) {id}
   }
 `
+
+const ADD_DATE_MONTH = gql`
+  mutation addDateMonth(
+    $dateid: ID!
+    $monthid: ID!
+  ) {
+    AddDateMonth(
+      dateid: $dateid
+      monthid: $monthid
+    ) {id}
+  }
+`
+
+const ADD_DATE_DAY = gql`
+  mutation addDateDay(
+    $dateid: ID!
+    $dayid: ID!
+  ) {
+    AddDateDay(
+      dateid: $dateid
+      dayid: $dayid
+    ) {id}
+  }
+`
+
+const CREATE_MONTH = gql`
+  mutation createMonth(
+    $id: ID!
+    $value: Int!
+    $yearid: ID!
+  ) {
+    CreateMonth(
+      id: $id
+      value: $value
+    ) {id}
+    AddYearMonths(
+      yearid: $yearid
+      monthid: $id
+    ) {id}
+  }
+`
+
+const CREATE_DAY = gql`
+  mutation createDay(
+    $id: ID!
+    $value: Int!
+    $monthid: ID!
+  ) {
+    CreateDay(
+      id: $id
+      value: $value
+    ) {id}
+    AddMonthDays(
+      monthid: $monthid
+      dayid: $id
+    ) {id}
+  }
+`
+
+const GET_YEAR = gql`
+  query getYear($value: Int!) {
+    Year(value: $value) {
+      id
+      months {
+        id
+        value
+        days {
+          id
+          value
+        }
+      }
+    }
+  }
+`
+
+const createDates = (datingid, dateDetails, client) => {
+
+  // Handle each date details item
+  const dates = dateDetails.map(async (dateInfo) => {
+    const yearQuery = await client.query({
+      query: GET_YEAR,
+      variables: { value: dateInfo.year }
+    })
+    const year = yearQuery.data.Year[0]
+
+    // Create date and add year
+    const date = await client.mutate({
+      mutation: CREATE_DATE,
+      variables: {
+        id: dateInfo.dateid,
+        datingid: datingid,
+        yearid: year.id,
+        type: dateInfo.datetype,
+      }
+    })
+
+    // Month and day creation and registration if applicable.
+    if (dateInfo.month !== undefined) {
+      let month
+      let day
+      const months = year.months
+      if (months === undefined || !months.find(x => x.value === dateInfo.month)) {
+        console.log("Creating month.")
+        month = await client.mutate({
+          mutation: CREATE_MONTH,
+          variables: {
+            id: createGUID(),
+            yearid: year.id,
+            value: dateInfo.month
+          }
+        })
+        month = month.data.CreateMonth
+      } else {
+        // find month
+        console.log("Finding monthg")
+        month = months.find(x => x.value === dateInfo.month)
+      }
+      console.log("Month: ", month)
+      const monthDate = await client.mutate({
+        mutation: ADD_DATE_MONTH,
+        variables: {
+          dateid: dateInfo.dateid,
+          monthid: month.id
+        }
+      })
+      if (monthDate.error) {
+        console.log("monthDate error: ", monthDate.error.messagev)
+      } else {
+        console.log("monthDate: ", monthDate)
+      }
+
+      if (dateInfo.day !== undefined) {
+        const days = month && month.days ? month.days : undefined
+        if (days === undefined || !days.find(x => x.value === dateInfo.day)) {
+          console.log("Creating day")
+          day = await client.mutate({
+            mutation: CREATE_DAY,
+            variables: {
+              id: createGUID(),
+              monthid: month.id,
+              value: dateInfo.day
+            }
+          })
+          day = day.data.CreateDay
+        } else {
+          // find day
+          console.log("Finding day")
+          day = days.find(x => x.value === dateInfo.day)
+        }
+        console.log("Day: ", day)
+        const dayDate = await client.mutate({
+          mutation: ADD_DATE_DAY,
+          variables: {
+            dateid: dateInfo.dateid,
+            dayid: day.id
+          }
+        })
+        if (dayDate.error) {
+          console.log("dayDate error: ", dayDate.error.messagev)
+        } else {
+          console.log("dayDate: ", dayDate)
+        }
+      }
+    }
+
+    // Close the big map by returning the date object
+    return date
+  })
+
+  return dates
+}
 
 const DELETE_DATING = gql`
   mutation deleteDating(
@@ -74,16 +272,6 @@ const DELETE_DATE = gql`
  }
 `
 
-
-
-const GET_YEAR = gql`
-  query getYear($value: Int!) {
-    Year(value: $value) {
-      id
-    }
-  }
-`
-
 class EditItemDating extends Component {
   state = {
     visibleForm: false,
@@ -94,34 +282,42 @@ class EditItemDating extends Component {
     this.formRef.props.form.resetFields();
   }
 
-  handleCreateUpdate = async () => {
+  handleCreateUpdate = () => {
     const form = this.formRef.props.form;
     const values = form.getFieldsValue()
 
-    console.log(values)
-
+    // Create and get some IDs
     if (values.datingid === undefined) {
       values.datingid = createGUID()
     }
     values.textid = this.props.textId
-    values.dateid = createGUID()
+    console.log(values)
 
-    const year = await this.props.client.query({
-      query: GET_YEAR,
-      variables: { value: values.year }
-    })
-    values.yearid = year.data.Year[0].id
+    // First, create a dating
+    const datingid = createGUID()
+    createDating(datingid, values, this.props.client)
 
-    const { error, data } = await this.props.client.mutate({
-      //mutation: CREATE_DATING,
-      variables: values,
-      refetchQueries: ['textDating'],
-      // optimisticResponse: {}
-    });
-    console.log("After mutation: ", data)
-    if (error) {
-      message.error(error.message)
+    // A range or a single item?
+    if (values.singleYear || values.singleMonthDate) {
+      const dateDetails = [{
+        datetype: 'SINGLE',
+        dateid: createGUID(),
+        year: values.singleYear,
+        month: values.singleMonthDate ? values.singleMonthDate[0] : undefined,
+        day: values.singleMonthDate ? values.singleMonthDate[1] : undefined
+      }]
+      const dates = createDates(datingid, dateDetails, this.props.client)
+      console.log(dates)
+    } else {
+      // Single segment or range?
+      if (values.singleDecade || values.singleQuarter) {
+
+      } else {
+
+      }
     }
+
+
     form.resetFields();
     this.setState()
     this.setState({ visibleForm: false });
@@ -200,9 +396,8 @@ class EditItemDating extends Component {
                     ]}
                   >
                     <List.Item.Meta
-                      title={item.dates[0].year.value}
+                      title={item.id}
                     />
-                    {item.dates[0].type}
                   </List.Item>
                 )}
               />
