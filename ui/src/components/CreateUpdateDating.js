@@ -297,8 +297,8 @@ export const CreateUpdateDating = Form.create()(
                 {getFieldDecorator('singleCertainty')(
                   <Checkbox.Group
                     options={[
-                      { label: 'Approximate', value: 'singleApproximate' },
-                      { label: 'Uncertain', value: 'singleUncertain' },
+                      { label: 'Approximate', value: 'approximate' },
+                      { label: 'Uncertain', value: 'uncertain' },
                     ]}
                   />
                 )}
@@ -369,8 +369,8 @@ export const CreateUpdateDating = Form.create()(
                 {getFieldDecorator('startCertainty')(
                   <Checkbox.Group onChange={this.onChange}
                     options={[
-                      { label: 'Approximate', value: 'startApproximate' },
-                      { label: 'Uncertain', value: 'startUncertain' },
+                      { label: 'Approximate', value: 'approximate' },
+                      { label: 'Uncertain', value: 'uncertain' },
                     ]}
                   />
                 )}
@@ -431,8 +431,8 @@ export const CreateUpdateDating = Form.create()(
                 {getFieldDecorator('endCertainty')(
                   <Checkbox.Group onChange={this.onChange}
                     options={[
-                      { label: 'Approximate', value: 'endApproximate' },
-                      { label: 'Uncertain', value: 'endUncertain' },
+                      { label: 'Approximate', value: 'approximate' },
+                      { label: 'Uncertain', value: 'uncertain' },
                     ]}
                   />
                 )}

@@ -188,7 +188,6 @@ const createDates = (datingid, dateDetails, client) => {
       let day
       const months = year.months
       if (months === undefined || !months.find(x => x.value === dateInfo.month)) {
-        console.log("Creating month.")
         month = await client.mutate({
           mutation: CREATE_MONTH,
           variables: {
@@ -200,10 +199,8 @@ const createDates = (datingid, dateDetails, client) => {
         month = month.data.CreateMonth
       } else {
         // find month
-        console.log("Finding monthg")
         month = months.find(x => x.value === dateInfo.month)
       }
-      console.log("Month: ", month)
       const monthDate = await client.mutate({
         mutation: ADD_DATE_MONTH,
         variables: {
@@ -213,14 +210,11 @@ const createDates = (datingid, dateDetails, client) => {
       })
       if (monthDate.error) {
         console.log("monthDate error: ", monthDate.error.messagev)
-      } else {
-        console.log("monthDate: ", monthDate)
       }
 
       if (dateInfo.day !== undefined) {
         const days = month && month.days ? month.days : undefined
         if (days === undefined || !days.find(x => x.value === dateInfo.day)) {
-          console.log("Creating day")
           day = await client.mutate({
             mutation: CREATE_DAY,
             variables: {
@@ -232,10 +226,8 @@ const createDates = (datingid, dateDetails, client) => {
           day = day.data.CreateDay
         } else {
           // find day
-          console.log("Finding day")
           day = days.find(x => x.value === dateInfo.day)
         }
-        console.log("Day: ", day)
         const dayDate = await client.mutate({
           mutation: ADD_DATE_DAY,
           variables: {
@@ -245,8 +237,6 @@ const createDates = (datingid, dateDetails, client) => {
         })
         if (dayDate.error) {
           console.log("dayDate error: ", dayDate.error.messagev)
-        } else {
-          console.log("dayDate: ", dayDate)
         }
       }
     }
@@ -304,28 +294,114 @@ class EditItemDating extends Component {
     const datingid = createGUID()
     createDating(datingid, values, this.props.client)
 
-    // A range or a single item?
-    if (values.singleYear || values.singleMonthDate) {
-      const dateDetails = [{
+    // Create date details list of objects to create details from
+    let dateDetails = []
+
+    // Single year registration (including months and days)
+    const uncertainty = (type) => {
+      const field = values[type + 'Certainty']
+      return {
+        approximate: field ? field.includes('approximate') : false,
+        uncertain: field ? field.includes('uncertain') : false,
+      }
+    }
+    if (values.singleYear) {
+      dateDetails.push({
         datetype: 'SINGLE',
         dateid: createGUID(),
         year: values.singleYear,
-        approximate: values.singleCertainty.includes('singleApproximate'),
-        uncertain: values.singleCertainty.includes('singleUncertain'),
         month: values.singleMonthDate ? values.singleMonthDate[0] : undefined,
-        day: values.singleMonthDate ? values.singleMonthDate[1] : undefined
-      }]
-      const dates = createDates(datingid, dateDetails, this.props.client)
-      console.log(dates)
-    } else {
-      // Single segment or range?
-      if (values.singleDecade || values.singleQuarter) {
-
-      } else {
-
-      }
+        day: values.singleMonthDate ? values.singleMonthDate[1] : undefined,
+        ...uncertainty('single'),
+      })
     }
 
+    // Single decade
+    if (values.singleDecade) {
+      dateDetails.push(
+        {
+          datetype: 'START',
+          dateid: createGUID(),
+          year: values.singleDecade[1],
+          ...uncertainty('single'),
+        },
+        {
+          datetype: 'END',
+          dateid: createGUID(),
+          year: values.singleDecade[1] + 9,
+          ...uncertainty('single'),
+        }
+      )
+    }
+
+    // Single quarter
+    if (values.singleQuarter) {
+      dateDetails.push(
+        {
+          datetype: 'START',
+          dateid: createGUID(),
+          year: values.singleQuarter[1],
+          ...uncertainty('single'),
+        },
+        {
+          datetype: 'END',
+          dateid: createGUID(),
+          year: values.singleQuarter[1] + 24,
+          ...uncertainty('single'),
+        }
+      )
+    }
+
+    if (values.startYear || values.startDecade || values.startQuarter) {
+      let datingData = {}
+      if (values.startYear !== undefined) {
+        datingData = {
+          year: values.startYear,
+          month: values.startMonthDate ? values.startMonthDate[0] : undefined,
+          day: values.startMonthDate ? values.startMonthDate[1] : undefined
+        }
+      } else if (values.startDecade !== undefined) {
+        datingData = { year: values.startDecade[1] }
+      } else {
+        datingData = { year: values.startQuarter[1] }
+      }
+      dateDetails.push(
+        {
+          ...datingData,
+          datetype: 'START',
+          dateid: createGUID(),
+          ...uncertainty('start'),
+        }
+      )
+    }
+
+    if (values.endYear || values.endDecade || values.endQuarter) {
+      let datingData = {}
+      if (values.endYear !== undefined) {
+        datingData = {
+          year: values.endYear,
+          month: values.endMonthDate ? values.endMonthDate[0] : undefined,
+          day: values.endMonthDate ? values.endMonthDate[1] : undefined
+        }
+      } else if (values.endDecade !== undefined) {
+        datingData = { year: values.endDecade[1] }
+      } else {
+        datingData = { year: values.endQuarter[1] }
+      }
+      dateDetails.push({
+        ...datingData,
+        datetype: 'END',
+        dateid: createGUID(),
+        ...uncertainty('end'),
+      })
+    }
+
+    createDates(datingid, dateDetails, this.props.client)
+
+    this.props.client.query({
+      query: DATING_QUERY,
+      variables: { id: values.textid }
+    })
 
     form.resetFields();
     this.setState()
@@ -334,7 +410,6 @@ class EditItemDating extends Component {
   }
 
   handleDelete = async (datingsObj) => {
-    console.log(datingsObj)
     const datingId = datingsObj.id
     const dates = datingsObj.dates
     dates.map(async d => {
