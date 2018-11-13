@@ -4,6 +4,7 @@ import gql from "graphql-tag";
 import { createGUID } from './utils'
 import { List, Button, message } from 'antd';
 import { CreateUpdateDating } from './CreateUpdateDating';
+const moment = require("moment");
 
 const DATING_QUERY = gql`
   query textDating($id: ID!) {
@@ -22,14 +23,14 @@ const DATING_QUERY = gql`
           year {
             id
             value
-            months {
-              id
-              value
-              days {
-                id 
-                value
-              }
-            }
+          }
+          month {
+            id
+            value
+          }
+          day {
+            id 
+            value
           }
         }
       }
@@ -63,9 +64,7 @@ const createDating = async (datingid, values, client) => {
       ...values,
       datingid: datingid,
     },
-    // optimisticResponse: {}
   });
-  console.log("Dating created: ", data)
   if (error) {
     message.error(error.message)
   }
@@ -176,7 +175,6 @@ const createDates = (datingid, dateDetails, client) => {
 
   // Handle each date details item
   const dates = dateDetails.map(async (dateInfo) => {
-    console.log("dateInfo: ", dateInfo)
 
     const yearQuery = await client.query({
       query: GET_YEAR,
@@ -220,7 +218,8 @@ const createDates = (datingid, dateDetails, client) => {
         variables: {
           dateid: dateInfo.dateid,
           monthid: month.id
-        }
+        },
+        refetchQueries: ['textDating']
       })
       if (monthDate.error) {
         console.log("monthDate error: ", monthDate.error.messagev)
@@ -247,7 +246,8 @@ const createDates = (datingid, dateDetails, client) => {
           variables: {
             dateid: dateInfo.dateid,
             dayid: day.id
-          }
+          },
+          refetchQueries: ['textDating']
         })
         if (dayDate.error) {
           console.log("dayDate error: ", dayDate.error.messagev)
@@ -301,8 +301,6 @@ class EditItemDating extends Component {
       values.datingid = createGUID()
     }
     values.textid = this.props.textId
-
-    console.log("values: ", values)
 
     // First, create a dating
     const datingid = createGUID()
@@ -486,19 +484,57 @@ class EditItemDating extends Component {
               <List
                 itemLayout="vertical"
                 dataSource={data.Text[0].datings}
-                renderItem={item => (
-                  <List.Item
-                    key={item.id}
-                    actions={[
-                      <a onClick={() => { }}>Edit</a>,
-                      <a onClick={() => this.handleDelete(item)}>Delete</a>
-                    ]}
-                  >
-                    <List.Item.Meta
-                      title={item.id}
-                    />
-                  </List.Item>
-                )}
+                renderItem={item => {
+                  const monthName = (month) => (moment().month(month).format('MMMM'))
+                  const dayName = (day) => (moment().date(day).format('Do'))
+                  const formatYears = () => (
+                    item.dates.map(date => {
+                      const month = date.month ? date.month.value : undefined
+                      const day = date.day ? date.day.value : undefined
+                      let datePrefix = []
+                      datePrefix += item.dates.length === 1 && date.type === 'END' ? 'before ' : ''
+                      datePrefix += item.dates.length === 1 && date.type === 'START' ? 'after ' : ''
+                      datePrefix += date.approximate ? 'around ' : ''
+                      const dateSuffix = date.uncertain ? '?' : ''
+
+                      let dateFormatter = []
+                      if (month !== undefined) {
+                        dateFormatter.push(monthName(month))
+                      }
+                      if (day !== undefined) {
+                        dateFormatter.push(dayName(day))
+                      }
+                      dateFormatter.push(date.year.value)
+
+                      return {
+                        formatted: datePrefix + dateFormatter.join(' ') + dateSuffix,
+                        type: date.type
+                      }
+                    })
+                  )
+                  const joinDates = (dates) => {
+                    if (dates.length === 1) {
+                      return dates[0].formatted
+                    } else {
+                      const start = dates.find(x => x.type === 'START')
+                      const end = dates.find(x => x.type === 'END')
+                      return [start.formatted, end.formatted].join(' to ')
+                    }
+                  }
+                  return (
+                    <List.Item
+                      key={item.id}
+                      actions={[
+                        <a onClick={() => { }}>Edit</a>,
+                        <a onClick={() => this.handleDelete(item)}>Delete</a>
+                      ]}
+                    >
+                      <List.Item.Meta
+                        title={joinDates(formatYears())}
+                      />
+                    </List.Item>
+                  )
+                }}
               />
               <div style={{ margin: '10px 0 0 0' }}>
                 <CreateUpdateDating
