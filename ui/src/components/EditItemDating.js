@@ -61,21 +61,25 @@ const createDating = async (datingid, values, client) => {
 
 const CREATE_DATE = gql`
   mutation createDate(
-    $id: ID!
+    $dateid: ID!
     $datingid: ID!
+    $approximate: Boolean!
+    $uncertain: Boolean!
     $yearid: ID!
     $type: DateType!
   ) {
     CreateDate(
-      id: $id
+      id: $dateid
       type: $type
+      approximate: $approximate
+      uncertain: $uncertain
     ) {id}
     AddDatingDates(
       datingid: $datingid
-      dateid: $id
+      dateid: $dateid
     ) {id}
     AddDateYear(
-      dateid: $id
+      dateid: $dateid
       yearid: $yearid
     ) {id}
   }
@@ -159,6 +163,8 @@ const createDates = (datingid, dateDetails, client) => {
 
   // Handle each date details item
   const dates = dateDetails.map(async (dateInfo) => {
+    console.log("dateInfo: ", dateInfo)
+
     const yearQuery = await client.query({
       query: GET_YEAR,
       variables: { value: dateInfo.year }
@@ -169,7 +175,7 @@ const createDates = (datingid, dateDetails, client) => {
     const date = await client.mutate({
       mutation: CREATE_DATE,
       variables: {
-        id: dateInfo.dateid,
+        ...dateInfo,
         datingid: datingid,
         yearid: year.id,
         type: dateInfo.datetype,
@@ -291,7 +297,8 @@ class EditItemDating extends Component {
       values.datingid = createGUID()
     }
     values.textid = this.props.textId
-    console.log(values)
+
+    console.log("values: ", values)
 
     // First, create a dating
     const datingid = createGUID()
@@ -303,6 +310,8 @@ class EditItemDating extends Component {
         datetype: 'SINGLE',
         dateid: createGUID(),
         year: values.singleYear,
+        approximate: values.singleCertainty.includes('singleApproximate'),
+        uncertain: values.singleCertainty.includes('singleUncertain'),
         month: values.singleMonthDate ? values.singleMonthDate[0] : undefined,
         day: values.singleMonthDate ? values.singleMonthDate[1] : undefined
       }]
