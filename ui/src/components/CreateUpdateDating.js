@@ -139,12 +139,12 @@ export const CreateUpdateDating = Form.create()(
         for ( let i = 0 ; i < 4 ; i++ ) {
           if (end) {
             quarters.push({
-              value: cent * 100 + 24 + i * 25,
+              value: cent + 24 + (i * 25),
               label: quartNames[i]
             })
           } else {
             quarters.push({
-              value: cent * 100 + i * 25, 
+              value: cent + (i * 25), 
               label: quartNames[i]
             })
           }
@@ -152,10 +152,10 @@ export const CreateUpdateDating = Form.create()(
         }
         return quarters
       }
-      for ( let i = 11 ; i < 16 ; i++ ) {
+      for ( let i = 1100 ; i < 1600 ; i = i + 100 ) {
         cents.push({
           value: i,
-          label: `${i+1}th century`,
+          label: `${(i / 100) +1}th century`,
           children: buildQuarters(i)
         })
       }

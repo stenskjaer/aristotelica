@@ -37,6 +37,9 @@ type Date {
   dating: Dating! @relation(name: "OF", direction: "IN")
   approximate: Boolean
   uncertain: Boolean
+  century: Int
+  decade: Int
+  quarter: Int
   edtf: String
   year: Year @relation(name: "BELONGS_TO", direction: "OUT")
   month: Month @relation(name: "BELONGS_TO", direction: "OUT")

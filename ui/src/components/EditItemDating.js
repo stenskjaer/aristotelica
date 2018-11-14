@@ -77,6 +77,9 @@ const CREATE_DATE = gql`
     $datingid: ID!
     $approximate: Boolean!
     $uncertain: Boolean!
+    $century: Int
+    $quarter: Int
+    $decade: Int
     $yearid: ID!
     $type: DateType!
   ) {
@@ -85,6 +88,9 @@ const CREATE_DATE = gql`
       type: $type
       approximate: $approximate
       uncertain: $uncertain
+      century: $century
+      decade: $decade
+      quarter: $quarter
     ) {id}
     AddDatingDates(
       datingid: $datingid
@@ -190,6 +196,8 @@ const createDates = (datingid, dateDetails, client) => {
         datingid: datingid,
         yearid: year.id,
         type: dateInfo.datetype,
+        decade: dateInfo.decade,
+        quarter: dateInfo.quarter,
       },
       refetchQueries: ['textDating']
     })
@@ -311,11 +319,25 @@ class EditItemDating extends Component {
 
     // DATA SORTING IN DIFFERENT BRANCHES ACCORDING TO INPUT DATA
     // Single year registration (including months and days)
-    const uncertainty = (type) => {
-      const field = values[type + 'Certainty']
+    const typeDependent = (type) => {
+      const certainty = values[type + 'Certainty']
+      const decade = values[type + 'Decade']
+      const quarter = values[type + 'Quarter']
+      const century = () => {
+        if (quarter || decade) {
+          return quarter ? quarter[0] : decade[0]
+        }
+        if (values[type + 'Year']) {
+          // E.g.: 1583 / 100 => 15.83; Math.trunc(15.83) => 15; 15 * 100 => 1500
+          return Math.trunc(values[type + 'Year'] / 100) * 100
+        }
+      }
       return {
-        approximate: field ? field.includes('approximate') : false,
-        uncertain: field ? field.includes('uncertain') : false,
+        approximate: certainty ? certainty.includes('approximate') : false,
+        uncertain: certainty ? certainty.includes('uncertain') : false,
+        century: century() ? century() : undefined,
+        decade: decade ? decade[1] : undefined,
+        quarter: quarter ? quarter[1] : undefined,
       }
     }
     if (values.singleYear) {
@@ -325,7 +347,7 @@ class EditItemDating extends Component {
         year: values.singleYear,
         month: values.singleMonthDate ? values.singleMonthDate[0] : undefined,
         day: values.singleMonthDate ? values.singleMonthDate[1] : undefined,
-        ...uncertainty('single'),
+        ...typeDependent('single'),
       })
     }
 
@@ -336,13 +358,13 @@ class EditItemDating extends Component {
           datetype: 'START',
           dateid: createGUID(),
           year: values.singleDecade[1],
-          ...uncertainty('single'),
+          ...typeDependent('single'),
         },
         {
           datetype: 'END',
           dateid: createGUID(),
           year: values.singleDecade[1] + 9,
-          ...uncertainty('single'),
+          ...typeDependent('single'),
         }
       )
     }
@@ -354,13 +376,13 @@ class EditItemDating extends Component {
           datetype: 'START',
           dateid: createGUID(),
           year: values.singleQuarter[1],
-          ...uncertainty('single'),
+          ...typeDependent('single'),
         },
         {
           datetype: 'END',
           dateid: createGUID(),
           year: values.singleQuarter[1] + 24,
-          ...uncertainty('single'),
+          ...typeDependent('single'),
         }
       )
     }
@@ -383,7 +405,7 @@ class EditItemDating extends Component {
           ...datingData,
           datetype: 'START',
           dateid: createGUID(),
-          ...uncertainty('start'),
+          ...typeDependent('start'),
         }
       )
     }
@@ -405,7 +427,7 @@ class EditItemDating extends Component {
         ...datingData,
         datetype: 'END',
         dateid: createGUID(),
-        ...uncertainty('end'),
+        ...typeDependent('end'),
       })
     }
 
