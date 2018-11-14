@@ -15,11 +15,15 @@ const DATING_QUERY = gql`
         id
         source
         note
+        type
         dates {
           id
           type
           approximate
           uncertain
+          decade
+          quarter
+          century
           year {
             id
             value
@@ -42,11 +46,13 @@ const CREATE_DATING = gql`
   mutation createDating(
     $textid: ID!
     $datingid: ID!
+    $datingtype: String!
     $note: String
     $source: String
   ) {
     CreateDating(
-      id:$datingid
+      id: $datingid
+      type: $datingtype
       note: $note
       source: $source
     ) {id}
@@ -63,6 +69,7 @@ const createDating = async (datingid, values, client) => {
     variables: {
       ...values,
       datingid: datingid,
+      datingtype: values.datingType
     },
   });
   if (error) {
@@ -293,6 +300,11 @@ const DELETE_DATE = gql`
 class EditItemDating extends Component {
   state = {
     visibleForm: false,
+    tabsPositions: {
+      singleTabs: '1',
+      startTabs: '1',
+      endTabs: '1'
+    }
   };
 
   handleCancel = () => {
@@ -309,6 +321,8 @@ class EditItemDating extends Component {
       values.datingid = createGUID()
     }
     values.textid = this.props.textId
+
+    console.log("vals: ", values)
 
     // First, create a dating
     const datingid = createGUID()
@@ -489,7 +503,32 @@ class EditItemDating extends Component {
 
   updateModal = (values) => {
     const form = this.formRef.props.form;
-    form.setFieldsValue({})
+    form.setFieldsValue({
+      datingid: values.id,
+      source: values.source,
+      note: values.note,
+      datingType: values.datingType,
+      singleYear: values.singleYear,
+      singleMonthDate: values.singleMonthDate,
+      singleDecade: values.singleDecade,
+      singleQuarter: values.singleQuarter,
+      singleCertainty: values.singleCertainty,
+      startYear: values.startYear,
+      startMonthDate: values.startMonthDate,
+      startDecade: values.startDecade,
+      startQuarter: values.startQuarter,
+      startCertainty: values.startCertainty,
+      endYear: values.endYear,
+      endMonthDate: values.endMonthDate,
+      endDecade: values.endDecade,
+      endQuarter: values.endQuarter,
+      endCertainty: values.endCertainty
+    })
+    // Update state of tabsPositions: 
+    // date: '1', decade: '2', quarter: '3'
+    // single: singleTabs
+    // start: startTabs
+    // end: endTabs
     this.showModal()
   }
 
@@ -540,20 +579,69 @@ class EditItemDating extends Component {
                     } else {
                       const start = dates.find(x => x.type === 'START')
                       const end = dates.find(x => x.type === 'END')
-                      return [start.formatted, end.formatted].join(' to ')
+                      if (start && end) {
+                        return [start.formatted, end.formatted].join(' to ')
+                      } else {
+                        console.log("Problem: ", start, end)
+                        return 'Problem rendering the dating.'
+                      }
                     }
                   }
                   return (
                     <List.Item
                       key={item.id}
                       actions={[
-                        <a onClick={() => { }}>Edit</a>,
+                        <a onClick={() => {
+                          const shared = {
+                            id: item.id,
+                            source: item.source,
+                            note: item.note,
+                            datingType: item.type,
+                          }
+                          let datingInfo
+                          if (item.type === 'SINGLE') {
+                            const certainty = []
+                            if (item.dates[0].approximate) {
+                              certainty.push('approximate')
+                            }
+                            if (item.dates[0].uncertain) {
+                              certainty.push('uncertain')
+                            }
+                            const monthDate = () => {
+                              const monthDate = []
+                              if (item.dates[0].month) {
+                                monthDate.push(item.dates[0].month.value)
+                              }
+                              if (item.dates[0].day) {
+                                monthDate.push(item.dates[0].day.value)
+                              }
+                              return monthDate
+                            }
+                            datingInfo = {
+                              ...shared,
+                              singleYear: item.dates[0].year.value,
+                              singleMonthDate: monthDate() ? monthDate() : undefined,
+                              singleCertainty: certainty,
+                              singleDecade: item.century && item.decade ? [item.century, item.decade] : undefined,
+                              singleQuarter: item.century && item.quarter ? [item.century, item.quarter] : undefined,
+                            }
+                          } else {
+                            datingInfo = {
+                              ...shared,
+                            }
+                          }
+                          this.updateModal(
+                            datingInfo
+                          )
+                        }
+                        }>Edit</a>,
                         <a onClick={() => this.handleDelete(item)}>Delete</a>
                       ]}
                     >
                       <List.Item.Meta
                         title={joinDates(formatYears())}
                       />
+                      {console.log(item)}
                     </List.Item>
                   )
                 }}
@@ -565,6 +653,7 @@ class EditItemDating extends Component {
                   visible={this.state.visibleForm}
                   onCancel={this.handleCancel}
                   onCreate={this.handleCreateUpdate}
+                  tabsPositions={this.state.tabsPositions}
                 />
                 <Button type="primary" onClick={this.showModal}>New dating</Button>
               </div>

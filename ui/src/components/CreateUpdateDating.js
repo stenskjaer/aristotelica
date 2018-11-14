@@ -244,7 +244,7 @@ export const CreateUpdateDating = Form.create()(
                   <Icon type="question-circle" />
                 </Tooltip>
               </h3>
-              <Tabs defaultActiveKey="1" 
+              <Tabs defaultActiveKey={this.props.tabsPositions.singleTabs} 
                 onChange={() => {
                   this.props.form.resetFields(
                     ['singleYear', 'singleMonthDate', 'singleDecade', 'singleQuarter']
