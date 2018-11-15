@@ -300,11 +300,6 @@ const DELETE_DATE = gql`
 class EditItemDating extends Component {
   state = {
     visibleForm: false,
-    tabsPositions: {
-      singleTabs: '1',
-      startTabs: '1',
-      endTabs: '1'
-    }
   };
 
   handleCancel = () => {
@@ -501,29 +496,11 @@ class EditItemDating extends Component {
     });
   }
 
-  updateModal = (values) => {
+  updateModal = (values, tabsState) => {
     const form = this.formRef.props.form;
-    form.setFieldsValue({
-      datingid: values.id,
-      source: values.source,
-      note: values.note,
-      datingType: values.datingType,
-      singleYear: values.singleYear,
-      singleMonthDate: values.singleMonthDate,
-      singleDecade: values.singleDecade,
-      singleQuarter: values.singleQuarter,
-      singleCertainty: values.singleCertainty,
-      startYear: values.startYear,
-      startMonthDate: values.startMonthDate,
-      startDecade: values.startDecade,
-      startQuarter: values.startQuarter,
-      startCertainty: values.startCertainty,
-      endYear: values.endYear,
-      endMonthDate: values.endMonthDate,
-      endDecade: values.endDecade,
-      endQuarter: values.endQuarter,
-      endCertainty: values.endCertainty
-    })
+    form.setFieldsValue(values)
+    this.formRef.setState(tabsState)
+
     // Update state of tabsPositions: 
     // date: '1', decade: '2', quarter: '3'
     // single: singleTabs
@@ -593,45 +570,68 @@ class EditItemDating extends Component {
                       actions={[
                         <a onClick={() => {
                           const shared = {
-                            id: item.id,
+                            datingid: item.id,
                             source: item.source,
                             note: item.note,
                             datingType: item.type,
                           }
-                          let datingInfo
-                          if (item.type === 'SINGLE') {
+
+                          const buildDateInfo = (date, typename) => {
                             const certainty = []
-                            if (item.dates[0].approximate) {
+                            if (date.approximate) {
                               certainty.push('approximate')
                             }
-                            if (item.dates[0].uncertain) {
+                            if (date.uncertain) {
                               certainty.push('uncertain')
                             }
-                            const monthDate = () => {
+                            const monthDate = (date) => {
                               const monthDate = []
-                              if (item.dates[0].month) {
-                                monthDate.push(item.dates[0].month.value)
+                              if (date.month) {
+                                monthDate.push(date.month.value)
                               }
-                              if (item.dates[0].day) {
-                                monthDate.push(item.dates[0].day.value)
+                              if (date.day) {
+                                monthDate.push(date.day.value)
                               }
-                              return monthDate
+                              return monthDate.length > 0 ? monthDate : undefined
                             }
+                            const dateInfo = {}
+                            dateInfo[typename + 'Year'] = date.year.value
+                            dateInfo[typename + 'MonthDate'] = monthDate(date)
+                            dateInfo[typename + 'Certainty'] = certainty
+                            dateInfo[typename + 'Decade'] = date.century && date.decade ? [date.century, date.decade] : undefined
+                            dateInfo[typename + 'Quarter'] = date.century && date.quarter ? [date.century, date.quarter] : undefined
+                            return (dateInfo)
+                          }
+                          let datingInfo = {}
+                          if (item.type === 'SINGLE') {
                             datingInfo = {
                               ...shared,
-                              singleYear: item.dates[0].year.value,
-                              singleMonthDate: monthDate() ? monthDate() : undefined,
-                              singleCertainty: certainty,
-                              singleDecade: item.century && item.decade ? [item.century, item.decade] : undefined,
-                              singleQuarter: item.century && item.quarter ? [item.century, item.quarter] : undefined,
+                              ...buildDateInfo(item.dates[0], 'single'),
                             }
                           } else {
+                            const start = item.dates.find(x => x.type === 'START')
+                            const end = item.dates.find(x => x.type === 'END')
                             datingInfo = {
                               ...shared,
+                              ...start ? buildDateInfo(start, 'start') : undefined,
+                              ...end ? buildDateInfo(end, 'end') : undefined
                             }
                           }
+                          const positions = {
+                            datingRange: datingInfo.datingType
+                          }
+                          const names = ['single', 'start', 'end']
+                          names.forEach(typename => {
+                            if (datingInfo[typename + 'Year']) {
+                              positions[typename + 'Tabs'] = '1'
+                            } else if (datingInfo[typename + 'Decade']) {
+                              positions[typename + 'Tabs'] = '2'
+                            } else if (datingInfo[typename + 'Decade']) {
+                              positions[typename + 'Tabs'] = '3'
+                            }
+                          })
                           this.updateModal(
-                            datingInfo
+                            datingInfo, positions
                           )
                         }
                         }>Edit</a>,

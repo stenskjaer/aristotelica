@@ -23,6 +23,11 @@ export const CreateUpdateDating = Form.create()(
         day: 1,
         sum: undefined
       },
+      tabsPositions: {
+        singleTabs: '1',
+        startTabs: '1',
+        endTabs: '1'
+      },
       datingRange: 'SINGLE',
     }
 
@@ -227,7 +232,7 @@ export const CreateUpdateDating = Form.create()(
                 help="Does the dating cover a start–end range or a single date point? 
                   A date point may cover a range within a segment."
               >
-                {getFieldDecorator('datingType', { initialValue: "SINGLE" })(
+                {getFieldDecorator('datingType', { initialValue: this.state.datingRange })(
                   <Radio.Group onChange={e => this.toggleDatingRange(e.target.value)}>
                     <Radio.Button value="SINGLE">Point</Radio.Button>
                     <Radio.Button value="RANGE">Range</Radio.Button>
@@ -244,7 +249,7 @@ export const CreateUpdateDating = Form.create()(
                   <Icon type="question-circle" />
                 </Tooltip>
               </h3>
-              <Tabs defaultActiveKey={this.props.tabsPositions.singleTabs} 
+              <Tabs defaultActiveKey={this.state.tabsPositions.singleTabs} 
                 onChange={() => {
                   this.props.form.resetFields(
                     ['singleYear', 'singleMonthDate', 'singleDecade', 'singleQuarter']
@@ -315,7 +320,7 @@ export const CreateUpdateDating = Form.create()(
               </h3>
               
               <h4>Start</h4>
-              <Tabs defaultActiveKey="1" 
+              <Tabs defaultActiveKey={this.state.tabsPositions.startTabs} 
                 onChange={() => {
                   this.props.form.resetFields(
                     ['startYear', 'startMonthDate', 'startDecade', 'startQuarter']
