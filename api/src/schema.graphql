@@ -64,6 +64,7 @@ type Dating {
 type Year {
   id: ID!
   value: Int!
+  dates: [Date!]! @relation(name: "BELONGS_TO", direction: "IN")
   months: [Month!]! @relation(name: "CONTAINS", direction: "OUT")
 }
 

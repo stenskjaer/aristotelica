@@ -32,10 +32,14 @@ export const CreateUpdateDating = Form.create()(
     }
 
     updateDate = (type, unit, value) => {
-      const copy = this.state
-      copy[type][unit] = value
-      copy[type].sum = moment().year(copy[type].year).month(copy[type].month).date(copy[type].day)
-      this.setState(copy)
+      if (value === undefined) {
+        this.resetDate(type)
+      } else {
+        const copy = this.state
+        copy[type][unit] = value
+        copy[type].sum = moment().year(copy[type].year).month(copy[type].month).date(copy[type].day)
+        this.setState(copy)
+      }
       this.setState(this.validateDateRange())
     }
 
@@ -203,7 +207,8 @@ export const CreateUpdateDating = Form.create()(
       const monthCascader = {
         displayRender: (label => label.join(' ')),
         changeOnSelect: true,
-        placeholder: 'Month and date'
+        placeholder: 'Month and date',
+        allowClear: true,
       }
       const endRangeItemOptions = {
         validateStatus: this.state.validateStatus,
@@ -225,6 +230,9 @@ export const CreateUpdateDating = Form.create()(
         >
           <Form>
             {getFieldDecorator('datingid')(<Input disabled style={{ display: 'none' }} />)}
+            {getFieldDecorator('singledateid')(<Input disabled style={{ display: 'none' }} />)}
+            {getFieldDecorator('startdateid')(<Input disabled style={{ display: 'none' }} />)}
+            {getFieldDecorator('enddateid')(<Input disabled style={{ display: 'none' }} />)}
 
             <div className="form-group">
               <h3>Dating type</h3>
