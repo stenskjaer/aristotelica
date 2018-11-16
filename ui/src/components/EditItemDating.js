@@ -204,6 +204,18 @@ const REMOVE_DATE_MONTH = gql`
   }
 `
 
+const REMOVE_DATE_DAY = gql`
+  mutation RemoveDateDay(
+    $dateid: ID!
+    $dayid: ID!
+  ) {
+    RemoveDateDay(
+      dateid: $dateid
+      dayid: $dayid
+    ) {id}
+  }
+`
+
 const ADD_DATE_DAY = gql`
   mutation addDateDay(
     $dateid: ID!
@@ -417,6 +429,7 @@ const updateDate = async (datingid, dateValues, client) => {
     })
   }
 
+  let month
   // Month: is the value set in the update?
   if (dateValues.month !== undefined) {
     // Does the old record have a month? If so and it's different, we remove the old
@@ -431,8 +444,7 @@ const updateDate = async (datingid, dateValues, client) => {
       })
     }
     // Then we create or attach the new
-    let month
-    let day
+
     const months = newYear.months
     if (months === undefined || !months.find(x => x.value === dateValues.month)) {
       // TODO: Generalize this duplicate mutation to a function outside this scope.
@@ -450,6 +462,7 @@ const updateDate = async (datingid, dateValues, client) => {
       // find month
       console.log("finding month")
       month = months.find(x => x.value === dateValues.month)
+      console.log("month found: ", month)
     }
 
     console.log("create date month relation")
@@ -480,38 +493,64 @@ const updateDate = async (datingid, dateValues, client) => {
   }
 
   // Expand the logic for day updating
+  // Day: is the value set in the update?
+  console.log("Create day logic")
+  if (dateValues.day !== undefined) {
+    console.log("Day values given")
+    // Does the old record have a month? If so and it's different, we remove the old
+    if (oldYearMonthDay.day && dateValues.day !== oldYearMonthDay.day.value) {
+      console.log("remove old day relation")
+      client.mutate({
+        mutation: REMOVE_DATE_DAY,
+        variables: {
+          dateid: dateValues.dateid,
+          monthid: oldYearMonthDay.day.id
+        }
+      })
+    }
+    // Then we create or attach the new
+    let day
+    const days = month && month.days ? month.days : undefined
+    if (days === undefined || !days.find(x => x.value === dateValues.day)) {
+      day = await client.mutate({
+        mutation: CREATE_DAY,
+        variables: {
+          id: createGUID(),
+          monthid: month.id,
+          value: dateValues.day
+        }
+      })
+      day = day.data.CreateDay
+    } else {
+      // find day
+      day = days.find(x => x.value === dateValues.day)
+    }
+    const dayDate = await client.mutate({
+      mutation: ADD_DATE_DAY,
+      variables: {
+        dateid: dateValues.dateid,
+        dayid: day.id
+      },
+      refetchQueries: ['textDating']
+    })
+    if (dayDate.error) {
+      console.log("dayDate error: ", dayDate.error.messagev)
+    }
+  }
 
+  // Day, is it removed in the update?
+  if (!dateValues.day && oldYearMonthDay.day) {
+    console.log("remove old day relation")
+    client.mutate({
+      mutation: REMOVE_DATE_DAY,
+      variables: {
+        dateid: dateValues.dateid,
+        dayid: oldYearMonthDay.month.id
+      },
+      refetchQueries: ['textDating']
+    })
+  }
 
-  // if (dateValues.day !== undefined) {
-  //   const days = month && month.days ? month.days : undefined
-  //   if (days === undefined || !days.find(x => x.value === dateValues.day)) {
-  //     day = await client.mutate({
-  //       mutation: CREATE_DAY,
-  //       variables: {
-  //         id: createGUID(),
-  //         monthid: month.id,
-  //         value: dateValues.day
-  //       }
-  //     })
-  //     day = day.data.CreateDay
-  //   } else {
-  //     // find day
-  //     day = days.find(x => x.value === dateValues.day)
-  //   }
-  //   const dayDate = await client.mutate({
-  //     mutation: ADD_DATE_DAY,
-  //     variables: {
-  //       dateid: dateValues.dateid,
-  //       dayid: day.id
-  //     },
-  //     refetchQueries: ['textDating']
-  //   })
-  //   if (dayDate.error) {
-  //     console.log("dayDate error: ", dayDate.error.messagev)
-  //   }
-  // }
-
-  // Close the big map by returning the date object
   return date
 }
 
