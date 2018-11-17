@@ -33,6 +33,7 @@ export const CreateUpdateDating = Form.create()(
 
     updateDate = (type, unit, value) => {
       if (value === undefined) {
+        // This update is a delete
         this.resetDate(type)
       } else {
         const copy = this.state
@@ -75,18 +76,24 @@ export const CreateUpdateDating = Form.create()(
     }
 
     updateSegmentDate = (type, unit, value) => {
-      const copy = this.state
-      if (type === 'startDate' || type === 'singleDate') {
-        copy['startDate'].year = value
-        copy['startDate'].sum = moment([copy['startDate'].year]).startOf('year')
+      if (value === undefined) {
+        // This is a delete update
+        this.props.form.resetFields([type + 'Year', type + 'Quarter', type + 'Decade'])
+        this.resetDate(type + 'Date')
+      } else {
+        const copy = this.state
+        if (type === 'start' || type === 'single') {
+          copy['startDate'].year = value
+          copy['startDate'].sum = moment([copy['startDate'].year]).startOf('year')
+        }
+        if (type === 'end' || type === 'single') {
+          copy['endDate'].year = unit === 'decade'? value + 9 : value
+          copy['endDate'].month = 11
+          copy['endDate'].day = 31
+          copy['endDate'].sum = moment([copy['endDate'].year]).endOf('year')
+        } 
+        this.setState(copy)
       }
-      if (type === 'endDate' || type === 'singleDate') {
-        copy['endDate'].year = unit === 'decade'? value + 9 : value
-        copy['endDate'].month = 11
-        copy['endDate'].day = 31
-        copy['endDate'].sum = moment([copy['endDate'].year]).endOf('year')
-      } 
-      this.setState(copy)
       this.setState(this.validateDateRange())
     }
 
@@ -185,7 +192,6 @@ export const CreateUpdateDating = Form.create()(
     }
 
     toggleDatingRange = (value) => {
-      this.props.form.resetFields();
       this.setState({ datingRange: value });
     }
 
@@ -289,7 +295,8 @@ export const CreateUpdateDating = Form.create()(
                   <Form.Item>
                   {getFieldDecorator('singleDecade')(
                       <Cascader options={startCenturies} displayRender={labels => labels[1]} 
-                        onChange={e => this.updateSegmentDate('singleDate', 'decade', e[1])}
+                        onChange={e => this.updateSegmentDate('single', 'decade', e[1])}
+                        allowClear={true}
                       />
                     )}
                   </Form.Item>
@@ -299,7 +306,8 @@ export const CreateUpdateDating = Form.create()(
                   <Form.Item>
                     {getFieldDecorator('singleQuarter')(
                       <Cascader options={startQuarters} displayRender={labels => labels.join(', ')}
-                        onChange={e => this.updateSegmentDate('singleDate', 'quarter', e[1])}
+                        onChange={e => this.updateSegmentDate('single', 'quarter', e[1])}
+                        allowClear={true}
                       />
                     )}
                   </Form.Item>
@@ -360,18 +368,19 @@ export const CreateUpdateDating = Form.create()(
                   <Form.Item>
                   {getFieldDecorator('startDecade')(
                       <Cascader options={startCenturies} displayRender={labels => labels[1]} 
-                        onChange={e => this.updateSegmentDate('startDate', 'decade', e[1])}
+                        onChange={e => this.updateSegmentDate('start', 'decade', e[1])}
+                        allowClear={true}
                       />
                     )}
                   </Form.Item>
-                  
                 </Tabs.TabPane>
 
                 <Tabs.TabPane tab="Quarter" key="3">
                   <Form.Item>
                     {getFieldDecorator('startQuarter')(
                       <Cascader options={startQuarters} displayRender={labels => labels.join(', ')}
-                        onChange={e => this.updateSegmentDate('startDate', 'quarter', e[1])}
+                        onChange={e => this.updateSegmentDate('start', 'quarter', e[1])}
+                        allowClear={true}
                       />
                     )}
                   </Form.Item>
@@ -412,7 +421,7 @@ export const CreateUpdateDating = Form.create()(
                   <Form.Item {...endRangeItemOptions}>
                     {getFieldDecorator('endMonthDate')(
                       <Cascader options={this.buildYear(this.state.endDate.year)} {...monthCascader}
-                        onChange={e => this.updateMonthDay('endDate', e)}
+                        onChange={e => this.updateMonthDay('end', e)}
                       />
                     )}
                   </Form.Item>
@@ -422,7 +431,8 @@ export const CreateUpdateDating = Form.create()(
                   <Form.Item {...endRangeItemOptions}>
                   {getFieldDecorator('endDecade')(
                       <Cascader options={endCenturies} displayRender={labels => labels[1]} 
-                        onChange={e => this.updateSegmentDate('endDate', 'decade', e[1])}
+                        onChange={e => this.updateSegmentDate('end', 'decade', e[1])}
+                        allowClear={true}
                       />
                     )}
                   </Form.Item>
@@ -433,7 +443,8 @@ export const CreateUpdateDating = Form.create()(
                 <Form.Item {...endRangeItemOptions}>
                   {getFieldDecorator('endQuarter')(
                       <Cascader options={endQuarters} displayRender={labels => labels.join(', ')} 
-                        onChange={e => this.updateSegmentDate('endDate', 'quarter', e[1])}  
+                        onChange={e => this.updateSegmentDate('end', 'quarter', e[1])}  
+                        allowClear={true}
                       />
                     )}
                   </Form.Item>
