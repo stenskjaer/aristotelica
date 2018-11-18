@@ -248,8 +248,6 @@ export const CreateUpdateDating = Form.create()(
       const endCenturies = this.centuries({end: true})
       const startQuarters = this.quarters()
       const endQuarters = this.quarters({end:true})
-      console.log("positions: ", form.getFieldValue('positions'))
-      console.log("state:", this.state)
 
       return (
         <Modal
@@ -289,51 +287,23 @@ export const CreateUpdateDating = Form.create()(
                   <Icon type="question-circle" />
                 </Tooltip>
               </h3>
-              <Tabs activeKey={this.state.tabsPositions.singleTabs} 
-                onChange={(e) => this.updateTabs(e, 'single')}
-              >
 
-                <Tabs.TabPane tab="Date" key="1">
-                  <Form.Item>
-                    {getFieldDecorator('singleYear')(
-                      <InputNumber 
-                        placeholder={'Year'} 
-                        min={1100} max={1600} 
-                        onChange={e => this.updateDate('singleDate', 'year', e)}
-                      />
-                    )}
-                  </Form.Item>
-                  <Form.Item>
-                    {getFieldDecorator('singleMonthDate')(
-                      <Cascader options={this.buildYear(this.state.singleDate.year)} {...monthCascader} 
-                        onChange={e => this.updateMonthDay('singleDate', e)}
-                      />
-                    )}
-                  </Form.Item>
-                </Tabs.TabPane>
-
-                <Tabs.TabPane tab="Decade" key="2">
-                  <Form.Item>
-                  {getFieldDecorator('singleDecade')(
-                      <Cascader options={startCenturies} displayRender={labels => labels[1]} 
-                        onChange={e => this.updateSegmentDate('single', 'decade', e[1])}
-                        allowClear={true}
-                      />
-                    )}
-                  </Form.Item>
-                </Tabs.TabPane>
-
-                <Tabs.TabPane tab="Quarter" key="3">
-                  <Form.Item>
-                    {getFieldDecorator('singleQuarter')(
-                      <Cascader options={startQuarters} displayRender={labels => labels.join(', ')}
-                        onChange={e => this.updateSegmentDate('single', 'quarter', e[1])}
-                        allowClear={true}
-                      />
-                    )}
-                  </Form.Item>
-                </Tabs.TabPane>
-              </Tabs>
+              <Form.Item>
+                {getFieldDecorator('singleYear')(
+                  <InputNumber 
+                    placeholder={'Year'} 
+                    min={1100} max={1600} 
+                    onChange={e => this.updateDate('singleDate', 'year', e)}
+                  />
+                )}
+              </Form.Item>
+              <Form.Item>
+                {getFieldDecorator('singleMonthDate')(
+                  <Cascader options={this.buildYear(this.state.singleDate.year)} {...monthCascader} 
+                    onChange={e => this.updateMonthDay('singleDate', e)}
+                  />
+                )}
+              </Form.Item>
               
               <Form.Item label="Certainty">
                 {getFieldDecorator('singleCertainty')(

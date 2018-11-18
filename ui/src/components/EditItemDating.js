@@ -353,7 +353,6 @@ class EditItemDating extends Component {
   state = {
     visibleForm: false,
     tabsPositions: {
-      singleTabs: '1',
       startTabs: '1',
       endTabs: '1',
       datingRange: 'SINGLE'
@@ -444,47 +443,13 @@ class EditItemDating extends Component {
     }
 
     if (values.datingType === 'SINGLE') {
-      if (values.singleYear) {
-        dateDetails.push({
-          datetype: 'SINGLE',
-          year: values.singleYear,
-          month: values.singleMonthDate ? values.singleMonthDate[0] : undefined,
-          day: values.singleMonthDate ? values.singleMonthDate[1] : undefined,
-          ...typeDependent('single'),
-        })
-      }
-
-      // Single decade
-      if (values.singleDecade) {
-        dateDetails.push(
-          {
-            datetype: 'START',
-            year: values.singleDecade[1],
-            ...typeDependent('single'),
-          },
-          {
-            datetype: 'END',
-            year: values.singleDecade[1] + 9,
-            ...typeDependent('single'),
-          }
-        )
-      }
-
-      // Single quarter
-      if (values.singleQuarter) {
-        dateDetails.push(
-          {
-            datetype: 'START',
-            year: values.singleQuarter[1],
-            ...typeDependent('single'),
-          },
-          {
-            datetype: 'END',
-            year: values.singleQuarter[1] + 24,
-            ...typeDependent('single'),
-          }
-        )
-      }
+      dateDetails.push({
+        datetype: 'SINGLE',
+        year: values.singleYear,
+        month: values.singleMonthDate ? values.singleMonthDate[0] : undefined,
+        day: values.singleMonthDate ? values.singleMonthDate[1] : undefined,
+        ...typeDependent('single'),
+      })
     } else {
       if (values.startYear || values.startDecade || values.startQuarter) {
         let datingData = {}
@@ -703,23 +668,17 @@ class EditItemDating extends Component {
                           const positions = {
                             datingRange: datingInfo.datingType
                           }
-                          const names = ['single', 'start', 'end']
+                          const names = ['start', 'end']
                           names.forEach(typename => {
-                            const placeholder = typename === 'single' ? 'start' : typename
-                            if (datingInfo[placeholder + 'Quarter']) {
+                            if (datingInfo[typename + 'Quarter']) {
                               positions[typename + 'Tabs'] = '3'
-                            } else if (datingInfo[placeholder + 'Decade']) {
+                            } else if (datingInfo[typename + 'Decade']) {
                               positions[typename + 'Tabs'] = '2'
                             } else {
                               positions[typename + 'Tabs'] = '1'
                             }
                           })
 
-                          console.log("positions: ", positions)
-                          datingInfo = {
-                            ...datingInfo,
-                          }
-                          console.log("datingInfo: ", datingInfo)
                           this.updateModal(
                             datingInfo, positions
                           )
@@ -731,7 +690,6 @@ class EditItemDating extends Component {
                       <List.Item.Meta
                         title={joinDates(formatYears())}
                       />
-                      {console.log(item)}
                     </List.Item>
                   )
                 }}
