@@ -331,6 +331,14 @@ const DELETE_DATING = gql`
   }
 `
 
+const DELETE_DATES_FROM_DATING = gql`
+  mutation deleteDatingFromDating($datingid: ID!) {
+    DeleteRelatedDates(datingid: $datingid) {
+      id
+    }
+  }
+`
+
 const DELETE_DATE = gql`
  mutation deleteDate(
    $dateid: ID!
@@ -367,7 +375,7 @@ class EditItemDating extends Component {
     return values
   }
 
-  handleCreateUpdate = () => {
+  handleCreateUpdate = async () => {
     const form = this.formRef.props.form;
     let values = form.getFieldsValue()
     console.log("createEdit values: ", values)
@@ -383,21 +391,18 @@ class EditItemDating extends Component {
     // Get text ID
     values.textid = this.props.textId
 
-    // First, create a dating
+    // First, find dating and remove existing dates if it has any (meaning this is an update)
     let datingid = values.datingid ? values.datingid : undefined
     if (datingid) {
-      [values.singledateid, values.startdateid, values.enddateid].forEach(async id => {
-        if (id) {
-          const { error } = await this.props.client.mutate({
-            mutation: DELETE_DATE,
-            variables: { dateid: id }
-          });
-          if (error) {
-            console.log("Error in deleting Date: " + id)
-            console.log(error.message)
-          }
-        }
-      })
+      console.log("Deleting dates on: ", datingid)
+      const { error } = await this.props.client.mutate({
+        mutation: DELETE_DATES_FROM_DATING,
+        variables: { datingid: datingid }
+      });
+      if (error) {
+        console.log("Error in deleting dates: ")
+        console.log(error.message)
+      }
       updateDating(values, this.props.client)
     }
     if (datingid === undefined) {

@@ -130,5 +130,11 @@ type Mutation {
   ): Attribution @cypher(
     statement: 
     "MATCH (t:Text {id: {textid}}), (p:Person {id:{personid}}) MERGE (t)<-[:OF]-(a:Attribution {id: {id}})-[:TO]->(p) RETURN a"
-    )
+  )
+
+  DeleteRelatedDates(
+    datingid: ID!
+  ): Dating @cypher(
+    statement: "MATCH (dating:Dating {id: {datingid}})-[:TO]->(date:Date) DETACH DELETE date return dating"
+  )
 }
