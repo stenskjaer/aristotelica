@@ -24,11 +24,15 @@ export const CreateUpdateDating = Form.create()(
         sum: undefined
       },
       tabsPositions: {
-        singleTabs: '1',
-        startTabs: '1',
-        endTabs: '1'
-      },
-      datingRange: 'SINGLE',
+        datingRange: "SINGLE",
+        endTabs: "1",
+        singleTabs: "1",
+        startTabs: "1",
+      }
+    }
+
+    componentDidMount() {
+      this.setState(this.props.form.getFieldValue('options'))
     }
 
     updateDate = (type, unit, value) => {
@@ -37,6 +41,7 @@ export const CreateUpdateDating = Form.create()(
         this.resetDate(type)
       } else {
         const copy = this.state
+        console.log(copy)
         copy[type][unit] = value
         copy[type].sum = moment().year(copy[type].year).month(copy[type].month).date(copy[type].day)
         this.setState(copy)
@@ -191,8 +196,26 @@ export const CreateUpdateDating = Form.create()(
       };
     }
 
+    updateDatingRange = (key, value) => {
+      const positions = this.state.tabsPositions
+      positions[key] = value
+      this.setState(positions)
+    }
+
     toggleDatingRange = (value) => {
-      this.setState({ datingRange: value });
+      const positions = this.state.tabsPositions
+      positions['datingRange'] = value
+      this.setState(positions)
+    }
+
+    updateTabs = (value, type) => {
+      this.props.form.resetFields(
+        [type + 'Year', type + 'MonthDate', type + 'Decade', type + 'Quarter']
+      )
+      this.resetDate(type + 'Date')
+      const positions = this.state.tabsPositions
+      positions[type + 'Tabs'] = value
+      this.setState(positions)
     }
 
     handleChange = (value) => {
@@ -225,6 +248,8 @@ export const CreateUpdateDating = Form.create()(
       const endCenturies = this.centuries({end: true})
       const startQuarters = this.quarters()
       const endQuarters = this.quarters({end:true})
+      console.log("positions: ", form.getFieldValue('positions'))
+      console.log("state:", this.state)
 
       return (
         <Modal
@@ -239,6 +264,7 @@ export const CreateUpdateDating = Form.create()(
             {getFieldDecorator('singledateid')(<Input disabled style={{ display: 'none' }} />)}
             {getFieldDecorator('startdateid')(<Input disabled style={{ display: 'none' }} />)}
             {getFieldDecorator('enddateid')(<Input disabled style={{ display: 'none' }} />)}
+            {getFieldDecorator('positions')(<Input disabled onChange={e => this.updateDatingRange('datingRange', e)} style={{ display: 'none' }} />)}
 
             <div className="form-group">
               <h3>Dating type</h3>
@@ -246,7 +272,7 @@ export const CreateUpdateDating = Form.create()(
                 help="Does the dating cover a start–end range or a single date point? 
                   A date point may cover a range within a segment."
               >
-                {getFieldDecorator('datingType', { initialValue: this.state.datingRange })(
+                {getFieldDecorator('datingType', { initialValue: this.state.tabsPositions.datingRange })(
                   <Radio.Group onChange={e => this.toggleDatingRange(e.target.value)}>
                     <Radio.Button value="SINGLE">Point</Radio.Button>
                     <Radio.Button value="RANGE">Range</Radio.Button>
@@ -255,7 +281,7 @@ export const CreateUpdateDating = Form.create()(
               </Form.Item>
             </div>
 
-            <div className="form-group" style={{ display: this.state.datingRange === 'SINGLE' ? 'block' : 'none' }}>
+            <div className="form-group" style={{ display: this.state.tabsPositions.datingRange === 'SINGLE' ? 'block' : 'none' }}>
               <h3>
                 Date details 
                 <span style={{margin: '5px'}}/>
@@ -263,13 +289,8 @@ export const CreateUpdateDating = Form.create()(
                   <Icon type="question-circle" />
                 </Tooltip>
               </h3>
-              <Tabs defaultActiveKey={this.state.tabsPositions.singleTabs} 
-                onChange={() => {
-                  this.props.form.resetFields(
-                    ['singleYear', 'singleMonthDate', 'singleDecade', 'singleQuarter']
-                  )
-                  this.resetDate('singleDate')
-                }}
+              <Tabs activeKey={this.state.tabsPositions.singleTabs} 
+                onChange={(e) => this.updateTabs(e, 'single')}
               >
 
                 <Tabs.TabPane tab="Date" key="1">
@@ -326,7 +347,7 @@ export const CreateUpdateDating = Form.create()(
               </Form.Item>
             </div>
 
-            <div className="form-group" style={{ display: this.state.datingRange === 'RANGE' ? 'block' : 'none' }}>
+            <div className="form-group" style={{ display: this.state.tabsPositions.datingRange === 'RANGE' ? 'block' : 'none' }}>
               <h3>
                 Date range details 
                 <span style={{margin: '5px'}}/>
@@ -336,13 +357,8 @@ export const CreateUpdateDating = Form.create()(
               </h3>
               
               <h4>Start</h4>
-              <Tabs defaultActiveKey={this.state.tabsPositions.startTabs} 
-                onChange={() => {
-                  this.props.form.resetFields(
-                    ['startYear', 'startMonthDate', 'startDecade', 'startQuarter']
-                  )
-                  this.resetDate('startDate')
-                  }}
+              <Tabs activeKey={this.state.tabsPositions.startTabs} 
+                onChange={(e) => this.updateTabs(e, 'start')}
                 >
 
                 <Tabs.TabPane tab="Date" key="1">
@@ -399,13 +415,8 @@ export const CreateUpdateDating = Form.create()(
               </Form.Item>
               
               <h4>End</h4>
-              <Tabs defaultActiveKey="1"
-                onChange={() => {
-                  this.props.form.resetFields(
-                  ['endYear', 'endMonthDate', 'endDecade', 'endQuarter']
-                )
-                this.resetDate('endDate')
-                }}
+              <Tabs activeKey={this.state.tabsPositions.endTabs}
+                onChange={(e) => this.updateTabs(e, 'end')}
               >
 
                 <Tabs.TabPane tab="Date" key="1">      
@@ -421,7 +432,7 @@ export const CreateUpdateDating = Form.create()(
                   <Form.Item {...endRangeItemOptions}>
                     {getFieldDecorator('endMonthDate')(
                       <Cascader options={this.buildYear(this.state.endDate.year)} {...monthCascader}
-                        onChange={e => this.updateMonthDay('end', e)}
+                        onChange={e => this.updateMonthDay('endDate', e)}
                       />
                     )}
                   </Form.Item>

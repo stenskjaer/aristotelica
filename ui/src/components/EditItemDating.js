@@ -352,6 +352,12 @@ const DELETE_DATE = gql`
 class EditItemDating extends Component {
   state = {
     visibleForm: false,
+    tabsPositions: {
+      singleTabs: '1',
+      startTabs: '1',
+      endTabs: '1',
+      datingRange: 'SINGLE'
+    }
   };
 
   handleCancel = () => {
@@ -577,10 +583,10 @@ class EditItemDating extends Component {
     });
   }
 
-  updateModal = (values, tabsState) => {
+  updateModal = (values, tabsPositions) => {
     const form = this.formRef.props.form;
     form.setFieldsValue(values)
-    this.formRef.setState(tabsState)
+    this.formRef.setState({ tabsPositions })
     this.showModal()
   }
 
@@ -670,42 +676,50 @@ class EditItemDating extends Component {
                               return monthDate.length > 0 ? monthDate : undefined
                             }
                             const dateInfo = {}
+                            if (date.decade || date.quarter) {
+                              dateInfo[typename + 'Decade'] = date.century && date.decade ? [date.century, date.decade] : undefined
+                              dateInfo[typename + 'Quarter'] = date.century && date.quarter ? [date.century, date.quarter] : undefined
+                            } else {
+                              dateInfo[typename + 'Year'] = date.year.value
+                              dateInfo[typename + 'MonthDate'] = monthDate(date)
+                            }
                             dateInfo[typename + 'dateid'] = date.id
-                            dateInfo[typename + 'Year'] = date.year.value
-                            dateInfo[typename + 'MonthDate'] = monthDate(date)
                             dateInfo[typename + 'Certainty'] = certainty
-                            dateInfo[typename + 'Decade'] = date.century && date.decade ? [date.century, date.decade] : undefined
-                            dateInfo[typename + 'Quarter'] = date.century && date.quarter ? [date.century, date.quarter] : undefined
+                            console.log("dateinfo: ", dateInfo)
                             return (dateInfo)
                           }
                           let datingInfo = {}
-                          if (item.type === 'SINGLE') {
-                            datingInfo = {
-                              ...shared,
-                              ...buildDateInfo(item.dates[0], 'single'),
-                            }
-                          } else {
-                            const start = item.dates.find(x => x.type === 'START')
-                            const end = item.dates.find(x => x.type === 'END')
-                            datingInfo = {
-                              ...shared,
-                              ...start ? buildDateInfo(start, 'start') : undefined,
-                              ...end ? buildDateInfo(end, 'end') : undefined
-                            }
+                          const start = item.dates.find(x => x.type === 'START')
+                          const end = item.dates.find(x => x.type === 'END')
+                          const single = item.dates.find(x => x.type === 'SINGLE')
+                          datingInfo = {
+                            ...shared,
+                            ...start ? buildDateInfo(start, 'start') : undefined,
+                            ...end ? buildDateInfo(end, 'end') : undefined,
+                            ...single ? buildDateInfo(single, 'single') : undefined,
+
                           }
+                          console.log("dateinfe: ", datingInfo)
                           const positions = {
                             datingRange: datingInfo.datingType
                           }
                           const names = ['single', 'start', 'end']
                           names.forEach(typename => {
-                            if (datingInfo[typename + 'Year']) {
-                              positions[typename + 'Tabs'] = '1'
-                            } else if (datingInfo[typename + 'Decade']) {
-                              positions[typename + 'Tabs'] = '2'
-                            } else if (datingInfo[typename + 'Decade']) {
+                            const placeholder = typename === 'single' ? 'start' : typename
+                            if (datingInfo[placeholder + 'Quarter']) {
                               positions[typename + 'Tabs'] = '3'
+                            } else if (datingInfo[placeholder + 'Decade']) {
+                              positions[typename + 'Tabs'] = '2'
+                            } else {
+                              positions[typename + 'Tabs'] = '1'
                             }
                           })
+
+                          console.log("positions: ", positions)
+                          datingInfo = {
+                            ...datingInfo,
+                          }
+                          console.log("datingInfo: ", datingInfo)
                           this.updateModal(
                             datingInfo, positions
                           )
