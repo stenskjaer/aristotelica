@@ -123,6 +123,33 @@ class EditText extends Component {
                           />
                         </FormItem>
                       </div>
+                      <div>
+                        <h2>TODOS</h2>
+                        <FormItem label="Literature">
+                          <Input
+                            placeholder="Literature" name="literature"
+                            onChange={handleChange} value={values.literature}
+                          />
+                        </FormItem>
+                        <FormItem label="Editions">
+                          <Input
+                            placeholder="Editions" name="editions"
+                            onChange={handleChange} value={values.editions}
+                          />
+                        </FormItem>
+                        <FormItem label="Manuscripts">
+                          <Input
+                            placeholder="Manuscripts" name="manuscripts"
+                            onChange={handleChange} value={values.manuscripts}
+                          />
+                        </FormItem>
+                        <FormItem label="Content">
+                          <Input
+                            placeholder="Content" name="content"
+                            onChange={handleChange} value={values.content}
+                          />
+                        </FormItem>
+                      </div>
                       <Button type="primary" htmlType="submit" className="edit-form-button">
                         Submit
                       </Button>
