@@ -306,21 +306,6 @@ const createDate = async (datingid, dateInfo, client) => {
   return date
 }
 
-const deleteDate = async (datingid, dateValues, client) => {
-
-  const { data, error } = await client.mutate({
-    mutation: DELETE_DATE,
-    variables: {
-      dateid: dateValues.dateid,
-    },
-  })
-  if (error) {
-    console.log("Error in deletion of date: ", dateValues)
-    console.log(error.message)
-  }
-  return (data.DeleteDate.id)
-}
-
 const DELETE_DATING = gql`
   mutation deleteDating(
     $datingid: ID!
