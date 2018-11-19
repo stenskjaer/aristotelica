@@ -45,8 +45,8 @@ const UPDATE_ITEM_QUERY = gql`
 `
 
 const GET_ITEM_QUERY = gql`
-  query Text($id: String!) {
-    textById(id: $id) {
+  query Text($id: ID!) {
+    Text(id: $id) {
       id
       title
       title_addon
@@ -71,7 +71,7 @@ class EditText extends Component {
           if (loading) return <div>Fetching</div>
           if (error) return <div>{error.message}</div>
 
-          const item = data.textById ? data.textById : null
+          const item = data.Text ? data.Text[0] : null
           if (!item) {
             return <div>Error: The item does not exist.</div>
           }

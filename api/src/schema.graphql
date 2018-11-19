@@ -101,11 +101,6 @@ scalar DateTime
 
 type Query {
   Attribution(id: ID): Attribution
-  personNameSubstring(substring: String!): [Person!]! @cypher(
-    statement: "MATCH (p:Person) WHERE lower(p.name) CONTAINS lower({substring}) RETURN p ORDER BY p.name"
-  )
-  textByTitle(substring: String): [Text] @cypher(statement: "MATCH (t:Text) WHERE lower(t.title) CONTAINS lower($substring) RETURN t")
-  textById(id: String!): Text @cypher(statement: "MATCH (t:Text) WHERE t.id = $id RETURN t")
 }
 
 type Mutation {

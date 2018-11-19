@@ -19,8 +19,8 @@ query TextType {
 `
 
 const THIS_TEXT_TYPES = gql`
-  query thisTextTypes($id: String!) {
-    textById(id: $id) {
+  query Text($id: ID!) {
+    Text(id: $id) {
       id
       types {
         name
@@ -164,7 +164,12 @@ class TypeSelector extends Component {
               {({ loading, error, data }) => {
                 if (loading) return <div>Fetching</div>
                 if (error) return <div>{error.message}</div>
-                const currentTypes = this.setCurrentTypes(data.textById.types)
+
+                const types = data.Text ? data.Text[0].types : undefined
+                if (!types) {
+                  console.log("Error getting the types field on the item ID ", data.Text.id)
+                }
+                const currentTypes = this.setCurrentTypes(types)
 
                 return (
                   <TreeSelect

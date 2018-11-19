@@ -4,8 +4,8 @@ import gql from "graphql-tag";
 import { withRouter } from "react-router";
 
 const ITEM_QUERY = gql`
-  query Text($id: String!) {
-    textById(id: $id) {
+  query Text($id: ID!) {
+    Text(id: $id) {
       title
       title_addon
       created
@@ -13,9 +13,6 @@ const ITEM_QUERY = gql`
       date
       note
       authors {
-        name
-      }
-      type {
         name
       }
     }
@@ -31,14 +28,13 @@ class TextItem extends Component {
       <Query query={ITEM_QUERY} variables={{ id: urlParams.id }}>
         {({ loading, error, data }) => {
           if (loading) return <div>Fetching</div>
-          if (error) return <div>Error</div>
+          if (error) return <div>{error.message}</div>
 
-          const item = data.textById
+          const item = data.Text ? data.Text[0] : undefined
           if (!item) {
             return <div>Error: There is not text with the id {urlParams.id}</div>
           }
           const names = item.authors.map(authors => [authors.name])
-          const types = item.type.map(type => [type.name])
 
           return (
             <dl>
@@ -46,8 +42,6 @@ class TextItem extends Component {
               <dd>{names.join(', ')}</dd>
               <dt>Title</dt>
               <dd>{item.title} {item.title_addon ? '(' + item.title_addon + ')' : ''}</dd>
-              <dt>Type</dt>
-              <dd>{types.join(', ')}</dd>
               <dt>Created</dt>
               <dd>{Date(item.created)}</dd>
               <dt>Modified</dt>
