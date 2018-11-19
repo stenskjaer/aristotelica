@@ -1,4 +1,5 @@
-.ant-list-vertical .ant-list-item-meta {
+.ant-list-vertical .ant-list-item-meta,
+.ant-list-vertical .ant-list-item-content {
   margin-bottom: 0;
 }
 

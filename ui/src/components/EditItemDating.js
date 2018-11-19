@@ -690,6 +690,10 @@ class EditItemDating extends Component {
                       <List.Item.Meta
                         title={joinDates(formatYears())}
                       />
+                      <div>
+                        {item.note ? <p>Note: {item.note}</p> : null}
+                        {item.source ? <p>Source: {item.source}</p> : null}
+                      </div>
                     </List.Item>
                   )
                 }}
