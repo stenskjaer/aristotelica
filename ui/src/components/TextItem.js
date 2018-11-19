@@ -2,9 +2,11 @@ import React, { Component } from "react";
 import { Query } from "react-apollo";
 import gql from "graphql-tag";
 import { withRouter } from "react-router";
+import { List, Collapse } from "antd";
+import { normCertainty } from './utils';
 
 const ITEM_QUERY = gql`
-  query Text($id: ID!) {
+  query textInfo($id: ID!) {
     Text(id: $id) {
       title
       title_addon
@@ -12,14 +14,45 @@ const ITEM_QUERY = gql`
       modified
       date
       note
-      authors {
+      attributions {
+        id
+        person {
+          name
+          id
+        }
+        note
+        source
+        certainty
+      }
+      types {
         name
+        id
+        children {
+          name
+          id
+        }
       }
     }
   }
 `
 
 class TextItem extends Component {
+  state = {
+    attributionContent: []
+  }
+
+  attributionDetails = (id, e) => {
+    const contentList = this.state.attributionContent
+    const idx = contentList.indexOf(id)
+    if (idx === -1) {
+      contentList.push(id)
+    } else {
+      contentList.splice(idx)
+    }
+    this.setState(contentList)
+  }
+
+  showContent = (id) => this.state.attributionContent.includes(id)
 
   render() {
     const urlParams = this.props.match.params
@@ -34,23 +67,40 @@ class TextItem extends Component {
           if (!item) {
             return <div>Error: There is not text with the id {urlParams.id}</div>
           }
-          const names = item.authors.map(authors => [authors.name])
 
           return (
-            <dl>
-              <dt>Author</dt>
-              <dd>{names.join(', ')}</dd>
-              <dt>Title</dt>
-              <dd>{item.title} {item.title_addon ? '(' + item.title_addon + ')' : ''}</dd>
-              <dt>Created</dt>
-              <dd>{Date(item.created)}</dd>
-              <dt>Modified</dt>
-              <dd>{Date(item.modified)}</dd>
-              <dt>Date</dt>
-              <dd>{item.date}</dd>
-              <dt>Note</dt>
-              <dd>{item.note}</dd>
-            </dl>
+            <section>
+              <h2>Authorship</h2>
+              <List
+                itemLayout="vertical"
+                dataSource={item.attributions}
+                renderItem={attribution => (
+                  <List.Item
+                    key={attribution.id}
+                    actions={[
+                      <a onClick={(e) => this.attributionDetails(attribution.id, e)}>
+                        {this.showContent(attribution.id) ? 'Less' : 'More'}
+                      </a>
+                    ]}
+                  >
+                    <List.Item.Meta
+                      title={attribution.person.name}
+                    />
+                    <div style={{
+                      display: this.showContent(attribution.id) ? 'block' : 'none'
+                    }}>
+                      {attribution.note ? <p>Note: {attribution.note}</p> : null}
+                      {attribution.source ? <p>Source: {attribution.source}</p> : null}
+                    </div>
+                  </List.Item>
+                )}
+              />
+              <h2>Base data</h2>
+
+              <h2>Dating</h2>
+
+              <h2>Additional information</h2>
+            </section>
           )
         }}
       </Query>
