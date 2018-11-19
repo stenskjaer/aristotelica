@@ -10,4 +10,13 @@ export const createGUID = () => {
   });
 }
 
-export default createGUID;
+
+export const normCertainty = (cert) => {
+  const normalization = {
+    CERTAIN: 'Certain',
+    POSSIBLE: 'Possible',
+    DUBIOUS: 'Dubious',
+    FALSE: 'False'
+  }
+  return normalization[cert]
+}

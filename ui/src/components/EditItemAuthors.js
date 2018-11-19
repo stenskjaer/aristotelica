@@ -4,8 +4,7 @@ import gql from "graphql-tag";
 import { Button, List, Collapse, message } from 'antd';
 import { createGUID } from './utils'
 import { AuthorCreateForm } from './CreateAttributionForm'
-
-const Panel = Collapse.Panel
+import { normCertainty } from './utils'
 
 const ATTRIBUTIONS_QUERY = gql`
 query attributionsQuery($id: ID!) {
@@ -151,16 +150,6 @@ class EditItemAuthors extends Component {
     }
   }
 
-  normCertainty = (cert) => {
-    const normalization = {
-      CERTAIN: 'Certain',
-      POSSIBLE: 'Possible',
-      DUBIOUS: 'Dubious',
-      FALSE: 'False'
-    }
-    return normalization[cert]
-  }
-
   saveFormRef = (formRef) => {
     this.formRef = formRef;
   }
@@ -215,14 +204,13 @@ class EditItemAuthors extends Component {
                       title={item.person.name}
                     />
                     <Collapse>
-                      <Panel showArrow={true} header={"Atribution: " + this.normCertainty(item.certainty)}>
+                      <Collapse.Panel showArrow={true} header={"Atribution: " + normCertainty(item.certainty)}>
                         {item.note ? <p>Note: {item.note}</p> : null}
                         {item.source ? <p>Source: {item.source}</p> : null}
-                      </Panel>
+                      </Collapse.Panel>
                     </Collapse>
                   </List.Item>
-                )
-                }
+                )}
               />
               <div style={{ margin: '10px 0 0 0' }}>
                 <AuthorCreateForm
