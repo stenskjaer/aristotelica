@@ -4,7 +4,7 @@ import gql from "graphql-tag";
 import { withRouter } from "react-router";
 import { List } from "antd";
 import DescriptionList from "./DescriptionList";
-import { normCertainty } from './utils';
+import { normCertainty, formatDates } from './utils';
 
 const ITEM_QUERY = gql`
   query textInfo($id: ID!) {
@@ -14,10 +14,36 @@ const ITEM_QUERY = gql`
       title_addon
       created
       modified
-      date
       note
       incipit
       explicit
+      datings {
+        id
+        source
+        note
+        type
+        dates {
+          id
+          type
+          approximate
+          uncertain
+          decade
+          quarter
+          century
+          year {
+            id
+            value
+          }
+          month {
+            id
+            value
+          }
+          day {
+            id 
+            value
+          }
+        }
+      }
       attributions {
         id
         person {
@@ -42,11 +68,11 @@ const ITEM_QUERY = gql`
 
 class TextItem extends Component {
   state = {
-    attributionContent: []
+    visibleDetails: []
   }
 
-  attributionDetails = (id, e) => {
-    const contentList = this.state.attributionContent
+  displayDetails = (id, e) => {
+    const contentList = this.state.visibleDetails
     const idx = contentList.indexOf(id)
     if (idx === -1) {
       contentList.push(id)
@@ -56,13 +82,7 @@ class TextItem extends Component {
     this.setState(contentList)
   }
 
-  showContent = (id) => this.state.attributionContent.includes(id)
-
-  showField = (item, fieldname) => {
-    if (item) {
-      return <p>{fieldname}: {item}</p>
-    }
-  }
+  displayingDetails = (id) => this.state.visibleDetails.includes(id)
 
   attributionName = (attribution) => {
     const certainty = attribution.certainty ? ' (' + normCertainty(attribution.certainty) + ')' : ''
@@ -93,8 +113,8 @@ class TextItem extends Component {
                   <List.Item
                     key={attribution.id}
                     actions={[
-                      <a onClick={(e) => this.attributionDetails(attribution.id, e)}>
-                        {this.showContent(attribution.id) ? 'Less' : 'More'}
+                      <a onClick={(e) => this.displayDetails(attribution.id, e)}>
+                        {this.displayingDetails(attribution.id) ? 'Less' : 'More'}
                       </a>
                     ]}
                   >
@@ -102,7 +122,7 @@ class TextItem extends Component {
                       title={this.attributionName(attribution)}
                     />
                     <div style={{
-                      display: this.showContent(attribution.id) ? 'block' : 'none'
+                      display: this.displayingDetails(attribution.id) ? 'block' : 'none'
                     }}>
                       {attribution.note ? <p>Note: {attribution.note}</p> : null}
                       {attribution.source ? <p>Source: {attribution.source}</p> : null}
@@ -137,6 +157,30 @@ class TextItem extends Component {
               />
 
               <h2>Dating</h2>
+              <List
+                itemLayout="vertical"
+                dataSource={item.datings}
+                renderItem={dating => (
+                  <List.Item
+                    key={dating.id}
+                    actions={[
+                      <a onClick={(e) => this.displayDetails(dating.id, e)}>
+                        {this.displayingDetails(dating.id) ? 'Less' : 'More'}
+                      </a>
+                    ]}
+                  >
+                    <List.Item.Meta
+                      title={formatDates(dating.dates)}
+                    />
+                    <div style={{
+                      display: this.displayingDetails(dating.id) ? 'block' : 'none'
+                    }}>
+                      {dating.note ? <p>Note: {dating.note}</p> : null}
+                      {dating.source ? <p>Source: {dating.source}</p> : null}
+                    </div>
+                  </List.Item>
+                )}
+              />
 
               <h2>Additional information</h2>
               <DescriptionList items={[
@@ -147,7 +191,6 @@ class TextItem extends Component {
                 }
               ]}
               />
-
 
             </section>
           )

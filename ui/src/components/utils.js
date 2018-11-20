@@ -1,3 +1,5 @@
+const moment = require("moment");
+
 export const createGUID = () => {
   var d = new Date().getTime();
   if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
@@ -20,3 +22,51 @@ export const normCertainty = (cert) => {
   }
   return normalization[cert]
 }
+
+export const formatDates = (dates) => {
+
+  const monthName = (month) => (moment().month(month).format('MMMM'))
+  const dayName = (day) => (moment().date(day).format('Do'))
+  const formattedDates = (dates) => (
+    dates.map(date => {
+      const month = date.month ? date.month.value : undefined
+      const day = date.day ? date.day.value : undefined
+      let datePrefix = []
+      datePrefix += dates.length === 1 && date.type === 'END' ? 'before ' : ''
+      datePrefix += dates.length === 1 && date.type === 'START' ? 'after ' : ''
+      datePrefix += date.approximate ? 'around ' : ''
+      const dateSuffix = date.uncertain ? '?' : ''
+
+      let dateFormatter = []
+      if (month !== undefined) {
+        dateFormatter.push(monthName(month))
+      }
+      if (day !== undefined) {
+        dateFormatter.push(dayName(day))
+      }
+      dateFormatter.push(date.year.value)
+
+      return {
+        formatted: datePrefix + dateFormatter.join(' ') + dateSuffix,
+        type: date.type
+      }
+    })
+  )
+  const joinDates = (dates) => {
+    if (dates.length === 1) {
+      return dates[0].formatted
+    } else {
+      const start = dates.find(x => x.type === 'START')
+      const end = dates.find(x => x.type === 'END')
+      if (start && end) {
+        return [start.formatted, end.formatted].join(' to ')
+      } else {
+        console.log("Problem rendering date: ", start, end)
+        return 'Problem rendering the dating.'
+      }
+    }
+  }
+
+  return (joinDates(formattedDates(dates)))
+}
+
