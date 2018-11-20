@@ -61,6 +61,11 @@ class TextItem extends Component {
     }
   }
 
+  attributionName = (attribution) => {
+    const certainty = attribution.certainty ? ' (' + normCertainty(attribution.certainty) + ')' : ''
+    return (attribution.person.name + certainty)
+  }
+
   render() {
     const urlParams = this.props.match.params
 
@@ -91,7 +96,7 @@ class TextItem extends Component {
                     ]}
                   >
                     <List.Item.Meta
-                      title={attribution.person.name}
+                      title={this.attributionName(attribution)}
                     />
                     <div style={{
                       display: this.showContent(attribution.id) ? 'block' : 'none'
