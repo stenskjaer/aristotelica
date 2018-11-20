@@ -9,12 +9,15 @@ import { normCertainty } from './utils';
 const ITEM_QUERY = gql`
   query textInfo($id: ID!) {
     Text(id: $id) {
+      id
       title
       title_addon
       created
       modified
       date
       note
+      incipit
+      explicit
       attributions {
         id
         person {
@@ -107,15 +110,28 @@ class TextItem extends Component {
                   </List.Item>
                 )}
               />
+
               <h2>Base data</h2>
               <DescriptionList items={[
                 {
                   title: 'Title',
-                  description: item.title
+                  description: item.title,
+                  key: item.id + '_title',
                 },
                 {
                   title: 'Title note',
-                  description: item.title_addon ? item.title_addon : undefined
+                  description: item.title_addon ? item.title_addon : undefined,
+                  key: item.id + '_suffix',
+                },
+                {
+                  title: 'Incipit',
+                  description: item.incipit ? item.incipit : undefined,
+                  key: item.id + '_incipit',
+                },
+                {
+                  title: 'Explicit',
+                  description: item.explicit ? item.explicit : undefined,
+                  key: item.id + '_explicit',
                 }
               ]}
               />
@@ -123,6 +139,16 @@ class TextItem extends Component {
               <h2>Dating</h2>
 
               <h2>Additional information</h2>
+              <DescriptionList items={[
+                {
+                  title: 'Notes',
+                  description: item.note ? item.note : undefined,
+                  key: item.note + '_note'
+                }
+              ]}
+              />
+
+
             </section>
           )
         }}
