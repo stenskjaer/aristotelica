@@ -1,10 +1,9 @@
 import React, { Component } from "react";
 import { Query } from "react-apollo";
 import gql from "graphql-tag";
-import { createGUID } from './utils'
+import { createGUID, formatDates } from './utils'
 import { List, Button, message } from 'antd';
 import { CreateUpdateDating } from './CreateUpdateDating';
-const moment = require("moment");
 
 const DATING_QUERY = gql`
   query textDating($id: ID!) {
@@ -553,135 +552,93 @@ class EditItemDating extends Component {
               <List
                 itemLayout="vertical"
                 dataSource={data.Text[0].datings}
-                renderItem={item => {
-                  const monthName = (month) => (moment().month(month).format('MMMM'))
-                  const dayName = (day) => (moment().date(day).format('Do'))
-                  const formatYears = () => (
-                    item.dates.map(date => {
-                      const month = date.month ? date.month.value : undefined
-                      const day = date.day ? date.day.value : undefined
-                      let datePrefix = []
-                      datePrefix += item.dates.length === 1 && date.type === 'END' ? 'before ' : ''
-                      datePrefix += item.dates.length === 1 && date.type === 'START' ? 'after ' : ''
-                      datePrefix += date.approximate ? 'around ' : ''
-                      const dateSuffix = date.uncertain ? '?' : ''
-
-                      let dateFormatter = []
-                      if (month !== undefined) {
-                        dateFormatter.push(monthName(month))
-                      }
-                      if (day !== undefined) {
-                        dateFormatter.push(dayName(day))
-                      }
-                      dateFormatter.push(date.year.value)
-
-                      return {
-                        formatted: datePrefix + dateFormatter.join(' ') + dateSuffix,
-                        type: date.type
-                      }
-                    })
-                  )
-                  const joinDates = (dates) => {
-                    if (dates.length === 1) {
-                      return dates[0].formatted
-                    } else {
-                      const start = dates.find(x => x.type === 'START')
-                      const end = dates.find(x => x.type === 'END')
-                      if (start && end) {
-                        return [start.formatted, end.formatted].join(' to ')
-                      } else {
-                        console.log("Problem: ", start, end)
-                        return 'Problem rendering the dating.'
-                      }
-                    }
-                  }
-                  return (
-                    <List.Item
-                      key={item.id}
-                      actions={[
-                        <a onClick={() => {
-                          const shared = {
-                            datingid: item.id,
-                            source: item.source,
-                            note: item.note,
-                            datingType: item.type,
-                          }
-
-                          const buildDateInfo = (date, typename) => {
-                            const certainty = []
-                            if (date.approximate) {
-                              certainty.push('approximate')
-                            }
-                            if (date.uncertain) {
-                              certainty.push('uncertain')
-                            }
-                            const monthDate = (date) => {
-                              const monthDate = []
-                              if (date.month) {
-                                monthDate.push(date.month.value)
-                              }
-                              if (date.day) {
-                                monthDate.push(date.day.value)
-                              }
-                              return monthDate.length > 0 ? monthDate : undefined
-                            }
-                            const dateInfo = {}
-                            if (date.decade || date.quarter) {
-                              dateInfo[typename + 'Decade'] = date.century && date.decade ? [date.century, date.decade] : undefined
-                              dateInfo[typename + 'Quarter'] = date.century && date.quarter ? [date.century, date.quarter] : undefined
-                            } else {
-                              dateInfo[typename + 'Year'] = date.year.value
-                              dateInfo[typename + 'MonthDate'] = monthDate(date)
-                            }
-                            dateInfo[typename + 'dateid'] = date.id
-                            dateInfo[typename + 'Certainty'] = certainty
-                            console.log("dateinfo: ", dateInfo)
-                            return (dateInfo)
-                          }
-                          let datingInfo = {}
-                          const start = item.dates.find(x => x.type === 'START')
-                          const end = item.dates.find(x => x.type === 'END')
-                          const single = item.dates.find(x => x.type === 'SINGLE')
-                          datingInfo = {
-                            ...shared,
-                            ...start ? buildDateInfo(start, 'start') : undefined,
-                            ...end ? buildDateInfo(end, 'end') : undefined,
-                            ...single ? buildDateInfo(single, 'single') : undefined,
-
-                          }
-                          console.log("dateinfe: ", datingInfo)
-                          const positions = {
-                            datingRange: datingInfo.datingType
-                          }
-                          const names = ['start', 'end']
-                          names.forEach(typename => {
-                            if (datingInfo[typename + 'Quarter']) {
-                              positions[typename + 'Tabs'] = '3'
-                            } else if (datingInfo[typename + 'Decade']) {
-                              positions[typename + 'Tabs'] = '2'
-                            } else {
-                              positions[typename + 'Tabs'] = '1'
-                            }
-                          })
-
-                          this.updateModal(
-                            datingInfo, positions
-                          )
+                renderItem={dating => (
+                  <List.Item
+                    key={dating.id}
+                    actions={[
+                      <a onClick={() => {
+                        const shared = {
+                          datingid: dating.id,
+                          source: dating.source,
+                          note: dating.note,
+                          datingType: dating.type,
                         }
-                        }>Edit</a>,
-                        <a onClick={() => this.handleDelete(item)}>Delete</a>
-                      ]}
-                    >
-                      <List.Item.Meta
-                        title={joinDates(formatYears())}
-                      />
-                      <div>
-                        {item.note ? <p>Note: {item.note}</p> : null}
-                        {item.source ? <p>Source: {item.source}</p> : null}
-                      </div>
-                    </List.Item>
-                  )
-                }}
+
+                        const buildDateInfo = (date, typename) => {
+                          const certainty = []
+                          if (date.approximate) {
+                            certainty.push('approximate')
+                          }
+                          if (date.uncertain) {
+                            certainty.push('uncertain')
+                          }
+                          const monthDate = (date) => {
+                            const monthDate = []
+                            if (date.month) {
+                              monthDate.push(date.month.value)
+                            }
+                            if (date.day) {
+                              monthDate.push(date.day.value)
+                            }
+                            return monthDate.length > 0 ? monthDate : undefined
+                          }
+                          const dateInfo = {}
+                          if (date.decade || date.quarter) {
+                            dateInfo[typename + 'Decade'] = date.century && date.decade ? [date.century, date.decade] : undefined
+                            dateInfo[typename + 'Quarter'] = date.century && date.quarter ? [date.century, date.quarter] : undefined
+                          } else {
+                            dateInfo[typename + 'Year'] = date.year.value
+                            dateInfo[typename + 'MonthDate'] = monthDate(date)
+                          }
+                          dateInfo[typename + 'dateid'] = date.id
+                          dateInfo[typename + 'Certainty'] = certainty
+                          console.log("dateinfo: ", dateInfo)
+                          return (dateInfo)
+                        }
+                        let datingInfo = {}
+                        const start = dating.dates.find(x => x.type === 'START')
+                        const end = dating.dates.find(x => x.type === 'END')
+                        const single = dating.dates.find(x => x.type === 'SINGLE')
+                        datingInfo = {
+                          ...shared,
+                          ...start ? buildDateInfo(start, 'start') : undefined,
+                          ...end ? buildDateInfo(end, 'end') : undefined,
+                          ...single ? buildDateInfo(single, 'single') : undefined,
+
+                        }
+                        console.log("dateinfe: ", datingInfo)
+                        const positions = {
+                          datingRange: datingInfo.datingType
+                        }
+                        const names = ['start', 'end']
+                        names.forEach(typename => {
+                          if (datingInfo[typename + 'Quarter']) {
+                            positions[typename + 'Tabs'] = '3'
+                          } else if (datingInfo[typename + 'Decade']) {
+                            positions[typename + 'Tabs'] = '2'
+                          } else {
+                            positions[typename + 'Tabs'] = '1'
+                          }
+                        })
+
+                        this.updateModal(
+                          datingInfo, positions
+                        )
+                      }
+                      }>Edit</a>,
+                      <a onClick={() => this.handleDelete(dating)}>Delete</a>
+                    ]}
+                  >
+                    <List.Item.Meta
+                      title={formatDates(dating.dates)}
+                    />
+                    <div>
+                      {dating.note ? <p>Note: {dating.note}</p> : null}
+                      {dating.source ? <p>Source: {dating.source}</p> : null}
+                    </div>
+                  </List.Item>
+                )
+                }
               />
               <div style={{ margin: '10px 0 0 0' }}>
                 <CreateUpdateDating
