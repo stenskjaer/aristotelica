@@ -185,7 +185,10 @@ class EditItemAuthors extends Component {
     this.setState(contentList)
   }
 
-  showContent = (id) => this.state.attributionContent.includes(id)
+  attributionName = (attribution) => {
+    const certainty = attribution.certainty ? ' (' + normCertainty(attribution.certainty) + ')' : ''
+    return (attribution.person.name + certainty)
+  }
 
   render() {
 
@@ -219,7 +222,8 @@ class EditItemAuthors extends Component {
                     ]}
                   >
                     <List.Item.Meta
-                      title={item.person.name}
+                      title={this.attributionName(item)}
+                    />
                     <DescriptionList
                       style={{
                         display: this.state.visibleDetails.includes(item.id) ? 'block' : 'none'
