@@ -55,6 +55,12 @@ class TextItem extends Component {
 
   showContent = (id) => this.state.attributionContent.includes(id)
 
+  showField = (item, fieldname) => {
+    if (item) {
+      return <p>{fieldname}: {item}</p>
+    }
+  }
+
   render() {
     const urlParams = this.props.match.params
 

@@ -73,6 +73,7 @@ mutation deleteAttribution(
 class EditItemAuthors extends Component {
   state = {
     visibleForm: false,
+    attributionContent: [],
   };
 
   handleCancel = () => {
@@ -172,6 +173,19 @@ class EditItemAuthors extends Component {
     this.showModal()
   }
 
+  attributionDetails = (id, e) => {
+    const contentList = this.state.attributionContent
+    const idx = contentList.indexOf(id)
+    if (idx === -1) {
+      contentList.push(id)
+    } else {
+      contentList.splice(idx)
+    }
+    this.setState(contentList)
+  }
+
+  showContent = (id) => this.state.attributionContent.includes(id)
+
   render() {
 
     return (
@@ -190,6 +204,9 @@ class EditItemAuthors extends Component {
                   <List.Item
                     key={item.id}
                     actions={[
+                      <a onClick={(e) => this.attributionDetails(item.id, e)}>
+                        {this.showContent(item.id) ? 'Less' : 'More'}
+                      </a>,
                       <a onClick={() => this.updateModal({
                         id: item.id,
                         personid: item.person.id,
@@ -203,12 +220,13 @@ class EditItemAuthors extends Component {
                     <List.Item.Meta
                       title={item.person.name}
                     />
-                    <Collapse>
-                      <Collapse.Panel showArrow={true} header={"Atribution: " + normCertainty(item.certainty)}>
-                        {item.note ? <p>Note: {item.note}</p> : null}
-                        {item.source ? <p>Source: {item.source}</p> : null}
-                      </Collapse.Panel>
-                    </Collapse>
+                    <div style={{
+                      display: this.showContent(item.id) ? 'block' : 'none'
+                    }}>
+                      {item.certainty ? <p>Atribution: {normCertainty(item.certainty)}</p> : null}
+                      {item.note ? <p>Note: {item.note}</p> : null}
+                      {item.source ? <p>Source: {item.source}</p> : null}
+                    </div>
                   </List.Item>
                 )}
               />
