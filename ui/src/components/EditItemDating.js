@@ -340,7 +340,8 @@ class EditItemDating extends Component {
       startTabs: '1',
       endTabs: '1',
       datingRange: 'SINGLE'
-    }
+    },
+    visibleDetails: [],
   };
 
   handleCancel = () => {
@@ -532,6 +533,19 @@ class EditItemDating extends Component {
     });
   }
 
+  displayDetails = (id, e) => {
+    const contentList = this.state.visibleDetails
+    const idx = contentList.indexOf(id)
+    if (idx === -1) {
+      contentList.push(id)
+    } else {
+      contentList.splice(idx)
+    }
+    this.setState(contentList)
+  }
+
+  displayingDetails = (id) => this.state.visibleDetails.includes(id)
+
   updateModal = (dating) => {
     const shared = {
       datingid: dating.id,
@@ -619,6 +633,9 @@ class EditItemDating extends Component {
                   <List.Item
                     key={dating.id}
                     actions={[
+                      <a onClick={(e) => this.displayDetails(dating.id, e)}>
+                        {this.displayingDetails(dating.id) ? 'Less' : 'More'}
+                      </a>,
                       <a onClick={() => { this.updateModal(dating) }}>Edit</a>,
                       <a onClick={() => this.handleDelete(dating)}>Delete</a>
                     ]}
@@ -626,13 +643,14 @@ class EditItemDating extends Component {
                     <List.Item.Meta
                       title={formatDates(dating.dates)}
                     />
-                    <div>
+                    <div
+                      style={{ display: this.displayingDetails(dating.id) ? 'block' : 'none' }}
+                    >
                       {dating.note ? <p>Note: {dating.note}</p> : null}
                       {dating.source ? <p>Source: {dating.source}</p> : null}
                     </div>
                   </List.Item>
-                )
-                }
+                )}
               />
               <div style={{ margin: '10px 0 0 0' }}>
                 <CreateUpdateDating
