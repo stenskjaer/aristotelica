@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Mutation, Query } from "react-apollo";
 import gql from "graphql-tag";
-import { withRouter } from "react-router";
+import { withRouter, Link } from "react-router-dom";
 import { Formik } from 'formik';
 import { Form, Input, Button } from 'antd';
 import FormItem from "antd/lib/form/FormItem";
@@ -81,79 +81,86 @@ class EditText extends Component {
               {(updateText) => (
                 <Formik
                   initialValues={item}
-                  onSubmit={values => {
+                  onSubmit={(values) => {
                     values.modified = new Date()
                     updateText({ variables: values })
-                  }}
+                    this.props.history.push("/text/" + item.id)
+                  }
+                  }
                 >
                   {({ values, handleSubmit, handleChange, isSubmitting }) => (
-                    <Form onSubmit={handleSubmit} className="edit-form">
-                      <h1>Update text</h1>
-                      <div className="form-group">
-                        <h2>Authorship</h2>
-                        <EditItemAuthors client={client} textId={values.id} />
-                      </div>
-                      <div className="form-group">
-                        <h2>Base data</h2>
-                        <FormItem label="Title">
-                          <Input placeholder="Title" name="title" onChange={handleChange} value={values.title} />
-                        </FormItem>
-                        <FormItem label="Title suffix">
-                          <Input placeholder="Title suffix" name="title_addon" onChange={handleChange} value={values.title_addon} />
-                        </FormItem>
-                        <FormItem label="Text types">
-                          <TypeSelector client={client} textId={item.id} />
-                        </FormItem>
-                      </div>
-                      <div className="form-group">
-                        <h2>Dating</h2>
-                        <EditItemDating client={client} textId={item.id} />
-                      </div>
-                      <div className="form-group">
-                        <FormItem label="Incipit">
-                          <TextArea row="3" name="incipit" onChange={handleChange} value={values.incipit} />
-                        </FormItem>
-                        <FormItem label="Explicit">
-                          <TextArea row="3" name="explicit" onChange={handleChange} value={values.explicit} />
-                        </FormItem>
-                        <FormItem label="Note">
-                          <TextArea row={4}
-                            placeholder="Note" name="note"
-                            onChange={handleChange} value={values.note}
-                          />
-                        </FormItem>
-                      </div>
-                      <div>
-                        <h2>TODOS</h2>
-                        <FormItem label="Literature">
-                          <Input
-                            placeholder="Literature" name="literature"
-                            onChange={handleChange} value={values.literature}
-                          />
-                        </FormItem>
-                        <FormItem label="Editions">
-                          <Input
-                            placeholder="Editions" name="editions"
-                            onChange={handleChange} value={values.editions}
-                          />
-                        </FormItem>
-                        <FormItem label="Manuscripts">
-                          <Input
-                            placeholder="Manuscripts" name="manuscripts"
-                            onChange={handleChange} value={values.manuscripts}
-                          />
-                        </FormItem>
-                        <FormItem label="Content">
-                          <Input
-                            placeholder="Content" name="content"
-                            onChange={handleChange} value={values.content}
-                          />
-                        </FormItem>
-                      </div>
-                      <Button type="primary" htmlType="submit" className="edit-form-button">
-                        Submit
+                    <React.Fragment>
+                      <h1>Edit text</h1>
+                      <Button>
+                        <Link to={"/text/" + item.id}>View text</Link>
                       </Button>
-                    </Form>
+                      <Form onSubmit={handleSubmit} className="edit-form">
+                        <div className="form-group">
+                          <h2>Authorship</h2>
+                          <EditItemAuthors client={client} textId={values.id} />
+                        </div>
+                        <div className="form-group">
+                          <h2>Base data</h2>
+                          <FormItem label="Title">
+                            <Input placeholder="Title" name="title" onChange={handleChange} value={values.title} />
+                          </FormItem>
+                          <FormItem label="Title suffix">
+                            <Input placeholder="Title suffix" name="title_addon" onChange={handleChange} value={values.title_addon} />
+                          </FormItem>
+                          <FormItem label="Text types">
+                            <TypeSelector client={client} textId={item.id} />
+                          </FormItem>
+                        </div>
+                        <div className="form-group">
+                          <h2>Dating</h2>
+                          <EditItemDating client={client} textId={item.id} />
+                        </div>
+                        <div className="form-group">
+                          <FormItem label="Incipit">
+                            <TextArea row="3" name="incipit" onChange={handleChange} value={values.incipit} />
+                          </FormItem>
+                          <FormItem label="Explicit">
+                            <TextArea row="3" name="explicit" onChange={handleChange} value={values.explicit} />
+                          </FormItem>
+                          <FormItem label="Note">
+                            <TextArea row={4}
+                              placeholder="Note" name="note"
+                              onChange={handleChange} value={values.note}
+                            />
+                          </FormItem>
+                        </div>
+                        <div>
+                          <h2>TODOS</h2>
+                          <FormItem label="Literature">
+                            <Input
+                              placeholder="Literature" name="literature"
+                              onChange={handleChange} value={values.literature}
+                            />
+                          </FormItem>
+                          <FormItem label="Editions">
+                            <Input
+                              placeholder="Editions" name="editions"
+                              onChange={handleChange} value={values.editions}
+                            />
+                          </FormItem>
+                          <FormItem label="Manuscripts">
+                            <Input
+                              placeholder="Manuscripts" name="manuscripts"
+                              onChange={handleChange} value={values.manuscripts}
+                            />
+                          </FormItem>
+                          <FormItem label="Content">
+                            <Input
+                              placeholder="Content" name="content"
+                              onChange={handleChange} value={values.content}
+                            />
+                          </FormItem>
+                        </div>
+                        <Button type="primary" htmlType="submit" className="edit-form-button">
+                          Submit
+                      </Button>
+                      </Form>
+                    </React.Fragment>
                   )}
                 </Formik>
               )}

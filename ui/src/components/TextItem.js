@@ -1,8 +1,8 @@
 import React, { Component } from "react";
 import { Query } from "react-apollo";
 import gql from "graphql-tag";
-import { withRouter } from "react-router";
-import { List } from "antd";
+import { Link, withRouter } from "react-router-dom";
+import { List, Button } from "antd";
 import DescriptionList from "./DescriptionList";
 import { normCertainty, formatDates } from './utils';
 
@@ -104,95 +104,101 @@ class TextItem extends Component {
           }
 
           return (
-            <section>
-              <h2>Authorship</h2>
-              <List
-                itemLayout="vertical"
-                dataSource={item.attributions}
-                renderItem={attribution => (
-                  <List.Item
-                    key={attribution.id}
-                    actions={[
-                      <a onClick={(e) => this.displayDetails(attribution.id, e)}>
-                        {this.displayingDetails(attribution.id) ? 'Less' : 'More'}
-                      </a>
-                    ]}
-                  >
-                    <List.Item.Meta
-                      title={this.attributionName(attribution)}
-                    />
-                    <div style={{
-                      display: this.displayingDetails(attribution.id) ? 'block' : 'none'
-                    }}>
-                      {attribution.note ? <p>Note: {attribution.note}</p> : null}
-                      {attribution.source ? <p>Source: {attribution.source}</p> : null}
-                    </div>
-                  </List.Item>
-                )}
-              />
+            <React.Fragment>
+              <h1>Text details</h1>
+              <Button>
+                <Link to={"/text/edit/" + item.id}>Edit text</Link>
+              </Button>
+              <section>
+                <h2>Authorship</h2>
+                <List
+                  itemLayout="vertical"
+                  dataSource={item.attributions}
+                  renderItem={attribution => (
+                    <List.Item
+                      key={attribution.id}
+                      actions={[
+                        <a onClick={(e) => this.displayDetails(attribution.id, e)}>
+                          {this.displayingDetails(attribution.id) ? 'Less' : 'More'}
+                        </a>
+                      ]}
+                    >
+                      <List.Item.Meta
+                        title={this.attributionName(attribution)}
+                      />
+                      <div style={{
+                        display: this.displayingDetails(attribution.id) ? 'block' : 'none'
+                      }}>
+                        {attribution.note ? <p>Note: {attribution.note}</p> : null}
+                        {attribution.source ? <p>Source: {attribution.source}</p> : null}
+                      </div>
+                    </List.Item>
+                  )}
+                />
 
-              <h2>Base data</h2>
-              <DescriptionList items={[
-                {
-                  title: 'Title',
-                  description: item.title,
-                  key: item.id + '_title',
-                },
-                {
-                  title: 'Title note',
-                  description: item.title_addon ? item.title_addon : undefined,
-                  key: item.id + '_suffix',
-                },
-                {
-                  title: 'Incipit',
-                  description: item.incipit ? item.incipit : undefined,
-                  key: item.id + '_incipit',
-                },
-                {
-                  title: 'Explicit',
-                  description: item.explicit ? item.explicit : undefined,
-                  key: item.id + '_explicit',
-                }
-              ]}
-              />
+                <h2>Base data</h2>
+                <DescriptionList items={[
+                  {
+                    title: 'Title',
+                    description: item.title,
+                    key: item.id + '_title',
+                  },
+                  {
+                    title: 'Title note',
+                    description: item.title_addon ? item.title_addon : undefined,
+                    key: item.id + '_suffix',
+                  },
+                  {
+                    title: 'Incipit',
+                    description: item.incipit ? item.incipit : undefined,
+                    key: item.id + '_incipit',
+                  },
+                  {
+                    title: 'Explicit',
+                    description: item.explicit ? item.explicit : undefined,
+                    key: item.id + '_explicit',
+                  }
+                ]}
+                />
 
-              <h2>Dating</h2>
-              <List
-                itemLayout="vertical"
-                dataSource={item.datings}
-                renderItem={dating => (
-                  <List.Item
-                    key={dating.id}
-                    actions={[
-                      <a onClick={(e) => this.displayDetails(dating.id, e)}>
-                        {this.displayingDetails(dating.id) ? 'Less' : 'More'}
-                      </a>
-                    ]}
-                  >
-                    <List.Item.Meta
-                      title={formatDates(dating.dates)}
-                    />
-                    <div style={{
-                      display: this.displayingDetails(dating.id) ? 'block' : 'none'
-                    }}>
-                      {dating.note ? <p>Note: {dating.note}</p> : null}
-                      {dating.source ? <p>Source: {dating.source}</p> : null}
-                    </div>
-                  </List.Item>
-                )}
-              />
+                <h2>Dating</h2>
+                <List
+                  itemLayout="vertical"
+                  dataSource={item.datings}
+                  renderItem={dating => (
+                    <List.Item
+                      key={dating.id}
+                      actions={[
+                        <a onClick={(e) => this.displayDetails(dating.id, e)}>
+                          {this.displayingDetails(dating.id) ? 'Less' : 'More'}
+                        </a>
+                      ]}
+                    >
+                      <List.Item.Meta
+                        title={formatDates(dating.dates)}
+                      />
+                      <div style={{
+                        display: this.displayingDetails(dating.id) ? 'block' : 'none'
+                      }}>
+                        {dating.note ? <p>Note: {dating.note}</p> : null}
+                        {dating.source ? <p>Source: {dating.source}</p> : null}
+                      </div>
+                    </List.Item>
+                  )}
+                />
 
-              <h2>Additional information</h2>
-              <DescriptionList items={[
-                {
-                  title: 'Notes',
-                  description: item.note ? item.note : undefined,
-                  key: item.note + '_note'
-                }
-              ]}
-              />
+                <h2>Additional information</h2>
+                <DescriptionList items={[
+                  {
+                    title: 'Notes',
+                    description: item.note ? item.note : undefined,
+                    key: item.note + '_note'
+                  }
+                ]}
+                />
 
-            </section>
+              </section>
+            </React.Fragment>
           )
         }}
       </Query>
