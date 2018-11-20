@@ -18,7 +18,7 @@ class DescriptionList extends Component {
       : []
 
     return (
-      <dl>
+      <dl {...this.props}>
         {items.length > 0 ? items : 'No data available'}
       </dl>
     )

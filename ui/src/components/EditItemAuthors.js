@@ -5,6 +5,7 @@ import { Button, List, Collapse, message } from 'antd';
 import { createGUID } from './utils'
 import { AuthorCreateForm } from './CreateAttributionForm'
 import { normCertainty } from './utils'
+import DescriptionList from "./DescriptionList";
 
 const ATTRIBUTIONS_QUERY = gql`
 query attributionsQuery($id: ID!) {
@@ -73,7 +74,7 @@ mutation deleteAttribution(
 class EditItemAuthors extends Component {
   state = {
     visibleForm: false,
-    attributionContent: [],
+    visibleDetails: [],
   };
 
   handleCancel = () => {
@@ -173,8 +174,8 @@ class EditItemAuthors extends Component {
     this.showModal()
   }
 
-  attributionDetails = (id, e) => {
-    const contentList = this.state.attributionContent
+  displayDetails = (id, e) => {
+    const contentList = this.state.visibleDetails
     const idx = contentList.indexOf(id)
     if (idx === -1) {
       contentList.push(id)
@@ -204,8 +205,8 @@ class EditItemAuthors extends Component {
                   <List.Item
                     key={item.id}
                     actions={[
-                      <a onClick={(e) => this.attributionDetails(item.id, e)}>
-                        {this.showContent(item.id) ? 'Less' : 'More'}
+                      <a onClick={(e) => this.displayDetails(item.id, e)}>
+                        {this.state.visibleDetails.includes(item.id) ? 'Less' : 'More'}
                       </a>,
                       <a onClick={() => this.updateModal({
                         id: item.id,
@@ -219,14 +220,23 @@ class EditItemAuthors extends Component {
                   >
                     <List.Item.Meta
                       title={item.person.name}
+                    <DescriptionList
+                      style={{
+                        display: this.state.visibleDetails.includes(item.id) ? 'block' : 'none'
+                      }}
+                      items={[
+                        {
+                          title: 'Notes',
+                          description: item.note ? item.note : undefined,
+                          key: item.note + '_note'
+                        },
+                        {
+                          title: 'Source',
+                          description: item.source ? item.source : undefined,
+                          key: item.id + '_source'
+                        },
+                      ]}
                     />
-                    <div style={{
-                      display: this.showContent(item.id) ? 'block' : 'none'
-                    }}>
-                      {item.certainty ? <p>Atribution: {normCertainty(item.certainty)}</p> : null}
-                      {item.note ? <p>Note: {item.note}</p> : null}
-                      {item.source ? <p>Source: {item.source}</p> : null}
-                    </div>
                   </List.Item>
                 )}
               />
