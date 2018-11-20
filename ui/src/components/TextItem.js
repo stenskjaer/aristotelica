@@ -2,7 +2,8 @@ import React, { Component } from "react";
 import { Query } from "react-apollo";
 import gql from "graphql-tag";
 import { withRouter } from "react-router";
-import { List, Collapse } from "antd";
+import { List } from "antd";
+import DescriptionList from "./DescriptionList";
 import { normCertainty } from './utils';
 
 const ITEM_QUERY = gql`
@@ -96,6 +97,17 @@ class TextItem extends Component {
                 )}
               />
               <h2>Base data</h2>
+              <DescriptionList items={[
+                {
+                  title: 'Title',
+                  description: item.title
+                },
+                {
+                  title: 'Title note',
+                  description: item.title_addon ? item.title_addon : undefined
+                }
+              ]}
+              />
 
               <h2>Dating</h2>
 
