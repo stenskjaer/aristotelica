@@ -1,7 +1,7 @@
 import React from "react";
 import { Query } from "react-apollo";
 import gql from "graphql-tag";
-import { Table, Divider } from 'antd'
+import { Table, Divider, Input, Button, Icon } from 'antd'
 import { Link } from 'react-router-dom';
 import { normCertainty, formatDates } from './utils'
 
@@ -47,6 +47,20 @@ const TEXTS_QUERY = gql`
 `
 
 class TextList extends React.Component {
+  state = {
+    searchText: '',
+  };
+
+  handleSearch = (selectedKeys, confirm) => () => {
+    confirm();
+    this.setState({ searchText: selectedKeys[0] });
+  }
+
+  handleReset = clearFilters => () => {
+    clearFilters();
+    this.setState({ searchText: '' });
+  }
+
 
   render() {
     return (
@@ -75,12 +89,35 @@ class TextList extends React.Component {
             attributions: formatAttributions(text.attributions).join(' / '),
             datings: formatDatings(text.datings).join(' / ')
           }))
+
           const columns = [
             {
               title: 'Attributions',
               dataIndex: 'attributions',
               defaultSortOrder: 'ascend',
               sorter: (a, b) => a.attributions.localeCompare(b.attributions),
+              filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+                <div className="custom-filter-dropdown">
+                  <Input
+                    ref={el => this.searchInput = el}
+                    placeholder="Search attributions"
+                    value={selectedKeys[0]}
+                    onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                    onPressEnter={this.handleSearch(selectedKeys, confirm)}
+                  />
+                  <Button type="primary" onClick={this.handleSearch(selectedKeys, confirm)}>Search</Button>
+                  <Button onClick={this.handleReset(clearFilters)}>Reset</Button>
+                </div>
+              ),
+              filterIcon: filtered => <Icon type="search" style={{ color: filtered ? '#108ee9' : '#aaa' }} />,
+              onFilter: (value, record) => record.attributions.toLowerCase().includes(value.toLowerCase()),
+              onFilterDropdownVisibleChange: (visible) => {
+                if (visible) {
+                  setTimeout(() => {
+                    this.searchInput.focus();
+                  });
+                }
+              },
             },
             {
               title: 'Title',
@@ -96,11 +133,11 @@ class TextList extends React.Component {
               title: 'Action',
               key: 'action',
               render: (text, record) => (
-                <span>
+                <React.Fragment>
                   <Link to={"text/" + record.id}>More</Link>
                   <Divider type="vertical" />
                   <Link to={"text/edit/" + record.id}>Edit</Link>
-                </span>
+                </React.Fragment>
               ),
             }
           ]
