@@ -95,6 +95,7 @@ enum AttributionCertainty {
   POSSIBLE
   DUBIOUS
   FALSE
+  UNKNOWN
 }
 
 scalar DateTime

@@ -18,7 +18,8 @@ export const normCertainty = (cert) => {
     CERTAIN: 'Certain',
     POSSIBLE: 'Possible',
     DUBIOUS: 'Dubious',
-    FALSE: 'False'
+    FALSE: 'False',
+    UNKNOWN: 'Unknown',
   }
   return normalization[cert]
 }
