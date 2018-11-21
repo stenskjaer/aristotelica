@@ -4,6 +4,7 @@ import gql from "graphql-tag";
 import { Link, withRouter } from "react-router-dom";
 import { List, Button } from "antd";
 import DescriptionList from "./DescriptionList";
+import TypeTree from "./TypeTree";
 import { normCertainty, formatDates } from './utils';
 
 const ITEM_QUERY = gql`
@@ -166,6 +167,11 @@ class TextItem extends Component {
                     title: 'Explicit',
                     description: item.explicit || undefined,
                     key: item.id + '_explicit',
+                  },
+                  {
+                    title: 'Text type',
+                    description: <TypeTree textId={item.id} />,
+                    key: item.id + '_types'
                   }
                 ]}
                 />
