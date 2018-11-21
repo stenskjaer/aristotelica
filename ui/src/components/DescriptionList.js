@@ -30,7 +30,10 @@ class DescriptionList extends Component {
 DescriptionList.propTypes = {
   items: propTypes.arrayOf(propTypes.shape({
     title: propTypes.string.isRequired,
-    description: propTypes.string,
+    description: propTypes.oneOfType([
+      propTypes.string,
+      propTypes.element
+    ]),
     key: propTypes.string.isRequired,
   }))
 }
