@@ -19,7 +19,7 @@ query TextType {
 `
 
 const THIS_TEXT_TYPES = gql`
-  query Text($id: ID!) {
+  query thisTextTypes($id: ID!) {
     Text(id: $id) {
       id
       types {
