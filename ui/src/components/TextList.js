@@ -1,7 +1,8 @@
 import React from "react";
 import { Query } from "react-apollo";
 import gql from "graphql-tag";
-import { Table } from 'antd'
+import { Table, Divider } from 'antd'
+import { Link } from 'react-router-dom';
 
 const TEXTS_QUERY = gql`
   query allTexts {
@@ -79,8 +80,19 @@ class TextList extends React.Component {
               render: (text, record) => <a href={`text/${record.id}`}>{text}</a>
             },
             {
-              title: 'ID',
-              dataIndex: 'id',
+              title: 'Datings',
+              dataIndex: 'datings',
+            },
+            {
+              title: 'Action',
+              key: 'action',
+              render: (text, record) => (
+                <span>
+                  <Link to={"text/" + record.id}>More</Link>
+                  <Divider type="vertical" />
+                  <Link to={"text/edit/" + record.id}>Edit</Link>
+                </span>
+              ),
             }
           ]
 
