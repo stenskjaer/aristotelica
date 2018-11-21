@@ -1,4 +1,5 @@
 import React, { Component, Fragment } from "react";
+import propTypes from 'prop-types';
 
 class DescriptionList extends Component {
 
@@ -24,6 +25,14 @@ class DescriptionList extends Component {
     )
 
   }
+}
+
+DescriptionList.propTypes = {
+  items: propTypes.arrayOf(propTypes.shape({
+    title: propTypes.string.isRequired,
+    description: propTypes.string,
+    key: propTypes.string.isRequired,
+  }))
 }
 
 export default DescriptionList
