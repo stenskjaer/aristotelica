@@ -3,6 +3,7 @@ import { Query } from "react-apollo";
 import gql from "graphql-tag";
 import { Table, Divider } from 'antd'
 import { Link } from 'react-router-dom';
+import { normCertainty, formatDates } from './utils'
 
 const TEXTS_QUERY = gql`
   query allTexts {
@@ -11,9 +12,34 @@ const TEXTS_QUERY = gql`
       title
       attributions {
         id
+        certainty
         person {
           name
           id
+        }
+      }
+      datings {
+        id
+        dates {
+          id
+          type
+          approximate
+          uncertain
+          decade
+          quarter
+          century
+          year {
+            id
+            value
+          }
+          month {
+            id
+            value
+          }
+          day {
+            id 
+            value
+          }
         }
       }
     }
@@ -21,30 +47,6 @@ const TEXTS_QUERY = gql`
 `
 
 class TextList extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      order: "asc",
-      orderBy: "title",
-      page: 0,
-    };
-  }
-
-  handleSortRequest = property => {
-    const orderBy = property;
-    let order = "desc";
-
-    if (this.state.orderBy === property && this.state.order === "desc") {
-      order = "asc";
-    }
-
-    this.setState({ order, orderBy });
-  };
-
-  onShowSizeChange = (current, pageSize) => {
-    console.log(current, pageSize);
-  }
 
   render() {
     return (
@@ -53,25 +55,32 @@ class TextList extends React.Component {
           if (loading) return <p>Loading...</p>;
           if (error) return <p>Error</p>;
 
-          const authorNames = (attributions) => (
+          const formatAttributions = (attributions) => (
             attributions.map(attribution => {
               const person = attribution.person
-              const certainty = person.certainty !== undefined ? ' (' + person.certainty + ')' : ''
+              const certainty = ' (' + normCertainty(attribution.certainty) + ')'
               return person.name + certainty
+            })
+          ).sort()
+
+          const formatDatings = (datings) => (
+            datings.map(dating => {
+              return formatDates(dating.dates)
             })
           ).sort()
 
           const texts = data.Text.map(text => ({
             id: text.id,
             title: text.title,
-            authors: authorNames(text.attributions).join(' / ')
+            attributions: formatAttributions(text.attributions).join(' / '),
+            datings: formatDatings(text.datings).join(' / ')
           }))
           const columns = [
             {
-              title: 'Authors',
-              dataIndex: 'authors',
+              title: 'Attributions',
+              dataIndex: 'attributions',
               defaultSortOrder: 'ascend',
-              sorter: (a, b) => a.authors.localeCompare(b.authors),
+              sorter: (a, b) => a.attributions.localeCompare(b.attributions),
             },
             {
               title: 'Title',
