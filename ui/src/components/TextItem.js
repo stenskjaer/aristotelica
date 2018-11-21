@@ -123,15 +123,24 @@ class TextItem extends Component {
                         </a>
                       ]}
                     >
-                      <List.Item.Meta
-                        title={this.attributionName(attribution)}
+                      <List.Item.Meta title={this.attributionName(attribution)} />
+                      <DescriptionList
+                        style={{
+                          display: this.displayingDetails(attribution.id) ? 'block' : 'none'
+                        }}
+                        items={[
+                          {
+                            title: 'Note',
+                            description: attribution.note || undefined,
+                            key: attribution.id + '_note'
+                          },
+                          {
+                            title: 'Source',
+                            description: attribution.source || undefined,
+                            key: attribution.id + '_source'
+                          }
+                        ]}
                       />
-                      <div style={{
-                        display: this.displayingDetails(attribution.id) ? 'block' : 'none'
-                      }}>
-                        {attribution.note ? <p>Note: {attribution.note}</p> : null}
-                        {attribution.source ? <p>Source: {attribution.source}</p> : null}
-                      </div>
                     </List.Item>
                   )}
                 />
