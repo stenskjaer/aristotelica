@@ -85,7 +85,7 @@ class TextItem extends Component {
   displayingDetails = (id) => this.state.visibleDetails.includes(id)
 
   attributionName = (attribution) => {
-    const certainty = attribution.certainty ? ' (' + normCertainty(attribution.certainty) + ')' : ''
+    const certainty = ' (' + normCertainty(attribution.certainty) + ')' || ''
     return (attribution.person.name + certainty)
   }
 
@@ -98,7 +98,7 @@ class TextItem extends Component {
           if (loading) return <div>Fetching</div>
           if (error) return <div>{error.message}</div>
 
-          const item = data.Text ? data.Text[0] : undefined
+          const item = data.Text[0] || undefined
           if (!item) {
             return <div>Error: There is not text with the id {urlParams.id}</div>
           }
@@ -145,17 +145,17 @@ class TextItem extends Component {
                   },
                   {
                     title: 'Title note',
-                    description: item.title_addon ? item.title_addon : undefined,
+                    description: item.title_addon || undefined,
                     key: item.id + '_suffix',
                   },
                   {
                     title: 'Incipit',
-                    description: item.incipit ? item.incipit : undefined,
+                    description: item.incipit || undefined,
                     key: item.id + '_incipit',
                   },
                   {
                     title: 'Explicit',
-                    description: item.explicit ? item.explicit : undefined,
+                    description: item.explicit || undefined,
                     key: item.id + '_explicit',
                   }
                 ]}
@@ -191,7 +191,7 @@ class TextItem extends Component {
                 <DescriptionList items={[
                   {
                     title: 'Notes',
-                    description: item.note ? item.note : undefined,
+                    description: item.note || undefined,
                     key: item.note + '_note'
                   }
                 ]}
