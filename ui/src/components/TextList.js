@@ -52,20 +52,31 @@ class TextList extends React.Component {
           if (loading) return <p>Loading...</p>;
           if (error) return <p>Error</p>;
 
+          const authorNames = (attributions) => (
+            attributions.map(attribution => {
+              const person = attribution.person
+              const certainty = person.certainty !== undefined ? ' (' + person.certainty + ')' : ''
+              return person.name + certainty
+            })
+          ).sort()
+
           const texts = data.Text.map(text => ({
             id: text.id,
             title: text.title,
-            authors: text.attributions ? text.attributions.map(a => a.person.name).join(' / ') : 'No name'
+            authors: authorNames(text.attributions).join(' / ')
           }))
           const columns = [
             {
               title: 'Authors',
               dataIndex: 'authors',
+              defaultSortOrder: 'ascend',
+              sorter: (a, b) => a.authors.localeCompare(b.authors),
             },
             {
               title: 'Title',
               dataIndex: 'title',
-              render: (text, record) => <a href={`detail/${record.id}`}>{text}</a>
+              sorter: (a, b) => a.title.localeCompare(b.title),
+              render: (text, record) => <a href={`text/${record.id}`}>{text}</a>
             },
             {
               title: 'ID',
