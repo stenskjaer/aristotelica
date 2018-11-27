@@ -2,10 +2,10 @@ import React, { Component } from "react";
 import { Query } from "react-apollo";
 import gql from "graphql-tag";
 import { Button, List, message } from 'antd';
-import { createGUID } from './utils'
-import { AuthorCreateForm } from './CreateAttributionForm'
-import { normCertainty } from './utils'
-import DescriptionList from "./DescriptionList";
+import { createGUID } from '../utils'
+import { AuthorCreateForm } from '../CreateAttributionForm'
+import { normCertainty } from '../utils'
+import DescriptionList from "../DescriptionList";
 
 const ATTRIBUTIONS_QUERY = gql`
 query attributionsQuery($id: ID!) {

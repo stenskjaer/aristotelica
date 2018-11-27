@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import { Switch, Route, Redirect } from 'react-router-dom'
 import { Layout } from 'antd';
-import TextItem from './TextItem';
-import EditText from './EditText';
-import TextList from './TextList';
+import TextItem from './Texts/TextItem';
+import EditText from './Texts/EditText';
+import TextList from './Texts/TextList';
 import SideMenu from './Menu';
 
 const { Sider } = Layout

@@ -1,9 +1,9 @@
 import React, { Component } from "react";
 import { Query } from "react-apollo";
 import gql from "graphql-tag";
-import { createGUID, formatDates } from './utils'
+import { createGUID, formatDates } from '../utils'
 import { List, Button, message } from 'antd';
-import { CreateUpdateDating } from './CreateUpdateDating';
+import { CreateUpdateDating } from '../CreateUpdateDating';
 
 const DATING_QUERY = gql`
   query textDating($id: ID!) {
