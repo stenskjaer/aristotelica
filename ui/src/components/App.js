@@ -4,7 +4,9 @@ import { Layout } from 'antd';
 import TextItem from './TextItem';
 import EditText from './EditText';
 import TextList from './TextList';
-import Menu from './Menu';
+import SideMenu from './Menu';
+
+const { Sider } = Layout
 
 const { Content } = Layout;
 
@@ -12,7 +14,9 @@ class App extends Component {
   render() {
     return (
       <Layout>
-        <Menu />
+        <Sider>
+          <SideMenu />
+        </Sider>
         <Content style={{ padding: '0 50px' }}>
           <div style={{ background: '#fff', padding: 12, minHeight: 280 }}>
             <Switch>

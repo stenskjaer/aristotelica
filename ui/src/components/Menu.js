@@ -1,25 +1,27 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
 import { withRouter } from 'react-router'
-import { Layout } from 'antd';
+import { Menu } from 'antd';
 
-const { Header } = Layout;
+const { Item } = Menu;
 
-class Menu extends Component {
+class SideMenu extends Component {
   render() {
     return (
-      <Layout>
-        <Header>
+      <Menu theme="light">
+        <Item key="1">
           <Link to="/">
             Main
           </Link>
+        </Item>
+        <Item key="2">
           <Link to="/texts">
             Texts
           </Link>
-        </Header>
-      </Layout>
+        </Item>
+      </Menu>
     );
   }
 }
 
-export default withRouter(Menu);
+export default withRouter(SideMenu);
