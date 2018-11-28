@@ -24,12 +24,23 @@ type TextType {
 type Person {
   id: ID!
   name: String!
-  name_en: String
-  name_la: String
+  description: String
+  biography: String
   created: DateTime!
   modified: DateTime
   note: String 
+  name_en: Name @cypher(statement: 
+    "(this)-[:HAS_NAME]->(n:Name {language: 'en'}) RETURN n"
+  )
+  names: [Name!]! @relation(name: "HAS_NAME", direction: "OUT")
   attributions: [Attribution!]! @relation(name: "TO", direction: "IN")
+}
+
+type Name {
+  id: ID!
+  language: String!
+  value: String!
+  person: Person! @relation(name: "HAS_NAME", direction: "IN")
 }
 
 type Date {
