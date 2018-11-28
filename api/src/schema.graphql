@@ -26,9 +26,10 @@ type Person {
   name: String!
   name_en: String
   name_la: String
-  created: String!
-  modified: String
+  created: DateTime!
+  modified: DateTime
   note: String 
+  attributions: [Attribution!]! @relation(name: "TO", direction: "IN")
 }
 
 type Date {
