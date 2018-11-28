@@ -12,6 +12,24 @@ h6::first-letter {
   text-transform: uppercase;
 }
 
+h1,
+h2 {
+  margin-top: 1.2ex;
+  margin-bottom: 1ex;
+}
+
+h3,
+h4 {
+  margin-top: 1ex;
+  margin-bottom: 0.8ex;
+}
+
+h5,
+h6 {
+  margin-top: 0.8ex;
+  margin-bottom: 0.6ex;
+}
+
 .ant-collapse>.ant-collapse-item>.ant-collapse-header {
   padding: 6px 0 6px 40px;
 }
