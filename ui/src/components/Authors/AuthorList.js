@@ -1,9 +1,7 @@
 import React from "react";
 import { Query } from "react-apollo";
 import gql from "graphql-tag";
-import { Table, Divider, Input, Button, Icon } from 'antd'
-import { Link } from 'react-router-dom';
-import { normCertainty, formatDates } from '../utils';
+import { Table, Input, Button, Icon } from 'antd'
 
 const PERSONS_QUERY = gql`
   query allPersons {
@@ -55,12 +53,6 @@ class AuthorList extends React.Component {
             }
           }
 
-          const formatDatings = (datings) => (
-            datings.map(dating => {
-              return formatDates(dating.dates)
-            })
-          ).sort()
-
           const authors = data.Person.map(author => ({
             id: author.id,
             name: author.name,
@@ -108,17 +100,6 @@ class AuthorList extends React.Component {
             {
               title: 'Death',
             },
-            {
-              title: 'Action',
-              key: 'action',
-              render: (_, record) => (
-                <React.Fragment>
-                  <Link to={"author/" + record.id}>More</Link>
-                  <Divider type="vertical" />
-                  <Link to={"author/edit/" + record.id}>Edit</Link>
-                </React.Fragment>
-              ),
-            }
           ]
 
           return (
