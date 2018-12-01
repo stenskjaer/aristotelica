@@ -50,6 +50,12 @@ h6 {
   margin-right: 8px;
 }
 
+.editable-row .ant-form-explain {
+  position: absolute;
+  font-size: 12px;
+  margin-top: -4px;
+}
+
 .form-group {
   margin-bottom: 32px;
 }

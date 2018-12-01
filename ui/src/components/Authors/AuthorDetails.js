@@ -160,4 +160,4 @@ class AuthorDetails extends Component {
   }
 }
 
-export default withRouter(AuthorDetails)
+export default AuthorDetails
