@@ -1,7 +1,8 @@
 import React from "react";
 import { Query } from "react-apollo";
 import gql from "graphql-tag";
-import { Table, Input, Button, Icon } from 'antd'
+import { Link } from "react-router-dom";
+import { Table, Input, Button, Icon } from "antd";
 
 const PERSONS_QUERY = gql`
   query allPersons {
@@ -65,7 +66,7 @@ class AuthorList extends React.Component {
               title: 'Name',
               dataIndex: 'name',
               sorter: (a, b) => a.name.localeCompare(b.name),
-              render: (name, record) => <a href={`author/${record.id}`}>{name}</a>
+              render: (name, record) => <Link to={`author/${record.id}`}>{name}</Link>
             },
             {
               title: 'Texts',

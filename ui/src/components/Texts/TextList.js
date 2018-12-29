@@ -123,7 +123,7 @@ class TextList extends React.Component {
               title: 'Title',
               dataIndex: 'title',
               sorter: (a, b) => a.title.localeCompare(b.title),
-              render: (text, record) => <a href={`text/${record.id}`}>{text}</a>
+              render: (text, record) => <Link to={`text/${record.id}`}>{text}</Link>
             },
             {
               title: 'Datings',
