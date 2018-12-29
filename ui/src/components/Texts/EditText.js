@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Mutation, Query } from "react-apollo";
 import gql from "graphql-tag";
+import { Link } from "react-router-dom";
 import { Formik } from 'formik';
 import { Form, Input, Button } from 'antd';
 import FormItem from "antd/lib/form/FormItem";
@@ -90,9 +91,7 @@ class EditText extends Component {
                   {({ values, handleSubmit, handleChange, isSubmitting }) => (
                     <React.Fragment>
                       <h1>Edit text</h1>
-                      <Button>
-                        <Link to={"/text/" + item.id}>View text</Link>
-                      </Button>
+                      <Link to={"/text/" + item.id}>View text</Link>
                       <Form onSubmit={handleSubmit} className="edit-form">
                         <div className="form-group">
                           <h2>Authorship</h2>

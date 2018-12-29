@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Mutation, Query } from "react-apollo";
 import gql from "graphql-tag";
+import { Link } from "react-router-dom";
 import { Formik } from 'formik';
 import { Form, Input, Button } from 'antd';
 import EditableTable from './AddAuthorText';
@@ -86,9 +87,7 @@ class EditAuthor extends Component {
                   {({ values, handleSubmit, handleChange, isSubmitting }) => (
                     <React.Fragment>
                       <h1>Edit author</h1>
-                      <Button>
-                        <Link to={"/author/" + author.id}>View author</Link>
-                      </Button>
+                      <Link to={"/author/" + author.id}>View author</Link>
                       <Form onSubmit={handleSubmit} className="edit-form">
                         <div className="form-group">
                           <h2>Authorship</h2>

@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import { Query } from "react-apollo";
 import gql from "graphql-tag";
-import { List, Button } from "antd";
+import { Link } from "react-router-dom";
+import { List } from "antd";
 import DescriptionList from "../DescriptionList";
 import TypeTree from "./TypeTree";
 import { normCertainty, formatDates } from '../utils';
@@ -106,9 +107,7 @@ class TextItem extends Component {
           return (
             <React.Fragment>
               <h1>Text details</h1>
-              <Button>
-                <Link to={"/text/edit/" + item.id}>Edit text</Link>
-              </Button>
+              <Link to={"/text/edit/" + item.id}>Edit text</Link>
               <section>
                 <h2>Authorship</h2>
                 <List

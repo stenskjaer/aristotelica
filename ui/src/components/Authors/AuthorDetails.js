@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import { Query } from "react-apollo";
 import gql from "graphql-tag";
-import { Button, Table } from "antd";
+import { Link } from "react-router-dom";
+import { Table } from "antd";
 import DescriptionList from "../DescriptionList";
 import { normCertainty } from '../utils';
 
@@ -69,9 +70,7 @@ class AuthorDetails extends Component {
           return (
             <React.Fragment>
               <h1>Author details</h1>
-              <Button>
-                <Link to={"/author/edit/" + author.id}>Edit author</Link>
-              </Button>
+              <Link to={"/author/edit/" + author.id}>Edit author</Link>
               <section>
                 <h2>Names</h2>
                 <Table
