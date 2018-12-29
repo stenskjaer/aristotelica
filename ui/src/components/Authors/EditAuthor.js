@@ -90,7 +90,7 @@ class EditAuthor extends Component {
                       <Link to={"/author/" + author.id}>View author</Link>
                       <Form onSubmit={handleSubmit} className="edit-form">
                         <div className="form-group">
-                          <h2>Authorship</h2>
+                          <h2>Name</h2>
                           <EditableTable client={client} author={author} />
                         </div>
                         <Button type="primary" htmlType="submit" className="edit-form-button">

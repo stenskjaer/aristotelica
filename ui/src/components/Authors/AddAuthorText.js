@@ -237,6 +237,7 @@ class EditableTable extends Component {
     this.setState({
       data: [...data, newData],
     });
+    this.edit(newData.key)
   }
 
   delete = async (nameid) => {
@@ -286,6 +287,8 @@ class EditableTable extends Component {
     this.setState({ editingKey: '' });
   };
 
+  showPagination = (records) => records.length > 10
+
   render() {
     const components = {
       body: {
@@ -318,8 +321,9 @@ class EditableTable extends Component {
           dataSource={this.state.data}
           columns={columns}
           rowClassName="editable-row"
+          pagination={this.showPagination(this.props.author.names)}
         />
-        <Button onClick={this.handleAdd} type="primary" style={{ marginBottom: 16 }}>
+        <Button onClick={this.handleAdd} type="primary" style={{ margin: '8px 0 16px' }}>
           Add a row
         </Button>
       </div>
