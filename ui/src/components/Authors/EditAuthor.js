@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { Mutation, Query } from "react-apollo";
 import gql from "graphql-tag";
-import { withRouter, Link } from "react-router-dom";
 import { Formik } from 'formik';
 import { Form, Input, Button } from 'antd';
 import EditableTable from './AddAuthorText';
@@ -111,4 +110,4 @@ class EditAuthor extends Component {
   }
 }
 
-export default withRouter(EditAuthor);
+export default EditAuthor;

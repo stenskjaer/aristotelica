@@ -1,6 +1,5 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { withRouter } from 'react-router'
 import { Menu } from 'antd';
 
 const { Item } = Menu;
@@ -27,4 +26,4 @@ function SideMenu() {
   );
 }
 
-export default withRouter(SideMenu);
+export default SideMenu;

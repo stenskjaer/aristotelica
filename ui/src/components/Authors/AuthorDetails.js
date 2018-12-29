@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { Query } from "react-apollo";
 import gql from "graphql-tag";
-import { Link, withRouter } from "react-router-dom";
 import { Button, Table } from "antd";
 import DescriptionList from "../DescriptionList";
 import { normCertainty } from '../utils';

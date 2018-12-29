@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { Query } from "react-apollo";
 import gql from "graphql-tag";
-import { Link, withRouter } from "react-router-dom";
 import { List, Button } from "antd";
 import DescriptionList from "../DescriptionList";
 import TypeTree from "./TypeTree";
@@ -222,4 +221,4 @@ class TextItem extends Component {
   }
 }
 
-export default withRouter(TextItem)
+export default TextItem

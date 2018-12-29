@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { Mutation, Query } from "react-apollo";
 import gql from "graphql-tag";
-import { withRouter, Link } from "react-router-dom";
 import { Formik } from 'formik';
 import { Form, Input, Button } from 'antd';
 import FormItem from "antd/lib/form/FormItem";
@@ -172,4 +171,4 @@ class EditText extends Component {
   }
 }
 
-export default withRouter(EditText);
+export default EditText;
