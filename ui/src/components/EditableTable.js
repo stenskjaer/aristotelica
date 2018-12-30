@@ -1,108 +1,9 @@
 import React, { Component } from 'react'
-import gql from "graphql-tag";
 import { Table, Input, InputNumber, Divider, Form, Button } from 'antd';
-import { createGUID } from '../utils';
+import { createGUID } from './utils';
 
 const FormItem = Form.Item;
 const EditableContext = React.createContext();
-
-const ADD_NAME = gql`
-  mutation createName(
-    $nameid: ID!
-    $personid: ID!
-    $name: String!
-    $language: String!
-  ) {
-    CreateName(
-      id: $nameid
-      value: $name
-      language: $language
-    ) {
-      id
-    }
-    AddPersonNames(
-      personid: $personid
-      nameid: $nameid
-    ) {
-      id
-    }
-  }
-`
-
-const addPersonName = async (values, client) => {
-  const { error, data } = await client.mutate({
-    mutation: ADD_NAME,
-    variables: {
-      nameid: values.key,
-      personid: values.personid,
-      language: values.language,
-      name: values.name
-    },
-    refetchQuery: ['authorNames']
-  });
-  if (error) {
-    console.log(error.message)
-  }
-  return data.CreateName.id
-}
-
-const UPDATE_NAME = gql`
-  mutation updateName(
-    $nameid: ID!
-    $language: String
-    $name: String
-  ) {
-    UpdateName(
-      id: $nameid
-      language: $language
-      value: $name
-    ) {
-      id
-    }
-  }
-`
-
-const updateName = async (values, client) => {
-  const { error, data } = await client.mutate({
-    mutation: UPDATE_NAME,
-    variables: {
-      nameid: values.key,
-      language: values.language,
-      name: values.name
-    },
-    refetchQuery: ['authorNames']
-  });
-  if (error) {
-    console.log(error.message)
-  }
-  return data.UpdateName.id
-}
-
-const DELETE_NAME = gql`
-  mutation deleteName(
-    $nameid: ID!
-  ) {
-    DeleteName(
-      id: $nameid
-    ) {
-      id
-    }
-  }
-`
-
-const deleteName = async (nameid, client) => {
-  const { error, data } = await client.mutate({
-    mutation: DELETE_NAME,
-    variables: {
-      nameid: nameid,
-    },
-    refetchQuery: ['authorNames']
-  });
-  if (error) {
-    console.log(error.message)
-  }
-  return data.DeleteName.id
-}
 
 const EditableRow = ({ form, index, ...props }) => (
   <EditableContext.Provider value={form}>
@@ -155,37 +56,22 @@ class EditableCell extends React.Component {
   }
 }
 
-class AddAuthorText extends Component {
+class EditableTable extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      data: this.props.author.names.map(name => ({
-        name: name.value,
-        language: name.language,
-        key: name.id
-      })),
-      authorId: this.props.author.id,
-      editingKey: '',
+      editingKey: ''
     }
     this.columns = [
+      ...this.props.contentColumns,
       {
-        title: 'Name',
-        dataIndex: 'name',
-        editable: true,
-      },
-      {
-        title: 'Language',
-        dataIndex: 'language',
-        editable: true,
-      },
-      {
-        title: 'operation',
+        title: 'Operation',
         dataIndex: 'operation',
         render: (text, record) => {
-          const editable = this.isEditing(record);
+          const editing = this.isEditing(record);
           return (
             <div>
-              {editable ? (
+              {editing ? (
                 <span>
                   <EditableContext.Consumer>
                     {form => (
@@ -228,7 +114,6 @@ class AddAuthorText extends Component {
   }
 
   delete = async (nameid) => {
-    deleteName(nameid, this.props.client)
     const newData = [...this.state.data];
     const index = newData.findIndex(item => nameid === item.key);
     newData.splice(index, 1);
@@ -241,6 +126,7 @@ class AddAuthorText extends Component {
 
   edit(key) {
     this.setState({ editingKey: key });
+    console.log(key)
   }
 
   save(form, record) {
@@ -262,13 +148,6 @@ class AddAuthorText extends Component {
         data: newData,
         editingKey: ''
       });
-
-      // Run corresponding queries
-      if (this.props.author.names.find(name => name.id === record.key)) {
-        updateName(newData[index], client)
-      } else {
-        addPersonName({ ...newData[index], personid: this.state.authorId }, client)
-      }
 
     });
   }
@@ -307,12 +186,11 @@ class AddAuthorText extends Component {
       <div>
         <Table
           components={components}
-          size={'small'}
-          bordered
-          dataSource={this.state.data}
           columns={columns}
           rowClassName="editable-row"
-          pagination={this.showPagination(this.props.author.names)}
+          bordered
+          pagination={this.showPagination(this.props.dataSource)}
+          {...this.props}
         />
         <Button onClick={this.handleAdd} type="primary" style={{ margin: '8px 0 16px' }}>
           Add a row
@@ -323,4 +201,4 @@ class AddAuthorText extends Component {
   }
 }
 
-export default AddAuthorText
+export default EditableTable

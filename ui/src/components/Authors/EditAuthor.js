@@ -1,8 +1,11 @@
 import React, { Component } from "react";
 import { Query } from "react-apollo";
 import gql from "graphql-tag";
-import EditableTable from './AddAuthorText';
+import AddAuthorText from "./AddAuthorText";
+import EditableTable from '../EditableTable';
 import EditableTextArea from "../EditableTextArea";
+import DescriptionList from "../DescriptionList";
+import { normCertainty } from '../utils';
 
 const AUTHOR_QUERY = gql`
   query authorInfo($id: ID!) {
@@ -73,10 +76,53 @@ class EditAuthor extends Component {
               <h1>Author</h1>
               <section>
                 <h2>Names</h2>
-                <EditableTable client={client} author={author} />
+                <AddAuthorText client={client} author={author} />
               </section>
               <section>
                 <EditableTextArea heading={'Description'} client={client} author={author} field={'note'} />
+              </section>
+              <section>
+                <h2>Attributed texts</h2>
+                <p>
+                  Editing or deleting an attribution will not change the text, only the connection between the author and the text. To edit the text, click the text title and edit it from the detailed view.
+                </p>
+                <EditableTable
+                  contentColumns={[
+                    { title: 'Title', dataIndex: 'title', editable: true },
+                  ]}
+                  dataSource={author.attributions.map(attribution => ({
+                    key: attribution.id,
+                    title: attribution.text.title,
+                    note: attribution.note,
+                    source: attribution.source,
+                    certainty: normCertainty(attribution.certainty),
+                  }))}
+                  size={'small'}
+                  expandedRowRender={record => (
+                    <DescriptionList
+                      items={[
+                        {
+                          title: 'Certainty',
+                          dataIndex: 'certainty',
+                          description: record.certainty,
+                          key: record.id + '_certainty'
+                        },
+                        {
+                          title: 'Note',
+                          dataIndex: 'note',
+                          description: record.note || undefined,
+                          key: record.id + '_note'
+                        },
+                        {
+                          title: 'Source',
+                          dataIndex: 'source',
+                          description: record.source || undefined,
+                          key: record.id + '_source'
+                        }
+                      ]}
+                    />
+                  )}
+                />
               </section>
             </React.Fragment>
           )
