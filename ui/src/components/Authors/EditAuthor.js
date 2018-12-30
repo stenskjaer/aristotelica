@@ -6,8 +6,6 @@ import { Formik } from 'formik';
 import { Form, Input, Button } from 'antd';
 import EditableTable from './AddAuthorText';
 
-const { TextArea } = Input
-
 const AUTHOR_QUERY = gql`
   query authorInfo($id: ID!) {
     Person(id: $id) {
@@ -33,7 +31,6 @@ const AUTHOR_QUERY = gql`
     }
   }
 `
-
 
 const UPDATE_AUTHOR = gql`
   mutation UpdateAuthor(
@@ -81,8 +78,7 @@ class EditAuthor extends Component {
                     values.modified = new Date()
                     updateAuthor({ variables: values })
                     this.props.history.push("/author/" + author.id)
-                  }
-                  }
+                  }}
                 >
                   {({ values, handleSubmit, handleChange, isSubmitting }) => (
                     <React.Fragment>

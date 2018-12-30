@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import gql from "graphql-tag";
-import { Query } from "react-apollo";
 import { Table, Input, InputNumber, Divider, Form, Button } from 'antd';
 import { createGUID } from '../utils';
 
@@ -211,6 +210,7 @@ class EditableTable extends Component {
                       </a>
                     )}
                   </EditableContext.Consumer>
+                  <Divider type="vertical" />
                   <a onClick={() => this.cancel(record.key)}>Cancel</a>
                 </span>
               ) : (
@@ -271,7 +271,10 @@ class EditableTable extends Component {
         ...item,
         ...values,
       });
-      this.setState({ data: newData, editingKey: '' });
+      this.setState({
+        data: newData,
+        editingKey: ''
+      });
 
       // Run corresponding queries
       if (this.props.author.names.find(name => name.id === record.key)) {
@@ -317,6 +320,7 @@ class EditableTable extends Component {
       <div>
         <Table
           components={components}
+          size={'small'}
           bordered
           dataSource={this.state.data}
           columns={columns}
