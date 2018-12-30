@@ -1,10 +1,8 @@
 import React, { Component } from "react";
-import { Mutation, Query } from "react-apollo";
+import { Query } from "react-apollo";
 import gql from "graphql-tag";
-import { Link } from "react-router-dom";
-import { Formik } from 'formik';
-import { Form, Input, Button } from 'antd';
 import EditableTable from './AddAuthorText';
+import EditableTextArea from "../EditableTextArea";
 
 const AUTHOR_QUERY = gql`
   query authorInfo($id: ID!) {
@@ -39,7 +37,7 @@ const UPDATE_AUTHOR = gql`
       $description: String,
       $biography: String,
       $note: String,
-    ){
+    ) {
     UpdatePerson(
         id: $id, 
         modified: $modified
@@ -70,34 +68,17 @@ class EditAuthor extends Component {
           }
 
           return (
-            <Mutation mutation={UPDATE_AUTHOR}>
-              {(updateAuthor) => (
-                <Formik
-                  initialValues={author}
-                  onSubmit={(values) => {
-                    values.modified = new Date()
-                    updateAuthor({ variables: values })
-                    this.props.history.push("/author/" + author.id)
-                  }}
-                >
-                  {({ values, handleSubmit, handleChange, isSubmitting }) => (
-                    <React.Fragment>
-                      <h1>Edit author</h1>
-                      <Link to={"/author/" + author.id}>View author</Link>
-                      <Form onSubmit={handleSubmit} className="edit-form">
-                        <div className="form-group">
-                          <h2>Name</h2>
-                          <EditableTable client={client} author={author} />
-                        </div>
-                        <Button type="primary" htmlType="submit" className="edit-form-button">
-                          Submit
-                      </Button>
-                      </Form>
-                    </React.Fragment>
-                  )}
-                </Formik>
-              )}
-            </Mutation>
+
+            <React.Fragment>
+              <h1>Author</h1>
+              <section>
+                <h2>Names</h2>
+                <EditableTable client={client} author={author} />
+              </section>
+              <section>
+                <EditableTextArea heading={'Description'} client={client} author={author} field={'note'} />
+              </section>
+            </React.Fragment>
           )
         }}
       </Query>
