@@ -6,9 +6,11 @@ const AUTHORS = gql`
 query allAuthors {
   Person(orderBy: name_asc) {
     id
-    name
-    name_la
-    name_en
+    names {
+      id
+      value
+      language
+    }
   }
 }
 `
@@ -75,12 +77,10 @@ export const AuthorCreateForm = Form.create()(
                 >
 
                   {this.state.data.map(d => {
-                    const values = [d.name, d.name_la, d.name_en]
-                      .filter(i => i !== null)
-                      .join(';')
+                    const values = d.names.map(n => (n.value)).join(';')
                     return (
                       <Select.Option key={d.id} values={values}>
-                        {d.name}
+                        {d.names[0].value}
                       </Select.Option>
                     )
                   })}
