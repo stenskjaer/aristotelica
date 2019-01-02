@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Query } from "react-apollo";
 import gql from "graphql-tag";
-import AddAuthorText from "./AddAuthorText";
+import AuthorshipAttributions from "./AuthorshipAttributions";
 import AuthorTexts from "./AuthorTexts";
 import EditableTable from '../EditableTable';
 import EditableTextArea from "../EditableTextArea";
@@ -77,7 +77,7 @@ class EditAuthor extends Component {
               <h1>Author</h1>
               <section>
                 <h2>Names</h2>
-                <AddAuthorText client={client} author={author} />
+                <AuthorshipAttributions client={client} author={author} />
               </section>
               <section>
                 <EditableTextArea heading={'Description'} client={client} author={author} field={'note'} />

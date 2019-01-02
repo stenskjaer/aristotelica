@@ -155,7 +155,7 @@ class EditableCell extends React.Component {
   }
 }
 
-class AddAuthorText extends Component {
+class AuthorshipAttributions extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -323,4 +323,4 @@ class AddAuthorText extends Component {
   }
 }
 
-export default AddAuthorText
+export default AuthorshipAttributions
