@@ -72,7 +72,6 @@ class EditAuthor extends Component {
           }
 
           return (
-
             <React.Fragment>
               <h1>Author</h1>
               <section>
