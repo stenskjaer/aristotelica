@@ -204,7 +204,7 @@ class AddAuthorText extends Component {
                   <React.Fragment>
                     <a onClick={() => this.edit(record.key)}>Edit</a>
                     <Divider type="vertical" />
-                    <a onClick={() => this.delete(record.key)}>Delete</a>
+                    <a onClick={() => this.delete(record.key)}>Remove</a>
                   </React.Fragment>
                 )}
             </div>
@@ -315,7 +315,7 @@ class AddAuthorText extends Component {
           pagination={this.showPagination(this.props.author.names)}
         />
         <Button onClick={this.handleAdd} type="primary" style={{ margin: '8px 0 16px' }}>
-          Add a row
+          New name
         </Button>
       </div>
 

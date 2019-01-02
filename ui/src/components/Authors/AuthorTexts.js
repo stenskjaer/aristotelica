@@ -104,7 +104,7 @@ class AuthorTexts extends Component {
                         note: record.note,
                       })}>Edit</a>
                       <Divider type="vertical" />
-                      <a onClick={() => this.handleDelete(record.id)}>Delete</a>
+                      <a onClick={() => this.handleDelete(record.id)}>Remove</a>
                     </React.Fragment>
                   </div>
                 );
