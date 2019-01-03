@@ -5,10 +5,12 @@
 This is the repository of the *Aristotelica* catalogue interface. Once completed this application will provide the most complete catalogue of commentaries on Aristotle's *De anima*, but this is only the beginning.
 
 Aristotelica will: 
-- Enable registration, browsing, and editing of scholarly data digital.
+- Enable registration, browsing, and editing of scholarly data about the Aristotelian tradition.
 - Be able to handle all kinds of Aristotelian commentaries.
 - Be open to contributions from the scholarly community.
-- Integrate with the [*Scholastical Commentaries and Texts Archive*](https://scta.info), an existing platforms for first class digital text editing and preservation.
+- Integrate with the [*Scholastical Commentaries and Texts Archive*](https://scta.info), an existing selection of software for metadata aggregation and first class digital text editing and preservation.
+
+There is not yet any publicly availabe version of the website. This is only the repository for the source code.
 
 ## Tech stack
 
