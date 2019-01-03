@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
 import gql from "graphql-tag";
-import { Table, Input, InputNumber, Divider, Form, Button } from 'antd';
+import { Table, Input, InputNumber, Divider, Form, Button, Select } from 'antd';
 import { createGUID } from '../utils';
+import { Languages } from '../languages';
 
 const FormItem = Form.Item;
 const EditableContext = React.createContext();
@@ -116,6 +117,18 @@ class EditableCell extends React.Component {
   getInput = () => {
     if (this.props.inputType === 'number') {
       return <InputNumber />;
+    } else if (this.props.inputType === 'select') {
+      const children = this.props.selectData.selectChildren
+      return <Select {...this.props.selectData.selectProps}>{Object.keys(children).map(i => {
+        const values = [children[i].isoName, children[i].nativeName, children[i].langCode].join(';')
+        return (
+          <Select.Option values={values} key={children[i].langCode} value={children[i].langCode}>
+            {children[i].isoName} ({children[i].nativeName})
+          </Select.Option>
+        )
+      }
+
+      )}</Select>
     }
     return <Input />;
   };
@@ -128,6 +141,7 @@ class EditableCell extends React.Component {
       inputType,
       record,
       index,
+      selectData,
       ...restProps
     } = this.props;
     return (
@@ -171,12 +185,25 @@ class AuthorshipAttributions extends Component {
       {
         title: 'Name',
         dataIndex: 'name',
-        editable: true,
+        inputType: 'text',
+        editable: 'true',
       },
       {
         title: 'Language',
         dataIndex: 'language',
-        editable: true,
+        inputType: 'select',
+        selectData: {
+          selectProps: {
+            showSearch: true,
+            style: { width: 200 },
+            placeholder: "Select language",
+            optionFilterProp: "values",
+            filterOption: (input, option) => option.props.values.toLowerCase().indexOf(input.toLowerCase()) >= 0
+          },
+          selectChildren: Languages,
+        },
+        editable: 'true',
+        render: (text, record) => (Languages[text].isoName)
       },
       {
         title: 'operation',
@@ -295,10 +322,11 @@ class AuthorshipAttributions extends Component {
         ...col,
         onCell: record => ({
           record,
-          inputType: col.dataIndex === 'age' ? 'number' : 'text',
+          inputType: col.inputType,
           dataIndex: col.dataIndex,
           title: col.title,
           editing: this.isEditing(record),
+          selectData: col.selectData,
         }),
       };
     });
