@@ -5,7 +5,7 @@ class EditableTextArea extends React.Component {
   state = {
     editing: false,
     editable: true,
-    content: this.props.author[this.props.field]
+    content: this.props.author[this.props.field] || ''
   }
 
   componentDidMount() {
@@ -20,6 +20,15 @@ class EditableTextArea extends React.Component {
     }
   }
 
+  handleCreateUpdateDB = this.props.handleCreateUpdateDB;
+
+  handleClickOutside = (e) => {
+    const { editing } = this.state;
+    if (editing && this.field !== e.target && !this.field.contains(e.target)) {
+      this.save();
+    }
+  }
+
   toggleEdit = () => {
     const editing = !this.state.editing;
     this.setState({ editing }, () => {
@@ -29,24 +38,14 @@ class EditableTextArea extends React.Component {
     });
   }
 
-  handleClickOutside = (e) => {
-    const { editing } = this.state;
-    if (editing && this.field !== e.target && !this.field.contains(e.target)) {
-      this.save();
-    }
-  }
-
-  handleSave = (content) => {
-    this.setState({ content: content });
-  }
-
   save = () => {
     this.form.validateFields((error, values) => {
       if (error) {
         return;
       }
       this.toggleEdit();
-      this.handleSave(values.description);
+      this.setState({ content: values.description });
+      this.handleCreateUpdateDB({ [this.props.field]: values.description })
     });
   }
 
@@ -78,7 +77,7 @@ class EditableTextArea extends React.Component {
               style={{ paddingRight: 24 }}
               onClick={this.toggleEdit}
             >
-              {content}
+              {content || <span style={{ opacity: 0.65 }}>{'Field is empty, click to add a ' + this.props.field}</span>}
             </div>
           )
       );

@@ -32,18 +32,15 @@ const AUTHOR_QUERY = gql`
   }
 `
 
-const UPDATE_AUTHOR = gql`
-  mutation UpdateAuthor(
+const UPDATE_PERSON = gql`
+  mutation UpdatePerson(
       $id: ID!, 
-      $modified: DateTime!,
       $description: String,
       $biography: String,
       $note: String,
     ) {
     UpdatePerson(
         id: $id, 
-        modified: $modified
-        name: $name,
         description: $description,
         biography: $biography,
         note: $note,
@@ -69,6 +66,22 @@ class EditAuthor extends Component {
             return <div>Error: The author does not exist.</div>
           }
 
+          const handleUpdatePerson = async (variables) => {
+            const { error, data } = await client.mutate({
+              mutation: UPDATE_PERSON,
+              variables: {
+                id: author.id,
+                modified: new Date(),
+                ...variables
+              },
+              refetchQueries: ['authorInfo']
+            })
+            if (error) {
+              console.warn(error.message)
+            }
+            return data.UpdatePerson.id
+          }
+
           return (
             <React.Fragment>
               <h1>Author</h1>
@@ -78,7 +91,18 @@ class EditAuthor extends Component {
                 <AuthorshipAttributions client={client} author={author} />
               </section>
               <section>
-                <EditableTextArea heading={'Description'} client={client} author={author} field={'note'} />
+                <EditableTextArea
+                  handleCreateUpdateDB={handleUpdatePerson}
+                  heading={'Description'}
+                  author={author}
+                  field={'description'} />
+              </section>
+              <section>
+                <EditableTextArea
+                  handleCreateUpdateDB={handleUpdatePerson}
+                  heading={'Note'}
+                  author={author}
+                  field={'note'} />
               </section>
               <section>
                 <h2>Attributed texts</h2>
