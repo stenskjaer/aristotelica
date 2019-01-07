@@ -126,7 +126,6 @@ class EditableTable extends Component {
 
   edit(key) {
     this.setState({ editingKey: key });
-    console.log(key)
   }
 
   save(form, record) {

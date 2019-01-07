@@ -62,7 +62,7 @@ export const formatDates = (dates) => {
       if (start && end) {
         return [start.formatted, end.formatted].join(' to ')
       } else {
-        console.log("Problem rendering date: ", start, end)
+        console.warn("Problem rendering date: ", start, end)
         return 'Problem rendering the dating.'
       }
     }

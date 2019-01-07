@@ -121,7 +121,7 @@ class TypeSelector extends Component {
         }
       });
       if (errors) {
-        console.log(errors)
+        console.warn(errors)
       }
     } else {
       const { errors } = await this.props.client.mutate({
@@ -141,12 +141,10 @@ class TypeSelector extends Component {
         }
       });
       if (errors) {
-        console.log(errors)
+        console.warn(errors)
       }
     }
   }
-
-  // IMPLEMENT UPTIMISTIC UI AND REFETCH!
 
   render() {
 
@@ -167,7 +165,7 @@ class TypeSelector extends Component {
 
                 const types = data.Text ? data.Text[0].types : undefined
                 if (!types) {
-                  console.log("Error getting the types field on the item ID ", data.Text.id)
+                  console.warn("Error getting the types field on the item ID ", data.Text.id)
                 }
                 const currentTypes = this.setCurrentTypes(types)
 

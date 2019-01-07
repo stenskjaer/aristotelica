@@ -86,7 +86,7 @@ class TypeTree extends Component {
 
                 const types = data.Text ? data.Text[0].types : undefined
                 if (!types) {
-                  console.log("Error getting the types field on the item ID ", data.Text.id)
+                  console.warn("Error getting the types field on the item ID ", data.Text.id)
                 }
                 const currentTypes = types.map(item => (item.id))
                 const annotatedTree = this.annotateTree(typeTree, currentTypes)

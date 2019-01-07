@@ -9,7 +9,7 @@ export const getEventId = (item) => {
   if (item.events && item.events.length > 0) {
     const id = item.events.find(i => i.type === 'WRITTEN').id || undefined
     if (id === undefined) {
-      console.log("The text events did non contain a WRITTEN event.")
+      console.warn("The text events did non contain a WRITTEN event.")
     }
     return id
   } else {

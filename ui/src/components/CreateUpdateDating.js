@@ -40,7 +40,6 @@ export const CreateUpdateDating = Form.create()(
         this.resetDate(type)
       } else {
         const copy = this.state
-        console.log(copy)
         copy[type][unit] = value
         copy[type].sum = moment().year(copy[type].year).month(copy[type].month).date(copy[type].day)
         this.setState(copy)

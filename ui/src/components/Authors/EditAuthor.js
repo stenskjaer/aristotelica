@@ -3,7 +3,6 @@ import { Query } from "react-apollo";
 import gql from "graphql-tag";
 import AuthorshipAttributions from "./AuthorshipAttributions";
 import AuthorTexts from "./AuthorTexts";
-import EditableTable from '../EditableTable';
 import EditableTextArea from "../EditableTextArea";
 
 const AUTHOR_QUERY = gql`
@@ -87,7 +86,7 @@ class EditAuthor extends Component {
               <h1>Author</h1>
               <section>
                 <h2>Names</h2>
-                {/* TODO: THIS SHOULD BE THE EditableTable COMPONENT*/}
+                {/* TODO: SHOULD THIS USE THE EditableTable COMPONENT??*/}
                 <AuthorshipAttributions client={client} author={author} />
               </section>
               <section>

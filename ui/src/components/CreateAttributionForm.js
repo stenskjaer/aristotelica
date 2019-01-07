@@ -20,7 +20,7 @@ const prefetchAuthors = async (client) => {
     query: AUTHORS
   });
   if (error) {
-    console.log("prefetchAuthors" + error.message)
+    console.warn("prefetchAuthors" + error.message)
   }
   return (
     data.Person

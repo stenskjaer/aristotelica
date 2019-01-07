@@ -42,7 +42,7 @@ const addPersonName = async (values, client) => {
     refetchQuery: ['authorNames']
   });
   if (error) {
-    console.log(error.message)
+    console.warn(error.message)
   }
   return data.CreateName.id
 }
@@ -74,7 +74,7 @@ const updateName = async (values, client) => {
     refetchQuery: ['authorNames']
   });
   if (error) {
-    console.log(error.message)
+    console.warn(error.message)
   }
   return data.UpdateName.id
 }
@@ -100,7 +100,7 @@ const deleteName = async (nameid, client) => {
     refetchQuery: ['authorNames']
   });
   if (error) {
-    console.log(error.message)
+    console.warn(error.message)
   }
   return data.DeleteName.id
 }

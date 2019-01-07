@@ -309,7 +309,7 @@ const createDate = async (datingid, dateInfo, client) => {
       refetchQueries: ['textDating']
     })
     if (monthDate.error) {
-      console.log("monthDate error: ", monthDate.error.messagev)
+      console.warn("monthDate error: ", monthDate.error.messagev)
     }
 
     if (dateInfo.day !== undefined) {
@@ -337,7 +337,7 @@ const createDate = async (datingid, dateInfo, client) => {
         refetchQueries: ['textDating']
       })
       if (dayDate.error) {
-        console.log("dayDate error: ", dayDate.error.messagev)
+        console.warn("dayDate error: ", dayDate.error.messagev)
       }
     }
   }
@@ -395,7 +395,6 @@ class EditItemDating extends Component {
       const decade = values[type + 'Decade']
       const quarter = values[type + 'Quarter']
       if (decade && decade.length === 0) {
-        console.log("cleaning ", decade)
         values.decade = undefined
       }
       if (quarter && quarter.length === 0) {
@@ -431,8 +430,8 @@ class EditItemDating extends Component {
         variables: { datingid: datingid }
       });
       if (error) {
-        console.log("Error in deleting dates: ")
-        console.log(error.message)
+        console.warn("Error in deleting dates: ")
+        console.warn(error.message)
       }
       updateDating(values, this.props.client)
     }
@@ -540,8 +539,8 @@ class EditItemDating extends Component {
         variables: { dateid: d.id }
       });
       if (error) {
-        console.log("Error in deleting Date: " + d.id)
-        console.log(error.message)
+        console.warn("Error in deleting Date: " + d.id)
+        console.warn(error.message)
       }
     })
     const { error } = await this.props.client.mutate({
