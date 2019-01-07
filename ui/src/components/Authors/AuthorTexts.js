@@ -3,6 +3,7 @@ import gql from "graphql-tag";
 import { Form, Input, Modal, Radio, Select, Button, Table, Divider, message } from 'antd';
 import { createGUID } from '../utils'
 import DescriptionList from "../DescriptionList";
+import { Link } from 'react-router-dom';
 
 const TEXTS = gql`
 query allTexts {
@@ -291,7 +292,11 @@ class AuthorTexts extends Component {
       <div>
         <Table
           columns={[
-            { title: 'Title', dataIndex: 'title' },
+            {
+              title: 'Title',
+              dataIndex: 'title',
+              render: (text, record) => <Link to={`/text/${record.textid}`}>{text}</Link>
+            },
             {
               title: 'Operation',
               dataIndex: 'operation',
