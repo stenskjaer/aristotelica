@@ -56,6 +56,10 @@ const GET_ITEM_QUERY = gql`
       note
       incipit
       explicit
+      events {
+        id
+        type
+      }
     }
   }
 `
@@ -111,7 +115,7 @@ class EditText extends Component {
                         </div>
                         <div className="form-group">
                           <h2>Dating</h2>
-                          <EditItemDating client={client} textId={item.id} />
+                          <EditItemDating client={client} text={item} />
                         </div>
                         <div className="form-group">
                           <FormItem label="Incipit">

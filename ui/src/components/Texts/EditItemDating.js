@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import { Query } from "react-apollo";
 import gql from "graphql-tag";
-import { createGUID, formatDates } from '../utils'
+import { createGUID, formatDates } from '../utils';
+import { itemEventDatings, getEventId } from '../Events';
 import { List, Button, message } from 'antd';
 import { CreateUpdateDating } from '../CreateUpdateDating';
 
@@ -10,30 +11,34 @@ const DATING_QUERY = gql`
     Text(id: $id) {
       id
       title
-      datings {
+      events {
         id
-        source
-        note
         type
-        dates {
+        datings {
           id
+          source
+          note
           type
-          approximate
-          uncertain
-          decade
-          quarter
-          century
-          year {
+          dates {
             id
-            value
-          }
-          month {
-            id
-            value
-          }
-          day {
-            id 
-            value
+            type
+            approximate
+            uncertain
+            decade
+            quarter
+            century
+            year {
+              id
+              value
+            }
+            month {
+              id
+              value
+            }
+            day {
+              id 
+              value
+            }
           }
         }
       }
@@ -43,7 +48,7 @@ const DATING_QUERY = gql`
 
 const CREATE_DATING = gql`
   mutation createDating(
-    $textid: ID!
+    $eventid: ID!
     $datingid: ID!
     $datingtype: String!
     $note: String
@@ -55,12 +60,48 @@ const CREATE_DATING = gql`
       note: $note
       source: $source
     ) {id}
-    AddDatingText(
+    AddDatingEvent(
       datingid:$datingid
-      textid:$textid
+      eventid:$eventid
     ) {id}
   }
 `
+
+const CREATE_TEXT_EVENT = gql`
+  mutation createTextEvent(
+    $id: ID!
+    $textid: ID!
+    $type: String!
+  ) {
+    CreateEvent(
+      id: $id
+      type: $type
+    ) {
+      id
+    }
+    AddTextEvents(
+      textid: $textid
+      eventid: $id
+    ) {
+      id
+    }
+  }
+`
+
+const createTextEvent = async (text, client) => {
+  const { error, data } = await client.mutate({
+    mutation: CREATE_TEXT_EVENT,
+    variables: {
+      id: createGUID(),
+      type: 'WRITTEN',
+      textid: text.id
+    },
+  });
+  if (error) {
+    message.error(error.message)
+  }
+  return data.CreateEvent.id
+}
 
 const createDating = async (datingid, values, client) => {
   const { error, data } = await client.mutate({
@@ -351,7 +392,6 @@ class EditItemDating extends Component {
 
   cleanupValues = (values) => {
     ['single', 'start', 'end'].forEach(type => {
-      console.log("cleaning ", type)
       const decade = values[type + 'Decade']
       const quarter = values[type + 'Quarter']
       if (decade && decade.length === 0) {
@@ -368,7 +408,6 @@ class EditItemDating extends Component {
   handleCreateUpdate = async () => {
     const form = this.formRef.props.form;
     let values = form.getFieldsValue()
-    console.log("createEdit values: ", values)
     let prop
     for (prop in values) {
       if (prop.includes('Decade') || prop.includes('Quarter')) {
@@ -378,13 +417,15 @@ class EditItemDating extends Component {
       }
     }
 
-    // Get text ID
-    values.textid = this.props.textId
+    // Get event ID
+    values.eventid = getEventId(this.props.text)
+    if (values.eventid === undefined) {
+      values.eventid = createTextEvent(this.props.text, this.props)
+    }
 
     // First, find dating and remove existing dates if it has any (meaning this is an update)
     let datingid = values.datingid ? values.datingid : undefined
     if (datingid) {
-      console.log("Deleting dates on: ", datingid)
       const { error } = await this.props.client.mutate({
         mutation: DELETE_DATES_FROM_DATING,
         variables: { datingid: datingid }
@@ -618,7 +659,7 @@ class EditItemDating extends Component {
 
   render() {
     return (
-      <Query query={DATING_QUERY} variables={{ id: this.props.textId }}>
+      <Query query={DATING_QUERY} variables={{ id: this.props.text.id }}>
         {({ loading, error, data }) => {
 
           if (loading) return <div>Fetching...</div>
@@ -628,7 +669,7 @@ class EditItemDating extends Component {
             <div>
               <List
                 itemLayout="vertical"
-                dataSource={data.Text[0].datings}
+                dataSource={itemEventDatings(data.Text[0], 'WRITTEN')}
                 renderItem={dating => (
                   <List.Item
                     key={dating.id}
@@ -636,7 +677,7 @@ class EditItemDating extends Component {
                       <a onClick={(e) => this.displayDetails(dating.id, e)}>
                         {this.displayingDetails(dating.id) ? 'Less' : 'More'}
                       </a>,
-                      <a onClick={() => { this.updateModal(dating) }}>Edit</a>,
+                      <a onClick={() => this.updateModal(dating)}>Edit</a>,
                       <a onClick={() => this.handleDelete(dating)}>Delete</a>
                     ]}
                   >

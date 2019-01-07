@@ -5,7 +5,8 @@ import { Link } from "react-router-dom";
 import { List } from "antd";
 import DescriptionList from "../DescriptionList";
 import TypeTree from "./TypeTree";
-import { normCertainty, formatDates } from '../utils';
+import { normCertainty, formatDates } from '../utils'
+import { itemEventDatings } from '../Events';
 
 const ITEM_QUERY = gql`
   query textInfo($id: ID!) {
@@ -18,30 +19,32 @@ const ITEM_QUERY = gql`
       note
       incipit
       explicit
-      datings {
-        id
-        source
-        note
+      events {
         type
-        dates {
+        datings {
           id
-          type
-          approximate
-          uncertain
-          decade
-          quarter
-          century
-          year {
+          source
+          note
+          dates {
             id
-            value
-          }
-          month {
-            id
-            value
-          }
-          day {
-            id 
-            value
+            type
+            approximate
+            uncertain
+            decade
+            quarter
+            century
+            year {
+              id
+              value
+            }
+            month {
+              id
+              value
+            }
+            day {
+              id 
+              value
+            }
           }
         }
       }
@@ -177,7 +180,7 @@ class TextItem extends Component {
                 <h2>Dating</h2>
                 <List
                   itemLayout="vertical"
-                  dataSource={item.datings}
+                  dataSource={itemEventDatings(item)}
                   renderItem={dating => (
                     <List.Item
                       key={dating.id}

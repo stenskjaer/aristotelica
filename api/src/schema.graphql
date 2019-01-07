@@ -10,7 +10,7 @@ type Text {
   note: String
   incipit: String
   explicit: String
-  datings: [Dating!]! @relation(name: "OF", direction: "IN")
+  events: [Event!]! @relation(name: "HAS_EVENT", direction: "OUT")
   types: [TextType]! @relation(name: "Type", direction: "OUT")
 }
 
@@ -43,6 +43,13 @@ type Name {
   person: Person! @relation(name: "HAS_NAME", direction: "IN")
 }
 
+type Event {
+  id: ID!
+  type: String
+  description: String
+  datings: [Dating!]! @relation(name: "OF", direction: "IN")
+}
+
 type Date {
   id: ID!
   type: DateType!
@@ -70,7 +77,7 @@ type Dating {
   note: String
   type: String
   dates: [Date!]! @relation(name: "TO", direction: "OUT")
-  text: Text @relation(name: "OF", direction: "OUT")
+  event: Event @relation(name: "OF", direction: "OUT")
 }
 
 type Year {

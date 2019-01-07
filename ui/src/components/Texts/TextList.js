@@ -4,6 +4,7 @@ import gql from "graphql-tag";
 import { Table, Divider, Input, Button, Icon } from 'antd'
 import { Link } from 'react-router-dom';
 import { normCertainty, formatDates } from '../utils'
+import { itemEventDatings } from '../Events';
 
 const TEXTS_QUERY = gql`
   query allTexts {
@@ -18,29 +19,32 @@ const TEXTS_QUERY = gql`
           id
         }
       }
-      datings {
-        id
-        dates {
+      events {
+        type
+        datings {
           id
-          type
-          approximate
-          uncertain
-          decade
-          quarter
-          century
-          year {
+          dates {
             id
-            value
+            type
+            approximate
+            uncertain
+            decade
+            quarter
+            century
+            year {
+              id
+              value
+            }
+            month {
+              id
+              value
+            }
+            day {
+              id 
+              value
+            }
           }
-          month {
-            id
-            value
-          }
-          day {
-            id 
-            value
-          }
-        }
+        }  
       }
     }
   }
@@ -87,7 +91,7 @@ class TextList extends React.Component {
             id: text.id,
             title: text.title,
             attributions: formatAttributions(text.attributions).join(' / '),
-            datings: formatDatings(text.datings).join(' / ')
+            datings: formatDatings(itemEventDatings(text, 'WRITTEN')).join(' / ') || 'No datings'
           }))
 
           const columns = [
