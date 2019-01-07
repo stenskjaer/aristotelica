@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import gql from "graphql-tag";
-import { Form, Input, Modal, Radio, Select, Button, Table, Divider } from 'antd';
+import { Form, Input, Modal, Radio, Select, Button, Table, Divider, message } from 'antd';
 import { createGUID } from '../utils'
 import DescriptionList from "../DescriptionList";
 
@@ -18,12 +18,63 @@ query allTexts {
 }
 `
 
+const CREATE_ATTRIBUTION = gql`
+  mutation CreateTextAttribution(
+    $id: ID!,
+    $textid: ID!,
+    $personid: ID!,
+    $note: String,
+    $source: String,
+    $certainty: AttributionCertainty
+  ) {
+    CreateTextAttribution(
+      id: $id,
+      textid: $textid,
+      personid: $personid,
+    ) {
+      __typename
+      id
+      person {
+        id
+      }
+      text {
+        id
+        title
+      }
+    }
+    UpdateAttribution(
+      id: $id
+      note: $note,
+      source: $source,
+      certainty: $certainty
+    ) {
+      __typename
+      id
+      note
+      source
+      certainty
+    }
+  }
+`
+
+const DELETE_ATTRIBUTION = gql`
+  mutation deleteAttribution(
+    $id: ID!
+  ) {
+    DeleteAttribution(
+      id: $id
+    ) {
+      id
+    }
+  }
+`
+
 const prefetchTexts = async (client) => {
   const { error, data } = await client.query({
     query: TEXTS
   });
   if (error) {
-    console.log("prefetchTexts" + error.message)
+    console.warn("prefetchTexts" + error.message)
   }
   return (
     data.Text
@@ -73,17 +124,16 @@ const AuthorTextForm = Form.create()(
                   showArrow={true}
                   filterOption={
                     (input, option) => {
-                      return (option.props.filterValues.toLowerCase().indexOf(input.toLowerCase()) >= 0)
+                      return (option.props.values.toLowerCase().indexOf(input.toLowerCase()) >= 0)
                     }
                   }
-                  onChange={this.handleChange}
                 >
 
                   {this.state.data.map(d => {
                     const authorNames = d.authors.map(a => a.names[0].value).join(', ')
                     const filterValues = [d.title, authorNames].join(';')
                     return (
-                      <Select.Option key={d.id} title={d.title} filterValues={filterValues}>
+                      <Select.Option key={d.id} value={d.id} title={d.title} values={filterValues}>
                         {d.title} ({authorNames})
                       </Select.Option>
                     )
@@ -120,6 +170,7 @@ const AuthorTextForm = Form.create()(
 class AuthorTexts extends Component {
   state = {
     visibleForm: false,
+    attributions: this.props.author.attributions
   };
 
   handleCancel = () => {
@@ -134,21 +185,79 @@ class AuthorTexts extends Component {
       if (err) {
         return;
       }
+      let updating = false;
 
       if (values.id === undefined) {
-        values.id = createGUID()
+        values.id = createGUID();
+      } else {
+        updating = true;
+        this.deleteAttribution(values.id);
       }
-      values.textid = this.props.textId
 
-      // Insert create/update logic here!
+      values.personid = this.props.author.id
 
+      // Create/update logic
+      const { error, data } = await this.props.client.mutate({
+        mutation: CREATE_ATTRIBUTION,
+        variables: values,
+        refetchQueries: ['allTexts'],
+      });
+      if (error) {
+        message.error(error.message)
+      }
+      if (data.CreateTextAttribution === null) {
+        message.error("Text attribution was not created.")
+      }
+      if (data.UpdateAttribution === null) {
+        message.error("Properties were not given to the attribution.")
+      }
+
+      // Update the state
+      const updateAttributions = [...this.state.attributions];
+      if (updating) {
+        const index = updateAttributions.findIndex(item => item.id === values.id);
+        updateAttributions.splice(index, 1, {
+          ...data.CreateTextAttribution,
+          ...data.UpdateAttribution
+        });
+      } else {
+        updateAttributions.push({
+          ...data.CreateTextAttribution,
+          ...data.UpdateAttribution
+        });
+      }
+
+      this.setState({
+        attributions: updateAttributions,
+        visibleForm: false,
+      });
       form.resetFields();
-      this.setState({ visibleForm: false });
     })
   }
 
-  handleDelete = async (nodeId) => {
-    // Insert delete logic
+  deleteAttribution = async id => {
+    const { error } = await this.props.client.mutate({
+      mutation: DELETE_ATTRIBUTION,
+      variables: { id: id },
+      optimisticResponse: {
+        "DeleteAttribution": {
+          __typename: "Attribution",
+          id: id
+        }
+      }
+    });
+    if (error) {
+      console.warn(error.message)
+    }
+  }
+
+  handleDelete = (id) => {
+    this.deleteAttribution(id)
+
+    const newData = [...this.state.attributions];
+    const index = newData.findIndex(item => item.id === id);
+    newData.splice(index, 1);
+    this.setState({ attributions: newData })
   }
 
   saveFormRef = (formRef) => {
@@ -190,27 +299,30 @@ class AuthorTexts extends Component {
                 return (
                   <div>
                     <a onClick={() => this.updateModal({
-                      id: record.id,
+                      id: record.attributionId,
                       textid: record.textid,
                       certainty: record.certainty,
                       source: record.source,
                       note: record.note,
                     })}>Edit</a>
                     <Divider type="vertical" />
-                    <a onClick={() => this.handleDelete(record.id)}>Remove</a>
+                    <a onClick={() => this.handleDelete(record.attributionId)}>Remove</a>
                   </div>
                 );
               },
             },
           ]}
-          dataSource={author.attributions.map(attribution => ({
-            key: attribution.id,
-            title: attribution.text.title,
-            textid: attribution.text.id,
-            note: attribution.note,
-            source: attribution.source,
-            certainty: attribution.certainty,
-          }))}
+          dataSource={
+            this.state.attributions.map(attribution => ({
+              key: attribution.id,
+              attributionId: attribution.id,
+              title: attribution.text.title,
+              textid: attribution.text.id,
+              note: attribution.note,
+              source: attribution.source,
+              certainty: attribution.certainty,
+            })).sort((a, b) => a.title.localeCompare(b.title))
+          }
           size={'small'}
           expandedRowRender={record => (
             <DescriptionList
