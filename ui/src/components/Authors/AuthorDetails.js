@@ -108,6 +108,7 @@ class AuthorDetails extends Component {
                   }))}
                   size={'small'}
                   pagination={this.showPagination(author.attributions)}
+                  expandRowByClick
                   expandedRowRender={record => (
                     <DescriptionList
                       items={[

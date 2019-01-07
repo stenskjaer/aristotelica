@@ -329,6 +329,7 @@ class AuthorTexts extends Component {
             })).sort((a, b) => a.title.localeCompare(b.title))
           }
           size={'small'}
+          expandRowByClick
           expandedRowRender={record => (
             <DescriptionList
               items={[
