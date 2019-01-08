@@ -180,7 +180,7 @@ class TextItem extends Component {
                 <h2>Dating</h2>
                 <List
                   itemLayout="vertical"
-                  dataSource={itemEventDatings(item)}
+                  dataSource={itemEventDatings(item, 'WRITTEN')}
                   renderItem={dating => (
                     <List.Item
                       key={dating.id}

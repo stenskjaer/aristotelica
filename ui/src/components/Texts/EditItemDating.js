@@ -686,8 +686,8 @@ class EditItemDating extends Component {
                     <div
                       style={{ display: this.displayingDetails(dating.id) ? 'block' : 'none' }}
                     >
-                      {dating.note ? <p>Note: {dating.note}</p> : null}
-                      {dating.source ? <p>Source: {dating.source}</p> : null}
+                      {dating.note && <p>Note: {dating.note}</p>}
+                      {dating.source && <p>Source: {dating.source}</p>}
                     </div>
                   </List.Item>
                 )}

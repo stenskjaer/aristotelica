@@ -34,6 +34,7 @@ type Person {
   )
   names: [Name!]! @relation(name: "HAS_NAME", direction: "OUT")
   attributions: [Attribution!]! @relation(name: "TO", direction: "IN")
+  events: [Event!]! @relation(name: "HAS_EVENT", direction: "OUT")
 }
 
 type Name {

@@ -1,6 +1,7 @@
 export const itemEventDatings = (item, type) => {
   if (item.events.length > 0) {
-    return item.events.find(d => d.type === type).datings
+    const event = item.events.find(d => d.type === type)
+    return (event && event.datings) || []
   }
   return []
 }
