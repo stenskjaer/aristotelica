@@ -1,6 +1,9 @@
 .ant-list-empty-text {
-  text-align: left;
   padding: 0;
+}
+.ant-empty, .ant-empty-normal {
+  margin: 8px 0;
+  text-align: left;
 }
 
 .ant-list-vertical .ant-list-item-meta,

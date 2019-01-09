@@ -366,7 +366,7 @@ class DatingList extends Component {
     }
 
     // First, find dating and remove existing dates if it has any (meaning this is an update)
-    let datingid = values.datingid ? values.datingid : undefined
+    let datingid = values.datingid || undefined
     if (datingid) {
       const { error } = await this.props.client.mutate({
         mutation: DELETE_DATES_FROM_DATING,
