@@ -5,8 +5,7 @@ import { Link } from "react-router-dom";
 import { List } from "antd";
 import DescriptionList from "../DescriptionList";
 import TypeTree from "./TypeTree";
-import { normCertainty, formatDates } from '../utils'
-import { itemEventDatings } from '../Events';
+import { normCertainty, formatDates, itemEventDatings } from '../utils'
 
 const ITEM_QUERY = gql`
   query textInfo($id: ID!) {

@@ -5,9 +5,9 @@ import { Link } from "react-router-dom";
 import { Formik } from 'formik';
 import { Form, Input, Button } from 'antd';
 import FormItem from "antd/lib/form/FormItem";
-import TypeSelector from './TypeSelector'
-import EditItemAuthors from './EditItemAuthors'
-import EditItemDating from './EditItemDating'
+import TypeSelector from './TypeSelector';
+import EditItemAuthors from './EditItemAuthors';
+import TextEvents from './TextEvents';
 
 const { TextArea } = Input
 
@@ -45,7 +45,7 @@ const UPDATE_ITEM_QUERY = gql`
 `
 
 const GET_ITEM_QUERY = gql`
-  query Text($id: ID!) {
+  query textInfo($id: ID!) {
     Text(id: $id) {
       id
       title
@@ -59,6 +59,33 @@ const GET_ITEM_QUERY = gql`
       events {
         id
         type
+        datings {
+          id
+          source
+          note
+          type
+          dates {
+            id
+            type
+            approximate
+            uncertain
+            decade
+            quarter
+            century
+            year {
+              id
+              value
+            }
+            month {
+              id
+              value
+            }
+            day {
+              id 
+              value
+            }
+          }
+        }
       }
     }
   }
@@ -115,7 +142,7 @@ class EditText extends Component {
                         </div>
                         <div className="form-group">
                           <h2>Dating</h2>
-                          <EditItemDating client={client} text={item} />
+                          <TextEvents client={client} text={item} />
                         </div>
                         <div className="form-group">
                           <FormItem label="Incipit">

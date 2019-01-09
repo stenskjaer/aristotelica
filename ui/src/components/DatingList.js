@@ -9,7 +9,7 @@ const getEventId = (item, type) => {
     const event = item.events.find(d => d.type === type)
     const id = (event && event.id) || undefined
     if (id === undefined) {
-      console.warn(`The text events did non contain a ${type} event.`)
+      console.warn(`The item events did non contain a ${type} event.`)
     }
     return id
   } else {
@@ -17,9 +17,7 @@ const getEventId = (item, type) => {
   }
 }
 
-const getEvent = (item, type) => {
-  return item.events.find(d => d.type === type) || undefined
-}
+const getEvent = (item, type) => item.events.find(d => d.type === type) || undefined
 
 const CREATE_DATING = gql`
   mutation createDating(
