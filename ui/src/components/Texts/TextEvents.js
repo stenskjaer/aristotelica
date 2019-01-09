@@ -67,6 +67,7 @@ class TextEvents extends Component {
         eventid: eventid,
         textid: this.props.text.id,
       },
+      refetchQueries: ['textInfo'],
     });
     if (error) {
       console.warn(error.message)
