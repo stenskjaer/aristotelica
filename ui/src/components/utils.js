@@ -12,6 +12,9 @@ export const createGUID = () => {
   });
 }
 
+export const titleCase = (string) => (
+  string.charAt(0).toUpperCase() + string.slice(1).toLowerCase()
+)
 
 export const normCertainty = (cert) => {
   const normalization = {
@@ -71,3 +74,10 @@ export const formatDates = (dates) => {
   return (joinDates(formattedDates(dates)))
 }
 
+export const itemEventDatings = (item, type) => {
+  if (item.events.length > 0) {
+    const event = item.events.find(d => d.type === type)
+    return (event && event.datings) || []
+  }
+  return []
+}
