@@ -19,7 +19,6 @@ const TEXTS_QUERY = gql`
             id
             value
             language
-            language_default
           }
         }
       }

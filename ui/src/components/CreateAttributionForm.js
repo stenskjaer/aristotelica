@@ -11,7 +11,6 @@ query allAuthors {
       id
       value
       language
-      language_default
     }
   }
 }

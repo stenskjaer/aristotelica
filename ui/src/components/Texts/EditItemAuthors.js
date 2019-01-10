@@ -19,7 +19,6 @@ query attributionsQuery($id: ID!) {
           id
           value
           language
-          language_default
         }
       }
       note

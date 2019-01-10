@@ -1,5 +1,5 @@
 const Defaults = {
-  language: 'la'
+  language: 'en'
 }
 
 export default Defaults;

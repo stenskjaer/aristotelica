@@ -1,3 +1,5 @@
+import Defaults from "./defaults";
+
 const moment = require("moment");
 
 export const createGUID = () => {
@@ -14,7 +16,7 @@ export const createGUID = () => {
 
 export const defaultName = (author) => {
   try {
-    return author.names.find(n => n.language === 'en' && n.language_default === true).value
+    return author.names.find(n => n.language === Defaults.language).value
   } catch (error) {
     return author.names[0].value
   }

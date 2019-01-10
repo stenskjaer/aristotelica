@@ -18,7 +18,6 @@ const AUTHOR_QUERY = gql`
         id
         value
         language
-        language_default
       }
       attributions {
         id
