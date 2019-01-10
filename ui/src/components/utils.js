@@ -12,6 +12,10 @@ export const createGUID = () => {
   });
 }
 
+export const defaultName = (author) => (
+  author.names.find(n => n.language_default === true && n.language === 'en').value
+)
+
 export const titleCase = (string) => (
   string.charAt(0).toUpperCase() + string.slice(1).toLowerCase()
 )

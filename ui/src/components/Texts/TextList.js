@@ -3,7 +3,7 @@ import { Query } from "react-apollo";
 import gql from "graphql-tag";
 import { Table, Divider, Input, Button, Icon } from 'antd'
 import { Link } from 'react-router-dom';
-import { normCertainty, formatDates, itemEventDatings } from '../utils'
+import { normCertainty, formatDates, itemEventDatings, defaultName } from '../utils'
 
 const TEXTS_QUERY = gql`
   query allTexts {
@@ -14,8 +14,13 @@ const TEXTS_QUERY = gql`
         id
         certainty
         person {
-          name
           id
+          names {
+            id
+            value
+            language
+            language_default
+          }
         }
       }
       events {
@@ -76,7 +81,7 @@ class TextList extends React.Component {
             attributions.map(attribution => {
               const person = attribution.person
               const certainty = ' (' + normCertainty(attribution.certainty) + ')'
-              return person.name + certainty
+              return defaultName(person) + certainty
             })
           ).sort()
 
@@ -89,16 +94,22 @@ class TextList extends React.Component {
           const texts = data.Text.map(text => ({
             id: text.id,
             title: text.title,
-            attributions: formatAttributions(text.attributions).join(' / '),
+            attributions: text.attributions,
             datings: formatDatings(itemEventDatings(text, 'WRITTEN')).join(' / ') || 'No datings'
           }))
+
+          const defaultNames = (attributions) => (
+            attributions
+              .map(attribution => (defaultName(attribution.person)))
+              .join(';')
+          )
 
           const columns = [
             {
               title: 'Attributions',
               dataIndex: 'attributions',
               defaultSortOrder: 'ascend',
-              sorter: (a, b) => a.attributions.localeCompare(b.attributions),
+              sorter: (a, b) => defaultName(a.attributions[0].person).localeCompare(defaultName(b.attributions[0].person)),
               filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
                 <div className="custom-filter-dropdown">
                   <Input
@@ -113,7 +124,7 @@ class TextList extends React.Component {
                 </div>
               ),
               filterIcon: filtered => <Icon type="search" style={{ color: filtered ? '#108ee9' : '#aaa' }} />,
-              onFilter: (value, record) => record.attributions.toLowerCase().includes(value.toLowerCase()),
+              onFilter: (value, record) => defaultNames(record.attributions).toLowerCase().includes(value.toLowerCase()),
               onFilterDropdownVisibleChange: (visible) => {
                 if (visible) {
                   setTimeout(() => {
@@ -121,6 +132,17 @@ class TextList extends React.Component {
                   });
                 }
               },
+              render: (text, record) => (
+                record.attributions
+                  .map(attribution => (
+                    <React.Fragment key={attribution.id}>
+                      <Link to={`/author/${attribution.person.id}`}>{defaultName(attribution.person)}</Link>
+                      {' '}
+                      ({normCertainty(attribution.certainty)})
+                    </React.Fragment>
+                  ))
+                  .reduce((accu, elem) => [accu, ', ', elem])
+              )
             },
             {
               title: 'Title',

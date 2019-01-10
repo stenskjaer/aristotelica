@@ -23,7 +23,6 @@ type TextType {
 
 type Person {
   id: ID!
-  name: String!
   description: String
   biography: String
   created: DateTime!
@@ -40,6 +39,7 @@ type Person {
 type Name {
   id: ID!
   language: String!
+  language_default: Boolean
   value: String!
   person: Person! @relation(name: "HAS_NAME", direction: "IN")
 }

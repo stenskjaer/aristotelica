@@ -50,8 +50,13 @@ const ITEM_QUERY = gql`
       attributions {
         id
         person {
-          name
           id
+          names {
+            id
+            value
+            language
+            language_default
+          }
         }
         note
         source

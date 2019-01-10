@@ -1,15 +1,17 @@
 import React, { Component } from "react";
 import gql from "graphql-tag";
 import { Form, Input, Modal, Radio, Select } from 'antd';
+import { defaultName } from "./utils";
 
 const AUTHORS = gql`
 query allAuthors {
-  Person(orderBy: name_asc) {
+  Person {
     id
     names {
       id
       value
       language
+      language_default
     }
   }
 }
@@ -23,7 +25,7 @@ const prefetchAuthors = async (client) => {
     console.warn("prefetchAuthors" + error.message)
   }
   return (
-    data.Person
+    data.Person.sort((a, b) => defaultName(a).localeCompare(defaultName(b)))
   )
 }
 

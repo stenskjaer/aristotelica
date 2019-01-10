@@ -3,12 +3,18 @@ import { Query } from "react-apollo";
 import gql from "graphql-tag";
 import { Link } from "react-router-dom";
 import { Table, Input, Button, Icon } from "antd";
+import { defaultName } from "../utils";
 
 const PERSONS_QUERY = gql`
   query allPersons {
     Person {
       id
-      name
+      names {
+        id
+        value
+        language
+        language_default
+      }
       attributions {
         id
         certainty
@@ -56,7 +62,7 @@ class AuthorList extends React.Component {
 
           const authors = data.Person.map(author => ({
             id: author.id,
-            name: author.name,
+            name: defaultName(author),
             texts: firstAttribution(author.attributions),
             //datings: formatDatings(author.datings).join(' / ')
           }))

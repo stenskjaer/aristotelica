@@ -4,7 +4,7 @@ import gql from "graphql-tag";
 import { Button, List, message } from 'antd';
 import { createGUID } from '../utils'
 import { AuthorCreateForm } from '../CreateAttributionForm'
-import { normCertainty } from '../utils'
+import { normCertainty, defaultName } from '../utils'
 import DescriptionList from "../DescriptionList";
 
 const ATTRIBUTIONS_QUERY = gql`
@@ -14,8 +14,13 @@ query attributionsQuery($id: ID!) {
     attributions {
       id
       person {
-        name
         id
+        names {
+          id
+          value
+          language
+          language_default
+        }
       }
       note
       source
@@ -186,8 +191,8 @@ class EditItemAuthors extends Component {
   }
 
   attributionName = (attribution) => {
-    const certainty = attribution.certainty ? ' (' + normCertainty(attribution.certainty) + ')' : ''
-    return (attribution.person.name + certainty)
+    const certainty = attribution.certainty && ' (' + normCertainty(attribution.certainty) + ')'
+    return (defaultName(attribution.person) + certainty)
   }
 
   render() {

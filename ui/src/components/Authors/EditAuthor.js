@@ -5,6 +5,7 @@ import AuthorshipAttributions from "./AuthorshipAttributions";
 import AuthorTexts from "./AuthorTexts";
 import AuthorEvents from "./AuthorEvents";
 import EditableTextArea from "../EditableTextArea";
+import { defaultName } from "../utils";
 
 const AUTHOR_QUERY = gql`
   query authorInfo($id: ID!) {
@@ -17,6 +18,7 @@ const AUTHOR_QUERY = gql`
         id
         value
         language
+        language_default
       }
       attributions {
         id
@@ -116,7 +118,7 @@ class EditAuthor extends Component {
 
           return (
             <React.Fragment>
-              <h1>Author</h1>
+              <h1>{defaultName(author)}</h1>
               <section>
                 <h2>Names</h2>
                 {/* TODO: SHOULD THIS USE THE EditableTable COMPONENT??*/}
