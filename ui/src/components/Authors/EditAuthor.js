@@ -149,6 +149,12 @@ class EditAuthor extends Component {
                 </p>
                 <AuthorTexts client={client} author={author} />
               </section>
+              <section>
+                <h2>Resources</h2>
+              </section>
+              <section>
+                <h2>Literature</h2>
+              </section>
             </React.Fragment>
           )
         }}
