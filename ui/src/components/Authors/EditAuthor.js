@@ -148,6 +148,7 @@ class EditAuthor extends Component {
                 </p>
                 <AuthorTexts client={client} author={author} />
               </section>
+              <h3>TODOS</h3>
               <section>
                 <h2>Resources</h2>
               </section>
