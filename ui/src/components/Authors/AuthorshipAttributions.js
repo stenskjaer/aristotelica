@@ -3,6 +3,7 @@ import gql from "graphql-tag";
 import { Table, Input, InputNumber, Divider, Form, Button, Select } from 'antd';
 import { createGUID } from '../utils';
 import { Languages } from '../languages';
+import Defaults from '../defaults';
 
 const FormItem = Form.Item;
 const EditableContext = React.createContext();
@@ -245,7 +246,7 @@ class AuthorshipAttributions extends Component {
     const { data } = this.state;
     const newData = {
       name: '',
-      language: '',
+      language: Defaults.language,
       key: createGUID(),
     };
     this.setState({
