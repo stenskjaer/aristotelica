@@ -77,14 +77,6 @@ class TextList extends React.Component {
           if (loading) return <p>Loading...</p>;
           if (error) return <p>Error</p>;
 
-          const formatAttributions = (attributions) => (
-            attributions.map(attribution => {
-              const person = attribution.person
-              const certainty = ' (' + normCertainty(attribution.certainty) + ')'
-              return defaultName(person) + certainty
-            })
-          ).sort()
-
           const formatDatings = (datings) => (
             datings.map(dating => {
               return formatDates(dating.dates)
