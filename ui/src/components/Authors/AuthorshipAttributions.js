@@ -128,7 +128,6 @@ class EditableCell extends React.Component {
           </Select.Option>
         )
       }
-
       )}</Select>
     }
     return <Input />;
@@ -207,7 +206,7 @@ class AuthorshipAttributions extends Component {
         render: (text, record) => (Languages[text].isoName)
       },
       {
-        title: 'operation',
+        title: 'Operation',
         dataIndex: 'operation',
         render: (text, record) => {
           const editable = this.isEditing(record);
