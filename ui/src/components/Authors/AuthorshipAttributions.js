@@ -40,7 +40,7 @@ const addPersonName = async (values, client) => {
       language: values.language,
       name: values.name
     },
-    refetchQuery: ['authorNames']
+    refetchQueries: ['allPersons']
   });
   if (error) {
     console.warn(error.message)
@@ -72,7 +72,7 @@ const updateName = async (values, client) => {
       language: values.language,
       name: values.name
     },
-    refetchQuery: ['authorNames']
+    refetchQueries: ['allPersons']
   });
   if (error) {
     console.warn(error.message)
@@ -98,7 +98,7 @@ const deleteName = async (nameid, client) => {
     variables: {
       nameid: nameid,
     },
-    refetchQuery: ['authorNames']
+    refetchQueries: ['allPersons']
   });
   if (error) {
     console.warn(error.message)
