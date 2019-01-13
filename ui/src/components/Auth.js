@@ -54,10 +54,14 @@ export default class Auth {
   }
 
   renewSession = () => {
+    console.log("inside renew")
     this.auth0.checkSession({}, (err, authResult) => {
+      console.log("inside checksession")
       if (authResult && authResult.accessToken && authResult.idToken) {
+        console.log("renew, logged in")
         this.setSession(authResult);
       } else if (err) {
+        console.log("renew, error")
         this.logout();
         console.log(err);
         alert(`Could not get a new token (${err.error}: ${err.error_description}).`);
