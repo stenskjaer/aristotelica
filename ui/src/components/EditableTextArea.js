@@ -94,7 +94,9 @@ class EditableTextArea extends React.Component {
         </h2>
 
         <div ref={node => (this.field = node)}>
-          {editable ? editableContent() : content}
+          {editable
+            ? editableContent()
+            : content || <NoData />}
         </div>
       </React.Fragment>
     );

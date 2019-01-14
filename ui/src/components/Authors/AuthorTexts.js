@@ -286,37 +286,41 @@ class AuthorTexts extends Component {
   showPagination = (records) => records.length > 10
 
   render() {
-    const author = this.props.author
+    const { author, editable } = this.props
+
+    const columns = [
+      {
+        title: 'Title',
+        dataIndex: 'title',
+        enabled: true,
+        render: (text, record) => <Link to={`/text/${record.textid}`}>{text}</Link>
+      },
+      {
+        title: 'Operation',
+        dataIndex: 'operation',
+        enabled: editable,
+        render: (text, record) => {
+          return (
+            <div>
+              <a onClick={() => this.updateModal({
+                id: record.attributionId,
+                textid: record.textid,
+                certainty: record.certainty,
+                source: record.source,
+                note: record.note,
+              })}>Edit</a>
+              <Divider type="vertical" />
+              <a onClick={() => this.handleDelete(record.attributionId)}>Remove</a>
+            </div>
+          );
+        },
+      },
+    ]
 
     return (
       <div>
         <Table
-          columns={[
-            {
-              title: 'Title',
-              dataIndex: 'title',
-              render: (text, record) => <Link to={`/text/${record.textid}`}>{text}</Link>
-            },
-            {
-              title: 'Operation',
-              dataIndex: 'operation',
-              render: (text, record) => {
-                return (
-                  <div>
-                    <a onClick={() => this.updateModal({
-                      id: record.attributionId,
-                      textid: record.textid,
-                      certainty: record.certainty,
-                      source: record.source,
-                      note: record.note,
-                    })}>Edit</a>
-                    <Divider type="vertical" />
-                    <a onClick={() => this.handleDelete(record.attributionId)}>Remove</a>
-                  </div>
-                );
-              },
-            },
-          ]}
+          columns={columns.filter(c => c.enabled)}
           dataSource={
             this.state.attributions.map(attribution => ({
               key: attribution.id,
@@ -357,17 +361,20 @@ class AuthorTexts extends Component {
           bordered
           pagination={this.showPagination(this.props.author.names)}
         />
-        <div style={{ margin: '10px 0 0 0' }}>
-          <AuthorTextForm
-            client={this.props.client}
-            wrappedComponentRef={this.saveFormRef}
-            visible={this.state.visibleForm}
-            onCancel={this.handleCancel}
-            onCreate={this.handleCreateUpdate}
-            author={author}
-          />
-          <Button type="primary" onClick={this.showModal}>New attribution</Button>
-        </div>
+        {editable &&
+          <div style={{ margin: '10px 0 0 0' }}>
+            <AuthorTextForm
+              client={this.props.client}
+              wrappedComponentRef={this.saveFormRef}
+              visible={this.state.visibleForm}
+              onCancel={this.handleCancel}
+              onCreate={this.handleCreateUpdate}
+              author={author}
+            />
+            <Button type="primary" onClick={this.showModal}>New attribution</Button>
+          </div>
+        }
+
       </div>
     );
   }

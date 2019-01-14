@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import gql from "graphql-tag";
 import { createGUID, formatDates } from './utils';
-import { List, Button, message } from 'antd';
+import { List, Button, Divider, message } from 'antd';
 import { CreateUpdateDating } from './CreateUpdateDating';
 
 const getEventId = (item, type) => {
@@ -605,49 +605,47 @@ class DatingList extends Component {
 
   render() {
 
-    const { datings } = this.props;
+    const { editable, datings } = this.props;
 
     return (
-
-
       <div>
         <List
           itemLayout="vertical"
           dataSource={datings}
           renderItem={dating => (
-            <List.Item
-              key={dating.id}
-              actions={[
-                <a onClick={(e) => this.displayDetails(dating.id, e)}>
-                  {this.displayingDetails(dating.id) ? 'Less' : 'More'}
-                </a>,
-                <a onClick={() => this.updateModal(dating)}>Edit</a>,
-                <a onClick={() => this.handleDelete(dating)}>Delete</a>
-              ]}
-            >
+            <List.Item key={dating.id}>
               <List.Item.Meta
                 title={formatDates(dating.dates)}
               />
-              <div
-                style={{ display: this.displayingDetails(dating.id) ? 'block' : 'none' }}
-              >
+              <div>
                 {dating.note && <p>Note: {dating.note}</p>}
                 {dating.source && <p>Source: {dating.source}</p>}
+                {editable &&
+                  <span>
+                    <a onClick={() => this.updateModal(dating)}>Edit</a>
+                    <Divider type="vertical" />
+                    <a onClick={() => this.handleDelete(dating)}>Delete</a>
+                  </span>
+                }
+
               </div>
             </List.Item>
           )}
         />
-        <div style={{ margin: '10px 0 0 0' }}>
-          <CreateUpdateDating
-            client={this.props.client}
-            wrappedComponentRef={this.saveFormRef}
-            visible={this.state.visibleForm}
-            onCancel={this.handleCancel}
-            onCreate={this.handleCreateUpdate}
-            tabsPositions={this.state.tabsPositions}
-          />
-          <Button type="primary" onClick={this.showModal}>New dating</Button>
-        </div>
+        {editable &&
+          <div style={{ margin: '10px 0 0 0' }}>
+            <CreateUpdateDating
+              client={this.props.client}
+              wrappedComponentRef={this.saveFormRef}
+              visible={this.state.visibleForm}
+              onCancel={this.handleCancel}
+              onCreate={this.handleCreateUpdate}
+              tabsPositions={this.state.tabsPositions}
+            />
+            <Button type="primary" onClick={this.showModal}>New dating</Button>
+          </div>
+        }
+
       </div>
 
     )

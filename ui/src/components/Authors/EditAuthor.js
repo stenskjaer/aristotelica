@@ -124,11 +124,11 @@ class EditAuthor extends Component {
               <section>
                 <h2>Names</h2>
                 {/* TODO: SHOULD THIS USE THE EditableTable COMPONENT??*/}
-                <AuthorshipAttributions client={client} author={author} />
+                <AuthorshipAttributions editable={isAuthenticated()} client={client} author={author} />
               </section>
               <section>
                 <h2>Events</h2>
-                <AuthorEvents client={client} author={author} />
+                <AuthorEvents editable={isAuthenticated()} client={client} author={author} />
               </section>
               <section>
                 <EditableTextArea
@@ -148,10 +148,12 @@ class EditAuthor extends Component {
               </section>
               <section>
                 <h2>Attributed texts</h2>
-                <p>
-                  Editing or deleting an attribution will not change the text, only the connection between the author and the text. To edit the text, click the text title and edit it from the detailed view.
-                </p>
-                <AuthorTexts client={client} author={author} />
+                {isAuthenticated() &&
+                  <p>
+                    Editing or deleting an attribution will not change the text, only the connection between the author and the text. To edit the text, click the text title and edit it from the detailed view.
+                  </p>
+                }
+                <AuthorTexts editable={isAuthenticated()} client={client} author={author} />
               </section>
               <h3>TODOS</h3>
               <section>

@@ -186,12 +186,13 @@ class AuthorshipAttributions extends Component {
         title: 'Name',
         dataIndex: 'name',
         inputType: 'text',
-        editable: 'true',
+        enabled: true,
       },
       {
         title: 'Language',
         dataIndex: 'language',
         inputType: 'select',
+        enabled: true,
         selectData: {
           selectProps: {
             showSearch: true,
@@ -202,7 +203,6 @@ class AuthorshipAttributions extends Component {
           },
           selectChildren: Languages,
         },
-        editable: 'true',
         render: (text, record) => (Languages[text].isoName)
       },
       {
@@ -307,6 +307,8 @@ class AuthorshipAttributions extends Component {
   showPagination = (records) => records.length > 10
 
   render() {
+    const { editable } = this.props
+
     const components = {
       body: {
         row: EditableFormRow,
@@ -314,22 +316,29 @@ class AuthorshipAttributions extends Component {
       },
     };
 
-    const columns = this.columns.map((col) => {
-      if (!col.editable) {
-        return col;
-      }
-      return {
-        ...col,
-        onCell: record => ({
-          record,
-          inputType: col.inputType,
-          dataIndex: col.dataIndex,
-          title: col.title,
-          editing: this.isEditing(record),
-          selectData: col.selectData,
-        }),
-      };
-    });
+    const columns = this.columns
+      .filter(c => {
+        if (c.dataIndex === 'operation' && !editable) {
+          return false
+        }
+        return true
+      })
+      .map((col) => {
+        if (!col.editable) {
+          return col;
+        }
+        return {
+          ...col,
+          onCell: record => ({
+            record,
+            inputType: col.inputType,
+            dataIndex: col.dataIndex,
+            title: col.title,
+            editing: this.isEditing(record),
+            selectData: col.selectData,
+          }),
+        };
+      });
 
     return (
       <div>
@@ -342,9 +351,14 @@ class AuthorshipAttributions extends Component {
           rowClassName="editable-row"
           pagination={this.showPagination(this.props.author.names)}
         />
-        <Button onClick={this.handleAdd} type="primary" style={{ margin: '8px 0 16px' }}>
-          New name
-        </Button>
+        {editable &&
+          (
+            <Button onClick={this.handleAdd} type="primary" style={{ margin: '8px 0 16px' }}>
+              New name
+          </Button>
+          )
+        }
+
       </div>
 
     );

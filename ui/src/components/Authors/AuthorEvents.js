@@ -88,6 +88,7 @@ class AuthorEvents extends Component {
           item={author}
           client={client}
           type={'BIRTH'}
+          editable={this.props.editable}
           createItemEvent={this.createItemEvent}
           removeItemEvent={this.removeItemEvent}
           refetchQueries={['authorInfo']}
