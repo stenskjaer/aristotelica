@@ -57,7 +57,7 @@ export default class Auth {
 
   storeLocation = (state) => {
     const nonce = createNonce(12)
-    const location = { [nonce]: state }
+    const location = { [nonce]: state.pathname }
     localStorage.setItem('location', JSON.stringify(location))
     return nonce
   }
@@ -82,9 +82,9 @@ export default class Auth {
     this.idToken = authResult.idToken;
     this.expiresAt = expiresAt;
 
-    const storedState = this.matchStoredLocation(authResult.state)
-    if (storedState) {
-      history.replace(storedState.pathname);
+    const storedLocation = this.matchStoredLocation(authResult.state)
+    if (storedLocation) {
+      history.replace(storedLocation);
     } else {
       history.replace('/');
     }
@@ -112,7 +112,7 @@ export default class Auth {
     // Remove isLoggedIn flag from localStorage
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('location');
-    history.replace(location.pathname);
+    history.replace(location);
   }
 
   isAuthenticated = () => {
