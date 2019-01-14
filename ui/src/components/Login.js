@@ -27,7 +27,7 @@ class Login extends React.Component {
         {
           !isAuthenticated() && (
             <div
-              onClick={this.login.bind(this)}
+              onClick={() => this.login()}
             >
               Log In
               </div>
@@ -36,7 +36,7 @@ class Login extends React.Component {
         {
           isAuthenticated() && (
             <div
-              onClick={this.logout.bind(this)}
+              onClick={() => this.logout()}
             >
               Log Out
               </div>
