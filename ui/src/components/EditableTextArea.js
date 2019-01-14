@@ -1,6 +1,12 @@
 import React from "react";
 import { Input, Form, Button } from "antd";
 
+function NoData() {
+  return (
+    <span style={{ opacity: 0.65 }}>No data</span>
+  )
+}
+
 class EditableTextArea extends React.Component {
   state = {
     editing: false,
