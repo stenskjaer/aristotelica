@@ -2,17 +2,16 @@ import React, { Component } from 'react';
 import ApolloClient from 'apollo-boost';
 import { ApolloProvider } from 'react-apollo';
 import { Switch, Route } from 'react-router-dom'
-import { Layout, Button } from 'antd';
+import { Layout } from 'antd';
 import AuthorList from './Authors/AuthorList';
 import EditAuthor from './Authors/EditAuthor';
 import TextItem from './Texts/TextItem';
 import EditText from './Texts/EditText';
 import TextList from './Texts/TextList';
-import { SideMenu, TopMenu } from './Menu';
+import Login from './Login';
+import { SideMenu } from './Menu';
 
-const { Sider, Header } = Layout
-
-const { Content } = Layout;
+const { Sider, Header, Content, Footer } = Layout;
 
 
 const client = new ApolloClient({
@@ -21,56 +20,21 @@ const client = new ApolloClient({
 
 class App extends Component {
 
-  login() {
-    this.props.auth.login();
-  }
-
-  logout() {
-    this.props.auth.logout();
-  }
-
-  componentDidMount() {
-    const { renewSession } = this.props.auth;
-
-    if (localStorage.getItem('isLoggedIn') === 'true') {
-      renewSession();
-    }
-  }
-
   render() {
-    const { isAuthenticated } = this.props.auth
-
     return (
       <ApolloProvider client={client}>
         <Layout>
-          {
-            !isAuthenticated() && (
-              <Button
-                onClick={this.login.bind(this)}
-              >
-                Log In
-                  </Button>
-            )
-          }
-          {
-            isAuthenticated() && (
-              <Button
-                onClick={this.logout.bind(this)}
-              >
-                Log Out
-                  </Button>
-            )
-          }
           <Header className="header">
-            <TopMenu />
+            <h1>Aristotelica</h1>
           </Header>
           <Content style={{ padding: '0 50px' }}>
             <Layout>
-              <Sider>
+              <Sider theme='light'>
                 <SideMenu />
+                <Login auth={this.props.auth} />
               </Sider>
               <Content>
-                <div style={{ background: '#fff', padding: 12, minHeight: 280 }}>
+                <div style={{ background: '#fff', padding: 12, minHeight: '100%' }}>
                   <Switch>
                     <Route exact path="/texts" component={TextList} />
                     <Route exact path="/authors" component={AuthorList} />
@@ -82,6 +46,7 @@ class App extends Component {
               </Content>
             </Layout>
           </Content>
+          <Footer>Footer content</Footer>
         </Layout>
       </ApolloProvider>
     );

@@ -1,23 +1,6 @@
-.ant-list-empty-text {
-  padding: 0;
-}
-.ant-empty, .ant-empty-normal {
-  margin: 8px 0;
-  text-align: left;
-}
-
-.ant-list-vertical .ant-list-item-meta,
-.ant-list-vertical .ant-list-item-content {
-  margin-bottom: 0;
-}
-
-.ant-list-vertical .ant-list-item-meta-title {
-  font-size: 14px;
-  line-height: 16px;
-}
-
-.ant-list-item {
-  padding: 6px 0;
+/* Structure, full height */
+#root, .ant-layout, .ant-layout-content {
+  height: 100%;
 }
 
 h1::first-letter,
@@ -90,4 +73,49 @@ p {
 
 .editable-cell-value-wrap:hover {
   border-color: #40a9ff;
+}
+
+/* Ant List */
+.ant-list-empty-text {
+  padding: 0;
+}
+.ant-empty, .ant-empty-normal {
+  margin: 8px 0;
+  text-align: left;
+}
+
+.ant-list-vertical .ant-list-item-meta,
+.ant-list-vertical .ant-list-item-content {
+  margin-bottom: 0;
+}
+
+.ant-list-vertical .ant-list-item-meta-title {
+  font-size: 14px;
+  line-height: 16px;
+}
+
+.ant-list-item {
+  padding: 6px 0;
+}
+
+/* Ant menu and login flex */
+.ant-layout-sider-children {
+  border-right: 1px solid #e8e8e8;
+  display: flex;
+  flex-direction: column;
+}
+
+.ant-menu-inline, .ant-menu-vertical, .ant-menu-vertical-left {
+  border: 0;
+}
+
+.ant-menu {
+  flex: 1 0 auto;
+}
+
+.login {
+  flex-shrink: 0;
+  line-height: 40px;
+  padding: 0 16px;
+  cursor: pointer;
 }

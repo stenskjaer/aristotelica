@@ -21,13 +21,13 @@ const handleAuthentication = (nextState, replace) => {
 export const authRoutes = () => {
   return (
     <Router history={history} component={App}>
-      <div>
+      <React.Fragment>
         <Route path="/" render={(props) => (<App auth={auth} {...props} />)} />
         <Route path="/callback" render={(props) => {
           handleAuthentication(props);
           return <div />
         }} />
-      </div>
+      </React.Fragment>
     </Router>
   );
 }
