@@ -3,18 +3,18 @@ import React from 'react';
 class Login extends React.Component {
 
   login() {
-    this.props.auth.login();
+    this.props.auth.login(this.props.location);
   }
 
-  logout() {
-    this.props.auth.logout();
+  logout(location) {
+    this.props.auth.logout(location);
   }
 
   componentDidMount() {
     const { renewSession } = this.props.auth;
 
     if (localStorage.getItem('isLoggedIn') === 'true') {
-      renewSession();
+      renewSession(this.props.location);
     }
   }
 
@@ -27,7 +27,7 @@ class Login extends React.Component {
         {
           !isAuthenticated() && (
             <div
-              onClick={() => this.login()}
+              onClick={() => this.login(this.props.location)}
             >
               Log In
               </div>
@@ -36,7 +36,7 @@ class Login extends React.Component {
         {
           isAuthenticated() && (
             <div
-              onClick={() => this.logout()}
+              onClick={() => this.logout(this.props.location)}
             >
               Log Out
               </div>

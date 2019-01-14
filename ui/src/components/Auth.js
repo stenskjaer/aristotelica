@@ -1,6 +1,27 @@
 import auth0 from 'auth0-js';
 import history from './history';
 
+export function createNonce(length) {
+  const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._~'
+  let result = ''
+
+  while (length > 0) {
+    const bytes = new Uint8Array(16);
+    const random = window.crypto.getRandomValues(bytes);
+
+    random.forEach(function (c) {
+      if (length === 0) {
+        return;
+      }
+      if (c < charset.length) {
+        result += charset[c];
+        length--;
+      }
+    });
+  }
+  return result;
+}
+
 export default class Auth {
   accessToken;
   idToken;
@@ -15,17 +36,15 @@ export default class Auth {
   });
 
   handleAuthentication = () => {
-    setTimeout(() => (
-      this.auth0.parseHash((err, authResult) => {
-        if (authResult && authResult.accessToken && authResult.idToken) {
-          this.setSession(authResult);
-        } else if (err) {
-          history.replace('/');
-          console.log(err);
-          alert(`Error: ${err.error}. Check the console for further details.`);
-        }
-      })
-    ), 1000)
+    this.auth0.parseHash((err, authResult) => {
+      if (authResult && authResult.accessToken && authResult.idToken) {
+        this.setSession(authResult);
+      } else if (err) {
+        history.replace('/');
+        console.log(err);
+        alert(`Error: ${err.error}. Check the console for further details.`);
+      }
+    })
   }
 
   getAccessToken = () => {
@@ -36,8 +55,21 @@ export default class Auth {
     return this.idToken;
   }
 
-  login = () => {
-    this.auth0.authorize();
+  storeLocation = (state) => {
+    const nonce = createNonce(12)
+    const location = { [nonce]: state }
+    localStorage.setItem('location', JSON.stringify(location))
+    return nonce
+  }
+
+  matchStoredLocation = (nonce) => {
+    const location = JSON.parse(localStorage.getItem('location'))
+    return location[nonce] || null
+  }
+
+  login = (locationParams) => {
+    const nonce = this.storeLocation(locationParams)
+    this.auth0.authorize({ state: nonce });
   }
 
   setSession(authResult) {
@@ -50,12 +82,17 @@ export default class Auth {
     this.idToken = authResult.idToken;
     this.expiresAt = expiresAt;
 
-    // navigate to the home route
-    history.replace('/');
+    const storedState = this.matchStoredLocation(authResult.state)
+    if (storedState) {
+      history.replace(storedState.pathname);
+    } else {
+      history.replace('/');
+    }
   }
 
-  renewSession = () => {
-    this.auth0.checkSession({}, (err, authResult) => {
+  renewSession = (location) => {
+    const nonce = this.storeLocation(location)
+    this.auth0.checkSession({ state: nonce }, (err, authResult) => {
       if (authResult && authResult.accessToken && authResult.idToken) {
         this.setSession(authResult);
       } else if (err) {
@@ -66,7 +103,7 @@ export default class Auth {
     });
   }
 
-  logout = () => {
+  logout = (location) => {
     // Remove tokens and expiry time
     this.accessToken = null;
     this.idToken = null;
@@ -74,9 +111,8 @@ export default class Auth {
 
     // Remove isLoggedIn flag from localStorage
     localStorage.removeItem('isLoggedIn');
-
-    // navigate to the home route
-    history.replace('/');
+    localStorage.removeItem('location');
+    history.replace(location.pathname);
   }
 
   isAuthenticated = () => {
