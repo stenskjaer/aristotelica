@@ -2,8 +2,8 @@ import React from 'react';
 
 class Login extends React.Component {
 
-  login() {
-    this.props.auth.login(this.props.location);
+  login(location) {
+    this.props.auth.login(location);
   }
 
   logout(location) {
