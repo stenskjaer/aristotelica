@@ -87,6 +87,9 @@ class EditAuthor extends Component {
 
   render() {
 
+    const { auth } = this.props
+    const { isAuthenticated } = auth
+
     return (
       <Query query={AUTHOR_QUERY} variables={{ id: this.props.match.params.id }} >
         {({ loading, error, data, client }) => {
@@ -129,6 +132,7 @@ class EditAuthor extends Component {
               </section>
               <section>
                 <EditableTextArea
+                  editable={isAuthenticated()}
                   handleCreateUpdateDB={handleUpdatePerson}
                   heading={'Description'}
                   author={author}
@@ -136,6 +140,7 @@ class EditAuthor extends Component {
               </section>
               <section>
                 <EditableTextArea
+                  editable={isAuthenticated()}
                   handleCreateUpdateDB={handleUpdatePerson}
                   heading={'Note'}
                   author={author}

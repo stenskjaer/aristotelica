@@ -4,7 +4,6 @@ import { Input, Form, Button } from "antd";
 class EditableTextArea extends React.Component {
   state = {
     editing: false,
-    editable: true,
     content: this.props.author[this.props.field] || ''
   }
 
@@ -52,7 +51,9 @@ class EditableTextArea extends React.Component {
   form = this.props.form;
 
   render() {
-    const { editing, editable, content } = this.state;
+    const { editing, content } = this.state;
+    const { editable } = this.props;
+
     const editableContent = () => {
       return (
         editing ? (
@@ -84,7 +85,13 @@ class EditableTextArea extends React.Component {
     }
     return (
       <React.Fragment>
-        <h2>{this.props.heading} {editable ? <Button onClick={this.toggleEdit} shape="circle" size="small" icon="edit" style={{ marginLeft: '1ex' }} /> : ''}</h2>
+        <h2>{this.props.heading}
+          {
+            editable
+              ? <Button onClick={this.toggleEdit} shape="circle" size="small" icon="edit" style={{ marginLeft: '1ex' }} />
+              : ''
+          }
+        </h2>
 
         <div ref={node => (this.field = node)}>
           {editable ? editableContent() : content}

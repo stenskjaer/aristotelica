@@ -20,6 +20,8 @@ const client = new ApolloClient({
 
 function App(props) {
 
+  const auth = props.auth
+
   return (
     <ApolloProvider client={client}>
       <Layout>
@@ -30,15 +32,14 @@ function App(props) {
           <Layout>
             <Sider theme='light'>
               <SideMenu />
-              <Login auth={props.auth} />
+              <Login auth={auth} {...props} />
             </Sider>
             <Content>
               <div style={{ background: '#fff', padding: 12, minHeight: '100%' }}>
                 <Switch>
                   <Route exact path="/texts" component={TextList} />
                   <Route exact path="/authors" component={AuthorList} />
-                  <Route exact path="/author/:id" component={EditAuthor} />
-                  <Route exact path="/text/:id" component={TextItem} />
+                  <Route exact path="/author/:id" render={props => <EditAuthor auth={auth} {...props} />} />
                   <Route exact path="/text/edit/:id" component={EditText} />
                 </Switch>
               </div>
