@@ -4,7 +4,6 @@ import registerServiceWorker from './registerServiceWorker';
 import { Route, Router } from 'react-router-dom';
 import App from './components/App';
 import Auth from './components/Auth';
-import Callback from './components/Callback';
 import history from './components/history';
 
 
@@ -19,15 +18,14 @@ const handleAuthentication = (nextState, replace) => {
   }
 }
 
-export const authRouting = () => {
+export const authRoutes = () => {
   return (
     <Router history={history} component={App}>
       <div>
-        <Route path="/" render={(props) => <App auth={auth} {...props} />} />
+        <Route path="/" render={(props) => (<App auth={auth} {...props} />)} />
         <Route path="/callback" render={(props) => {
-          console.log("callback:", props)
           handleAuthentication(props);
-          return <Callback {...props} />
+          return <div />
         }} />
       </div>
     </Router>
@@ -35,7 +33,7 @@ export const authRouting = () => {
 }
 
 ReactDOM.render(
-  authRouting(),
+  authRoutes(),
   document.getElementById('root')
 );
 

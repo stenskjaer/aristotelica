@@ -15,88 +15,6 @@ const { Sider, Header } = Layout
 const { Content } = Layout;
 
 
-// class App extends Component {
-
-//   auth = new Auth();
-
-//   handleAuthentication = (nextState, replace) => {
-//     if (/access_token|id_token|error/.test(nextState.location.hash)) {
-//       this.auth.handleAuthentication();
-//     }
-//   }
-
-//   login() {
-//     this.auth.login();
-//   }
-
-//   logout() {
-//     this.auth.logout();
-//   }
-
-//   componentDidMount() {
-//     const { renewSession } = this.auth;
-
-//     if (localStorage.getItem('isLoggedIn') === 'true') {
-//       renewSession();
-//     }
-//   }
-
-
-//   render() {
-
-//     const { isAuthenticated } = this.auth;
-
-//     return (
-//       <Layout>
-//         {
-//           !isAuthenticated() && (
-//             <Button
-//               onClick={() => this.login()}
-//             >
-//               Log In
-//             </Button>
-//           )
-//         }
-//         {
-//           isAuthenticated() && (
-//             <Button
-//               onClick={() => this.logout()}
-//             >
-//               Log Out
-//             </Button>
-//           )
-//         }
-//         <Header className="header">
-//           <TopMenu />
-//         </Header>
-//         <Content style={{ padding: '0 50px' }}>
-//           <Layout>
-//             <Sider>
-//               <SideMenu />
-//             </Sider>
-//             <Content>
-//               <div style={{ background: '#fff', padding: 12, minHeight: 280 }}>
-//                 <Route path="/callback" render={(props) => {
-//                   this.handleAuthentication(props);
-//                   return <Callback {...props} />
-//                 }} />
-//                 <Switch>
-//                   <Route exact path="/texts" component={TextList} />
-//                   <Route exact path="/authors" component={AuthorList} />
-//                   <Route exact path="/author/:id" component={EditAuthor} />
-//                   <Route exact path="/text/:id" component={TextItem} />
-//                   <Route exact path="/text/edit/:id" component={EditText} />
-//                 </Switch>
-//               </div>
-//             </Content>
-//           </Layout>
-//         </Content>
-
-//       </Layout>
-//     );
-//   }
-// }
-
 const client = new ApolloClient({
   uri: process.env.REACT_APP_GRAPHQL_URI
 })
@@ -115,15 +33,12 @@ class App extends Component {
     const { renewSession } = this.props.auth;
 
     if (localStorage.getItem('isLoggedIn') === 'true') {
-      console.log("renew!")
       renewSession();
     }
   }
 
   render() {
-    const { isAuthenticated } = this.props.auth;
-
-    console.log(isAuthenticated())
+    const { isAuthenticated } = this.props.auth
 
     return (
       <ApolloProvider client={client}>
