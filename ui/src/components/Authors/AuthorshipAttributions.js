@@ -31,14 +31,15 @@ const ADD_NAME = gql`
   }
 `
 
-const addPersonName = async (values, client) => {
+const addPersonName = async ({ values, client }) => {
+  console.log(values, client)
   const { error, data } = await client.mutate({
     mutation: ADD_NAME,
     variables: {
-      nameid: values.key,
+      nameid: values.id,
       personid: values.personid,
       language: values.language,
-      name: values.name
+      name: values.value
     },
     refetchQueries: ['allPersons']
   });
@@ -64,13 +65,13 @@ const UPDATE_NAME = gql`
   }
 `
 
-const updateName = async (values, client) => {
+const updateName = async ({ values, client }) => {
   const { error, data } = await client.mutate({
     mutation: UPDATE_NAME,
     variables: {
-      nameid: values.key,
+      nameid: values.id,
       language: values.language,
-      name: values.name
+      name: values.value
     },
     refetchQueries: ['allPersons']
   });
@@ -170,29 +171,108 @@ class EditableCell extends React.Component {
 }
 
 class AuthorshipAttributions extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      data: this.props.author.names.map(name => ({
-        name: name.value,
-        language: name.language,
-        key: name.id
-      })),
-      authorId: this.props.author.id,
-      editingKey: '',
+  state = {
+    editingKey: '',
+    editable: this.props.editable
+  }
+
+
+  handleAdd = () => {
+    const newData = this.props.data;
+    const newItem = {
+      value: '',
+      language: Defaults.language,
+      id: createGUID(),
+      unsaved: true,
     }
-    this.columns = [
+    newData.push(newItem)
+    // Send up the state
+    this.props.handleUpdate({ relation: 'names', data: newData })
+    this.edit(newItem.id)
+  }
+
+  delete = async (nameid) => {
+    deleteName(nameid, this.props.client)
+    const newData = [...this.state.data];
+    const index = newData.findIndex(item => nameid === item.key);
+    newData.splice(index, 1);
+    this.setState({ data: newData })
+  }
+
+  isEditing = (record) => {
+    return record.key === this.state.editingKey;
+  };
+
+  edit(key) {
+    this.setState({ editingKey: key });
+  }
+
+  save(form, record) {
+    form.validateFields((error, values) => {
+      if (error) {
+        return;
+      }
+
+      // Update the data
+      const newData = [...this.props.data];
+      const index = newData.findIndex(item => item.id === record.key);
+      const item = newData[index];
+      newData.splice(index, 1, {
+        ...item,
+        ...values,
+      });
+      this.setState({
+        editingKey: ''
+      });
+
+      // Send up the state
+      this.props.handleUpdate({ relation: 'names', data: newData })
+
+      // Save the mutation functions in the updater registry
+      if (record.unsaved) {
+        this.props.addUpdater({
+          id: record.key,
+          func: addPersonName,
+          variables: {
+            values: { ...newData[index], personid: this.props.id },
+            client: this.props.client
+          }
+        })
+      } else {
+        this.props.addUpdater({
+          id: record.key,
+          func: updateName,
+          variables: {
+            values: newData[index],
+            client: this.props.client
+          }
+        })
+      }
+
+    });
+  }
+
+  cancel = () => {
+    this.setState({ editingKey: '' });
+  };
+
+  showPagination = (records) => records.length > 10
+
+  render() {
+    const columns = [
       {
         title: 'Name',
-        dataIndex: 'name',
+        dataIndex: 'value',
         inputType: 'text',
         enabled: true,
+        editable: 'true'
       },
       {
         title: 'Language',
         dataIndex: 'language',
         inputType: 'select',
         enabled: true,
+        editable: 'true',
         selectData: {
           selectProps: {
             showSearch: true,
@@ -221,7 +301,7 @@ class AuthorshipAttributions extends Component {
                         style={{ marginRight: 8 }}
                       >
                         Save
-                      </a>
+                        </a>
                     )}
                   </EditableContext.Consumer>
                   <Divider type="vertical" />
@@ -237,89 +317,12 @@ class AuthorshipAttributions extends Component {
             </div>
           );
         },
-      },
-    ];
-  }
-
-  handleAdd = () => {
-    const { data } = this.state;
-    const newData = {
-      name: '',
-      language: Defaults.language,
-      key: createGUID(),
-    };
-    this.setState({
-      data: [...data, newData],
-    });
-    this.edit(newData.key)
-  }
-
-  delete = async (nameid) => {
-    deleteName(nameid, this.props.client)
-    const newData = [...this.state.data];
-    const index = newData.findIndex(item => nameid === item.key);
-    newData.splice(index, 1);
-    this.setState({ data: newData })
-  }
-
-  isEditing = (record) => {
-    return record.key === this.state.editingKey;
-  };
-
-  edit(key) {
-    this.setState({ editingKey: key });
-  }
-
-  save(form, record) {
-    form.validateFields((error, values) => {
-      if (error) {
-        return;
-      }
-      const client = this.props.client
-
-      // Update the state
-      const newData = [...this.state.data];
-      const index = newData.findIndex(item => record.key === item.key);
-      const item = newData[index];
-      newData.splice(index, 1, {
-        ...item,
-        ...values,
-      });
-      this.setState({
-        data: newData,
-        editingKey: ''
-      });
-
-      // Run corresponding queries
-      if (this.props.author.names.find(name => name.id === record.key)) {
-        updateName(newData[index], client)
-      } else {
-        addPersonName({ ...newData[index], personid: this.state.authorId }, client)
-      }
-
-    });
-  }
-
-  cancel = () => {
-    this.setState({ editingKey: '' });
-  };
-
-  showPagination = (records) => records.length > 10
-
-  render() {
-    const { editable } = this.props
-
-    const components = {
-      body: {
-        row: EditableFormRow,
-        cell: EditableCell,
-      },
-    };
-
-    const columns = this.columns
+      }]
       .filter(c => {
-        if (c.dataIndex === 'operation' && !editable) {
-          return false
+        if (c.dataIndex === 'operation') {
+          if (!this.props.editable) {
+            return false
+          }
         }
         return true
       })
@@ -340,25 +343,32 @@ class AuthorshipAttributions extends Component {
         };
       });
 
+    const components = {
+      body: {
+        row: EditableFormRow,
+        cell: EditableCell,
+      },
+    };
+
+    const dataSource = this.props.data.map(name => ({
+      ...name,
+      key: name.id
+    }))
+
     return (
       <div>
         <Table
           components={components}
           size={'small'}
           bordered
-          dataSource={this.state.data}
+          dataSource={dataSource}
           columns={columns}
           rowClassName="editable-row"
           pagination={this.showPagination(this.props.author.names)}
         />
-        {editable &&
-          (
-            <Button onClick={this.handleAdd} type="primary" style={{ margin: '8px 0 16px' }}>
-              New name
-          </Button>
-          )
-        }
-
+        <Button onClick={this.handleAdd} type="primary" style={{ margin: '8px 0 16px' }}>
+          New name
+        </Button>
       </div>
 
     );

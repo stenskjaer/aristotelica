@@ -29,21 +29,39 @@ class AuthorEditor extends Component {
   state = {
     author: this.props.data,
     updaters: {
-      propertyUpdater: {},
-      relationUpdaters: []
+      propertyUpdater: undefined,
+      relationUpdaters: undefined
     }
   }
 
-  handleUpdatePerson = async (variables) => {
-    console.log("Running person update")
-    const { error, data } = await this.props.client.mutate({
-      mutation: UPDATE_PERSON,
-      variables: variables,
+  handleRelationUpdate = ({ relation, data }) => {
+    const newAuthor = this.state.author
+    newAuthor[relation] = data
+    this.setState({
+      author: newAuthor,
     })
-    if (error) {
-      console.warn(error.message)
+  }
+
+  addUpdater = (updater) => {
+    console.log("adding ", updater)
+    let curUpdaters = this.state.updaters.relationUpdaters || []
+    console.log("curren", curUpdaters)
+    const updaterIndex = curUpdaters.findIndex(x => x.id === updater.id)
+    console.log("index", updaterIndex)
+    if (updaterIndex > -1) {
+      curUpdaters.splice(updaterIndex, 1, {
+        ...updater
+      })
+    } else {
+      curUpdaters.push(updater)
     }
-    return data.UpdatePerson.id
+    console.log("updated:", curUpdaters)
+    this.setState((prev) => ({
+      updaters: {
+        ...prev.updaters,
+        relationUpdaters: curUpdaters
+      }
+    }))
   }
 
   handlePropertyState = ({ field, content }) => {
@@ -58,7 +76,7 @@ class AuthorEditor extends Component {
   propertyUpdater = () => {
     const newUpdaters = this.state.updaters
     newUpdaters.propertyUpdater = {
-      func: this.handleUpdatePerson,
+      func: this.updatePerson,
       variables: {
         id: this.state.author.id,
         description: this.state.author.description,
@@ -72,9 +90,28 @@ class AuthorEditor extends Component {
     })
   }
 
+  updatePerson = async (variables) => {
+    console.log("Running person update")
+    const { error, data } = await this.props.client.mutate({
+      mutation: UPDATE_PERSON,
+      variables: variables,
+    })
+    if (error) {
+      console.warn(error.message)
+    }
+    return data.UpdatePerson.id
+  }
+
   handleSave = () => {
-    const updater = this.state.updaters.propertyUpdater
-    updater.func(updater.variables)
+    const { relationUpdaters, propertyUpdater } = this.state.updaters
+    if (propertyUpdater) {
+      console.log("Prop udpater", propertyUpdater)
+      propertyUpdater.func(propertyUpdater.variables)
+    }
+    if (relationUpdaters) {
+      console.log("Relation udpater", relationUpdaters)
+      relationUpdaters.map(({ func, variables }) => func(variables))
+    }
   }
 
 
@@ -85,14 +122,20 @@ class AuthorEditor extends Component {
     const { isAuthenticated } = auth
     const editable = isAuthenticated()
 
-    console.log(author)
-
     return (
       <React.Fragment key={author.id}>
         <h1>{defaultName(author)}</h1>
         <section>
           <h2>Names</h2>
-          <AuthorshipAttributions editable={editable} client={client} author={author} />
+          <AuthorshipAttributions
+            editable={editable}
+            client={client}
+            author={author}
+            handleUpdate={this.handleRelationUpdate}
+            addUpdater={this.addUpdater}
+            data={author.names}
+            id={author.id}
+          />
         </section>
         <section>
           <h2>Events</h2>
