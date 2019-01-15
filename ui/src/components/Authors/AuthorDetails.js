@@ -83,7 +83,7 @@ const UPDATE_PERSON = gql`
   }
 `
 
-class EditAuthor extends Component {
+class AuthorDetails extends Component {
 
   render() {
 
@@ -170,4 +170,4 @@ class EditAuthor extends Component {
   }
 }
 
-export default EditAuthor;
+export default AuthorDetails;

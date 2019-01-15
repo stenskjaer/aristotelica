@@ -4,7 +4,7 @@ import { ApolloProvider } from 'react-apollo';
 import { Switch, Route } from 'react-router-dom'
 import { Layout } from 'antd';
 import AuthorList from './Authors/AuthorList';
-import EditAuthor from './Authors/EditAuthor';
+import AuthorDetails from './Authors/AuthorDetails';
 import TextItem from './Texts/TextItem';
 import EditText from './Texts/EditText';
 import TextList from './Texts/TextList';
@@ -39,7 +39,7 @@ function App(props) {
                 <Switch>
                   <Route exact path="/texts" component={TextList} />
                   <Route exact path="/authors" component={AuthorList} />
-                  <Route exact path="/author/:id" render={props => <EditAuthor auth={auth} {...props} />} />
+                  <Route exact path="/author/:id" render={props => <AuthorDetails auth={auth} {...props} />} />
                   <Route exact path="/text/edit/:id" component={EditText} />
                 </Switch>
               </div>
