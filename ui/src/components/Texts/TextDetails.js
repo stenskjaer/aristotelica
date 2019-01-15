@@ -91,7 +91,7 @@ const GET_ITEM_QUERY = gql`
   }
 `
 
-class EditText extends Component {
+class TextDetails extends Component {
 
   render() {
 
@@ -201,4 +201,4 @@ class EditText extends Component {
   }
 }
 
-export default EditText;
+export default TextDetails;
