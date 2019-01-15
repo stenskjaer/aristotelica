@@ -1,11 +1,7 @@
 import React, { Component } from "react";
 import { Query } from "react-apollo";
 import gql from "graphql-tag";
-import AuthorshipAttributions from "./AuthorshipAttributions";
-import AuthorTexts from "./AuthorTexts";
-import AuthorEvents from "./AuthorEvents";
-import EditableTextArea from "../EditableTextArea";
-import { defaultName } from "../utils";
+import AuthorEditor from "./AuthorEditor";
 
 const AUTHOR_QUERY = gql`
   query authorInfo($id: ID!) {
@@ -65,31 +61,10 @@ const AUTHOR_QUERY = gql`
   }
 `
 
-const UPDATE_PERSON = gql`
-  mutation UpdatePerson(
-      $id: ID!, 
-      $description: String,
-      $biography: String,
-      $note: String,
-    ) {
-    UpdatePerson(
-        id: $id, 
-        description: $description,
-        biography: $biography,
-        note: $note,
-      ) {
-      id
-    }
-  }
-`
 
 class AuthorDetails extends Component {
 
   render() {
-
-    const { auth } = this.props
-    const { isAuthenticated } = auth
-
     return (
       <Query query={AUTHOR_QUERY} variables={{ id: this.props.match.params.id }} >
         {({ loading, error, data, client }) => {
@@ -102,67 +77,8 @@ class AuthorDetails extends Component {
             return <div>Error: The author does not exist.</div>
           }
 
-          const handleUpdatePerson = async (variables) => {
-            const { error, data } = await client.mutate({
-              mutation: UPDATE_PERSON,
-              variables: {
-                id: author.id,
-                modified: new Date(),
-                ...variables
-              },
-              refetchQueries: ['authorInfo']
-            })
-            if (error) {
-              console.warn(error.message)
-            }
-            return data.UpdatePerson.id
-          }
-
           return (
-            <React.Fragment>
-              <h1>{defaultName(author)}</h1>
-              <section>
-                <h2>Names</h2>
-                {/* TODO: SHOULD THIS USE THE EditableTable COMPONENT??*/}
-                <AuthorshipAttributions editable={isAuthenticated()} client={client} author={author} />
-              </section>
-              <section>
-                <h2>Events</h2>
-                <AuthorEvents editable={isAuthenticated()} client={client} author={author} />
-              </section>
-              <section>
-                <EditableTextArea
-                  editable={isAuthenticated()}
-                  handleCreateUpdateDB={handleUpdatePerson}
-                  heading={'Description'}
-                  author={author}
-                  field={'description'} />
-              </section>
-              <section>
-                <EditableTextArea
-                  editable={isAuthenticated()}
-                  handleCreateUpdateDB={handleUpdatePerson}
-                  heading={'Note'}
-                  author={author}
-                  field={'note'} />
-              </section>
-              <section>
-                <h2>Attributed texts</h2>
-                {isAuthenticated() &&
-                  <p>
-                    Editing or deleting an attribution will not change the text, only the connection between the author and the text. To edit the text, click the text title and edit it from the detailed view.
-                  </p>
-                }
-                <AuthorTexts editable={isAuthenticated()} client={client} author={author} />
-              </section>
-              <h3>TODOS</h3>
-              <section>
-                <h2>Resources</h2>
-              </section>
-              <section>
-                <h2>Literature</h2>
-              </section>
-            </React.Fragment>
+            <AuthorEditor data={author} client={client} {...this.props} />
           )
         }}
       </Query>

@@ -122,7 +122,6 @@ class TextDetails extends Component {
                   {({ values, handleSubmit, handleChange, isSubmitting }) => (
                     <React.Fragment>
                       <h1>Edit text</h1>
-                      <Link to={"/text/" + item.id}>View text</Link>
                       <Form onSubmit={handleSubmit} className="edit-form">
                         <div className="form-group">
                           <h2>Authorship</h2>

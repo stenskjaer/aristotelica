@@ -10,22 +10,21 @@ function NoData() {
 class EditableTextArea extends React.Component {
   state = {
     editing: false,
-    content: this.props.author[this.props.field] || ''
   }
+  form = this.props.form;
+  handleUpdate = this.props.handleUpdate;
 
-  componentDidMount() {
-    if (this.state.editable) {
+  componentDidUpdate() {
+    if (this.props.editable) {
       document.addEventListener('click', this.handleClickOutside, true);
     }
   }
 
   componentWillUnmount() {
-    if (this.state.editable) {
+    if (this.props.editable) {
       document.removeEventListener('click', this.handleClickOutside, true);
     }
   }
-
-  handleCreateUpdateDB = this.props.handleCreateUpdateDB;
 
   handleClickOutside = (e) => {
     const { editing } = this.state;
@@ -49,32 +48,27 @@ class EditableTextArea extends React.Component {
         return;
       }
       this.toggleEdit();
-      this.setState({ content: values.description });
-      this.handleCreateUpdateDB({ [this.props.field]: values.description })
+      this.handleUpdate({ field: this.props.field, content: values.content })
     });
   }
 
-  form = this.props.form;
-
   render() {
-    const { editing, content } = this.state;
-    const { editable } = this.props;
+
+    const { editing } = this.state;
+    const { editable, data, field, heading } = this.props;
+    const content = data[field]
 
     const editableContent = () => {
       return (
         editing ? (
-          <Form.Item style={{ margin: 0 }}>
-            {this.form.getFieldDecorator('description', {
-              rules: [{
-                required: false,
-                message: `Required.`,
-              }],
+          <Form.Item style={{ margin: 0 }} key={data.id}>
+            {this.form.getFieldDecorator('content', {
               initialValue: content,
             })(
               <Input.TextArea
                 ref={node => (this.input = node)}
                 onPressEnter={this.save}
-                autosize={'true'}
+                autosize
               />
             )}
           </Form.Item>
@@ -84,14 +78,14 @@ class EditableTextArea extends React.Component {
               style={{ paddingRight: 24 }}
               onClick={this.toggleEdit}
             >
-              {content || <span style={{ opacity: 0.65 }}>{'Field is empty, click to add a ' + this.props.field}</span>}
+              {content || <span style={{ opacity: 0.65 }}>{'Field is empty, click to add a ' + field}</span>}
             </div>
           )
       );
     }
     return (
       <React.Fragment>
-        <h2>{this.props.heading}
+        <h2>{heading}
           {
             editable
               ? <Button onClick={this.toggleEdit} shape="circle" size="small" icon="edit" style={{ marginLeft: '1ex' }} />
