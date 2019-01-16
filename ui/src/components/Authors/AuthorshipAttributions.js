@@ -93,7 +93,7 @@ const DELETE_NAME = gql`
   }
 `
 
-const deleteName = async (nameid, client) => {
+const deleteName = async ({ nameid, client }) => {
   const { error, data } = await client.mutate({
     mutation: DELETE_NAME,
     variables: {
@@ -173,17 +173,15 @@ class EditableCell extends React.Component {
 class AuthorshipAttributions extends Component {
   state = {
     editingKey: '',
-    editable: this.props.editable
   }
 
-
-  handleAdd = () => {
+  add = () => {
     const newData = this.props.data;
     const newItem = {
       value: '',
       language: Defaults.language,
       id: createGUID(),
-      unsaved: true,
+      draft: true,
     }
     newData.push(newItem)
     // Send up the state
@@ -191,12 +189,21 @@ class AuthorshipAttributions extends Component {
     this.edit(newItem.id)
   }
 
-  delete = async (nameid) => {
-    deleteName(nameid, this.props.client)
-    const newData = [...this.state.data];
-    const index = newData.findIndex(item => nameid === item.key);
+  delete = (record) => {
+    const newData = [...this.props.data];
+    const index = newData.findIndex(item => item.id === record.id);
     newData.splice(index, 1);
-    this.setState({ data: newData })
+    this.props.handleUpdate({ relation: 'names', data: newData })
+    if (record.draft) {
+      this.props.removeUpdater(record.id)
+    } else {
+      this.props.addUpdater({
+        id: record.id,
+        func: deleteName,
+        variables: { nameid: record.id, client: this.props.client }
+      })
+    }
+
   }
 
   isEditing = (record) => {
@@ -229,21 +236,21 @@ class AuthorshipAttributions extends Component {
       this.props.handleUpdate({ relation: 'names', data: newData })
 
       // Save the mutation functions in the updater registry
-      if (record.unsaved) {
+      if (record.draft) {
         this.props.addUpdater({
           id: record.key,
-          func: addPersonName,
+          func: updateName,
           variables: {
-            values: { ...newData[index], personid: this.props.id },
+            values: newData[index],
             client: this.props.client
           }
         })
       } else {
         this.props.addUpdater({
           id: record.key,
-          func: updateName,
+          func: addPersonName,
           variables: {
-            values: newData[index],
+            values: { ...newData[index], personid: this.props.id },
             client: this.props.client
           }
         })
@@ -311,7 +318,7 @@ class AuthorshipAttributions extends Component {
                   <React.Fragment>
                     <a onClick={() => this.edit(record.key)}>Edit</a>
                     <Divider type="vertical" />
-                    <a onClick={() => this.delete(record.key)}>Remove</a>
+                    <a onClick={() => this.delete(record)}>Remove</a>
                   </React.Fragment>
                 )}
             </div>
@@ -366,7 +373,7 @@ class AuthorshipAttributions extends Component {
           rowClassName="editable-row"
           pagination={this.showPagination(this.props.author.names)}
         />
-        <Button onClick={this.handleAdd} type="primary" style={{ margin: '8px 0 16px' }}>
+        <Button onClick={this.add} style={{ margin: '8px 0 16px' }}>
           New name
         </Button>
       </div>

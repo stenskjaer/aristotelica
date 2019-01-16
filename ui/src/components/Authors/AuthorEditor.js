@@ -34,12 +34,23 @@ class AuthorEditor extends Component {
     }
   }
 
-  handleRelationUpdate = ({ relation, data }) => {
-    const newAuthor = this.state.author
-    newAuthor[relation] = data
-    this.setState({
-      author: newAuthor,
-    })
+  removeUpdater = (id) => {
+    console.log("removing", id)
+    let curUpdaters = this.state.updaters.relationUpdaters || []
+    console.log("curren", curUpdaters)
+    const updaterIndex = curUpdaters.findIndex(x => x.id === id)
+    if (updaterIndex > -1) {
+      curUpdaters.splice(updaterIndex, 1)
+    } else {
+      console.warn("Updater not found in updater registry during deletion: ", id)
+    }
+    console.log("updated:", curUpdaters)
+    this.setState((prev) => ({
+      updaters: {
+        ...prev.updaters,
+        relationUpdaters: curUpdaters
+      }
+    }))
   }
 
   addUpdater = (updater) => {
@@ -62,6 +73,14 @@ class AuthorEditor extends Component {
         relationUpdaters: curUpdaters
       }
     }))
+  }
+
+  handleRelationUpdate = ({ relation, data }) => {
+    const newAuthor = this.state.author
+    newAuthor[relation] = data
+    this.setState({
+      author: newAuthor,
+    })
   }
 
   handlePropertyState = ({ field, content }) => {
@@ -133,6 +152,7 @@ class AuthorEditor extends Component {
             author={author}
             handleUpdate={this.handleRelationUpdate}
             addUpdater={this.addUpdater}
+            removeUpdater={this.removeUpdater}
             data={author.names}
             id={author.id}
           />
