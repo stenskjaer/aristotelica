@@ -56,7 +56,7 @@ class AuthorEditor extends Component {
   addUpdater = (updater) => {
     console.log("adding ", updater)
     let curUpdaters = this.state.updaters.relationUpdaters || []
-    console.log("curren", curUpdaters)
+    console.log("current updaters", curUpdaters)
     const updaterIndex = curUpdaters.findIndex(x => x.id === updater.id)
     console.log("index", updaterIndex)
     if (updaterIndex > -1) {
@@ -66,7 +66,7 @@ class AuthorEditor extends Component {
     } else {
       curUpdaters.push(updater)
     }
-    console.log("updated:", curUpdaters)
+    console.log("updated, new updaters:", curUpdaters)
     this.setState((prev) => ({
       updaters: {
         ...prev.updaters,
@@ -158,7 +158,15 @@ class AuthorEditor extends Component {
         </section>
         <section>
           <h2>Events</h2>
-          <AuthorEvents editable={editable} client={client} author={author} />
+          <AuthorEvents
+            editable={editable}
+            client={client}
+            id={author.id}
+            data={author.events}
+            handleUpdate={this.handleRelationUpdate}
+            addUpdater={this.addUpdater}
+            removeUpdater={this.removeUpdater}
+          />
         </section>
         <section>
           <EditableTextArea
