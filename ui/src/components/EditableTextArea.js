@@ -67,7 +67,6 @@ class EditableTextArea extends React.Component {
             })(
               <Input.TextArea
                 ref={node => (this.input = node)}
-                onPressEnter={this.save}
                 autosize
               />
             )}
@@ -88,7 +87,9 @@ class EditableTextArea extends React.Component {
         <h2>{heading}
           {
             editable
-              ? <Button onClick={this.toggleEdit} shape="circle" size="small" icon="edit" style={{ marginLeft: '1ex' }} />
+              ? editing
+                ? <Button onClick={this.save} shape="circle" size="small" icon="check" style={{ marginLeft: '1ex' }} />
+                : <Button onClick={this.toggleEdit} shape="circle" size="small" icon="edit" style={{ marginLeft: '1ex' }} />
               : ''
           }
         </h2>
