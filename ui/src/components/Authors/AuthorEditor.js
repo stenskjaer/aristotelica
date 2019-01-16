@@ -149,7 +149,6 @@ class AuthorEditor extends Component {
           <AuthorshipAttributions
             editable={editable}
             client={client}
-            author={author}
             handleUpdate={this.handleRelationUpdate}
             addUpdater={this.addUpdater}
             removeUpdater={this.removeUpdater}

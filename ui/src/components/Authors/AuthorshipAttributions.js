@@ -371,7 +371,7 @@ class AuthorshipAttributions extends Component {
           dataSource={dataSource}
           columns={columns}
           rowClassName="editable-row"
-          pagination={this.showPagination(this.props.author.names)}
+          pagination={this.showPagination(this.props.data)}
         />
         <Button onClick={this.add} style={{ margin: '8px 0 16px' }}>
           New name
