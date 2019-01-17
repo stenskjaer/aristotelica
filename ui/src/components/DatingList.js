@@ -276,8 +276,7 @@ class DatingList extends Component {
     return values
   }
 
-
-  createDate = async (datingid, dateInfo, client) => {
+  registerDate = async (datingid, dateInfo, client) => {
     console.log("Start creating date")
 
     const yearQuery = await client.query({
@@ -397,6 +396,89 @@ class DatingList extends Component {
     return date
   }
 
+  createDateDetails = (values) => {
+    // This handles data sorting in different groups according to input date
+
+    let dateDetails = []
+    // Data builder based on date type
+    const typeDependent = (type) => {
+      const certainty = values[type + 'Certainty']
+      const decade = values[type + 'Decade']
+      const quarter = values[type + 'Quarter']
+      const century = () => {
+        if (quarter || decade) {
+          return quarter ? quarter[0] : decade[0]
+        }
+        if (values[type + 'Year']) {
+          // E.g.: 1583 / 100 => 15.83; Math.trunc(15.83) => 15; 15 * 100 => 1500
+          return Math.trunc(values[type + 'Year'] / 100) * 100
+        }
+      }
+      return {
+        approximate: certainty ? certainty.includes('approximate') : false,
+        uncertain: certainty ? certainty.includes('uncertain') : false,
+        century: century() ? century() : undefined,
+        decade: decade ? decade[1] : undefined,
+        quarter: quarter ? quarter[1] : undefined,
+      }
+    }
+
+    // Single date type
+    if (values.datingType === 'SINGLE') {
+      dateDetails.push({
+        datetype: 'SINGLE',
+        year: values.singleYear,
+        month: values.singleMonthDate ? values.singleMonthDate[0] : undefined,
+        day: values.singleMonthDate ? values.singleMonthDate[1] : undefined,
+        ...typeDependent('single'),
+      })
+    } else {
+      // Range date with start data
+      if (values.startYear || values.startDecade || values.startQuarter) {
+        let datingData = {}
+        if (values.startYear !== undefined) {
+          datingData = {
+            year: values.startYear,
+            month: values.startMonthDate ? values.startMonthDate[0] : undefined,
+            day: values.startMonthDate ? values.startMonthDate[1] : undefined
+          }
+        } else if (values.startDecade !== undefined) {
+          datingData = { year: values.startDecade[1] }
+        } else {
+          datingData = { year: values.startQuarter[1] }
+        }
+        dateDetails.push(
+          {
+            ...datingData,
+            datetype: 'START',
+            ...typeDependent('start'),
+          }
+        )
+      }
+      // Range date with end data
+      if (values.endYear || values.endDecade || values.endQuarter) {
+        let datingData = {}
+        if (values.endYear !== undefined) {
+          datingData = {
+            year: values.endYear,
+            month: values.endMonthDate ? values.endMonthDate[0] : undefined,
+            day: values.endMonthDate ? values.endMonthDate[1] : undefined
+          }
+        } else if (values.endDecade !== undefined) {
+          datingData = { year: values.endDecade[1] }
+        } else {
+          datingData = { year: values.endQuarter[1] }
+        }
+        dateDetails.push({
+          ...datingData,
+          datetype: 'END',
+          ...typeDependent('end'),
+        })
+      }
+    }
+    return dateDetails
+  }
+
   handleCreateUpdate = async () => {
     const form = this.formRef.props.form;
     let values = form.getFieldsValue()
@@ -472,89 +554,11 @@ class DatingList extends Component {
       })
     }
 
-    // PUT THIS IN SEPARATE FUNCTION
     // Create date details list of objects to create details from
-    let dateDetails = []
-
-    // DATA SORTING IN DIFFERENT BRANCHES ACCORDING TO INPUT DATA
-    // Single year registration (including months and days)
-    const typeDependent = (type) => {
-      const certainty = values[type + 'Certainty']
-      const decade = values[type + 'Decade']
-      const quarter = values[type + 'Quarter']
-      const century = () => {
-        if (quarter || decade) {
-          return quarter ? quarter[0] : decade[0]
-        }
-        if (values[type + 'Year']) {
-          // E.g.: 1583 / 100 => 15.83; Math.trunc(15.83) => 15; 15 * 100 => 1500
-          return Math.trunc(values[type + 'Year'] / 100) * 100
-        }
-      }
-      return {
-        approximate: certainty ? certainty.includes('approximate') : false,
-        uncertain: certainty ? certainty.includes('uncertain') : false,
-        century: century() ? century() : undefined,
-        decade: decade ? decade[1] : undefined,
-        quarter: quarter ? quarter[1] : undefined,
-      }
-    }
-
-    if (values.datingType === 'SINGLE') {
-      dateDetails.push({
-        datetype: 'SINGLE',
-        year: values.singleYear,
-        month: values.singleMonthDate ? values.singleMonthDate[0] : undefined,
-        day: values.singleMonthDate ? values.singleMonthDate[1] : undefined,
-        ...typeDependent('single'),
-      })
-    } else {
-      if (values.startYear || values.startDecade || values.startQuarter) {
-        let datingData = {}
-        if (values.startYear !== undefined) {
-          datingData = {
-            year: values.startYear,
-            month: values.startMonthDate ? values.startMonthDate[0] : undefined,
-            day: values.startMonthDate ? values.startMonthDate[1] : undefined
-          }
-        } else if (values.startDecade !== undefined) {
-          datingData = { year: values.startDecade[1] }
-        } else {
-          datingData = { year: values.startQuarter[1] }
-        }
-        dateDetails.push(
-          {
-            ...datingData,
-            datetype: 'START',
-            ...typeDependent('start'),
-          }
-        )
-      }
-
-      if (values.endYear || values.endDecade || values.endQuarter) {
-        let datingData = {}
-        if (values.endYear !== undefined) {
-          datingData = {
-            year: values.endYear,
-            month: values.endMonthDate ? values.endMonthDate[0] : undefined,
-            day: values.endMonthDate ? values.endMonthDate[1] : undefined
-          }
-        } else if (values.endDecade !== undefined) {
-          datingData = { year: values.endDecade[1] }
-        } else {
-          datingData = { year: values.endQuarter[1] }
-        }
-        dateDetails.push({
-          ...datingData,
-          datetype: 'END',
-          ...typeDependent('end'),
-        })
-      }
-    }
-
+    let dateDetails = this.createDateDetails(values)
 
     console.log("new/updated dating:", newDating)
-    newDating.dates = await Promise.all(dateDetails.map(date => this.createDate(
+    newDating.dates = await Promise.all(dateDetails.map(date => this.registerDate(
       newDating.id, date, this.props.client))
     )
     event.datings = event.datings || []
