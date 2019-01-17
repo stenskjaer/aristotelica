@@ -126,6 +126,7 @@ class AuthorEvents extends Component {
   handleUpdate = this.props.handleUpdate
   addUpdater = this.props.addUpdater
   removeUpdater = this.props.removeUpdater
+  isDrafted = this.props.isDrafted
 
   createEvent = async ({ id, type, description }) => {
     const { error, data } = await this.props.client.mutate({
@@ -275,6 +276,21 @@ class AuthorEvents extends Component {
     this.formRef.props.form.resetFields();
   }
 
+  handleDatingUpdate = (event) => {
+    // Push the dating updates from the child to the parent state
+    const newData = this.props.data
+    const eventIndex = newData.findIndex(x => x.id === event.id)
+    if (eventIndex > -1) {
+      newData.splice(eventIndex, 1, event)
+    } else {
+      newData.push(event)
+    }
+    this.handleUpdate({
+      relation: 'events',
+      data: newData
+    })
+  }
+
   saveFormRef = (formRef) => {
     this.formRef = formRef;
   }
@@ -313,22 +329,23 @@ class AuthorEvents extends Component {
         content: <DatingList
           datings={event.datings}
           type={event.type}
-          item={event}
+          event={event}
           client={this.props.client}
           editable={this.props.editable}
-          createItemEvent={this.createEvent}
-          removeItemEvent={this.delete}
+          handleDatingUpdate={this.handleDatingUpdate}
+          addUpdater={this.addUpdater}
+          removeUpdater={this.removeUpdater}
+          isDrafted={this.isDrafted}
           refetchQueries={['authorInfo']}
         />
       })
     })
 
-    console.log(data)
-
     return (
       <React.Fragment>
         <List
           itemLayout="vertical"
+          size="small"
           dataSource={eventsList}
           renderItem={item => (
             <List.Item key={item.id}>
@@ -344,7 +361,7 @@ class AuthorEvents extends Component {
           client={client}
           wrappedComponentRef={this.saveFormRef}
           visible={this.state.visibleForm}
-          handleUpdate={this.props.handleRelationUpdate}
+          handleUpdate={this.props.handleUpdate}
           handleDelete={this.delete}
           onCancel={this.handleCancel}
           onCreate={this.save}

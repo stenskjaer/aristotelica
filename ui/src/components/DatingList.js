@@ -4,21 +4,6 @@ import { createGUID, formatDates } from './utils';
 import { List, Button, Divider, message } from 'antd';
 import { CreateUpdateDating } from './CreateUpdateDating';
 
-const getEventId = (item, type) => {
-  if (item.events && item.events.length > 0) {
-    const event = item.events.find(d => d.type === type)
-    const id = (event && event.id) || undefined
-    if (id === undefined) {
-      console.warn(`The item events did non contain a ${type} event.`)
-    }
-    return id
-  } else {
-    return undefined
-  }
-}
-
-const getEvent = (item, type) => item.events.find(d => d.type === type) || undefined
-
 const CREATE_DATING = gql`
   mutation createDating(
     $eventid: ID!
@@ -40,14 +25,10 @@ const CREATE_DATING = gql`
   }
 `
 
-const createDating = async (datingid, values, client) => {
+const createDating = async ({ variables, client }) => {
   const { error, data } = await client.mutate({
     mutation: CREATE_DATING,
-    variables: {
-      ...values,
-      datingid: datingid,
-      datingtype: values.datingType
-    },
+    variables: variables,
   });
   if (error) {
     message.error(error.message)
@@ -71,14 +52,10 @@ const UPDATE_DATING = gql`
   }
 `
 
-const updateDating = async (values, client) => {
+const updateDating = async ({ variables, client }) => {
   const { error, data } = await client.mutate({
     mutation: UPDATE_DATING,
-    variables: {
-      ...values,
-      datingid: values.datingid,
-      datingtype: values.datingType
-    },
+    variables: variables,
   });
   if (error) {
     message.error(error.message)
@@ -180,6 +157,7 @@ const GET_YEAR = gql`
   query getYear($value: Int!) {
     Year(value: $value) {
       id
+      value
       months {
         id
         value
@@ -191,99 +169,6 @@ const GET_YEAR = gql`
     }
   }
 `
-
-const createDate = async (datingid, dateInfo, client, refetchQueries) => {
-
-  if (dateInfo.dateid === undefined) {
-    dateInfo.dateid = createGUID()
-  }
-
-  const yearQuery = await client.query({
-    query: GET_YEAR,
-    variables: { value: dateInfo.year }
-  })
-  const year = yearQuery.data.Year[0]
-
-  // Create date and add year
-  const date = await client.mutate({
-    mutation: CREATE_DATE,
-    variables: {
-      ...dateInfo,
-      datingid: datingid,
-      yearid: year.id,
-      type: dateInfo.datetype,
-      decade: dateInfo.decade,
-      quarter: dateInfo.quarter,
-    },
-    refetchQueries: refetchQueries,
-  })
-
-  // Month and day creation and registration if applicable.
-  if (dateInfo.month !== undefined) {
-    let month
-    let day
-    const months = year.months
-    if (months === undefined || !months.find(x => x.value === dateInfo.month)) {
-      month = await client.mutate({
-        mutation: CREATE_MONTH,
-        variables: {
-          id: createGUID(),
-          yearid: year.id,
-          value: dateInfo.month
-        },
-        refetchQueries: refetchQueries,
-      })
-      month = month.data.CreateMonth
-    } else {
-      // find month
-      month = months.find(x => x.value === dateInfo.month)
-    }
-    const monthDate = await client.mutate({
-      mutation: CREATE_DATE_MONTH,
-      variables: {
-        dateid: dateInfo.dateid,
-        monthid: month.id
-      },
-      refetchQueries: refetchQueries,
-    })
-    if (monthDate.error) {
-      console.warn("monthDate error: ", monthDate.error.messagev)
-    }
-
-    if (dateInfo.day !== undefined) {
-      const days = month && month.days ? month.days : undefined
-      if (days === undefined || !days.find(x => x.value === dateInfo.day)) {
-        day = await client.mutate({
-          mutation: CREATE_DAY,
-          variables: {
-            id: createGUID(),
-            monthid: month.id,
-            value: dateInfo.day
-          },
-          refetchQueries: refetchQueries,
-        })
-        day = day.data.CreateDay
-      } else {
-        // find day
-        day = days.find(x => x.value === dateInfo.day)
-      }
-      const dayDate = await client.mutate({
-        mutation: ADD_DATE_DAY,
-        variables: {
-          dateid: dateInfo.dateid,
-          dayid: day.id
-        },
-        refetchQueries: refetchQueries,
-      })
-      if (dayDate.error) {
-        console.warn("dayDate error: ", dayDate.error.messagev)
-      }
-    }
-  }
-
-  // Close the big map by returning the date object
-  return date
-}
 
 const DELETE_DATING = gql`
   mutation deleteDating(
@@ -313,6 +198,54 @@ const DELETE_DATE = gql`
  }
 `
 
+const saveDate = async ({ variables, client }) => {
+  await client.mutate({
+    mutation: CREATE_DATE,
+    variables,
+  })
+}
+
+const saveMonth = async ({ variables, client }) => {
+  await client.mutate({
+    mutation: CREATE_MONTH,
+    variables,
+  })
+}
+
+const saveMonthDate = async ({ variables, client }) => {
+  const monthDate = await client.mutate({
+    mutation: CREATE_DATE_MONTH,
+    variables,
+  })
+  if (monthDate.error) {
+    console.warn("monthDate error: ", monthDate.error.messagev)
+  }
+}
+
+const saveDay = async ({ variables, client }) => {
+  await client.mutate({
+    mutation: CREATE_DAY,
+    variables,
+  })
+}
+
+const saveDayDate = async ({ variables, client }) => {
+  const dayDate = await client.mutate({
+    mutation: ADD_DATE_DAY,
+    variables
+  })
+  if (dayDate.error) {
+    console.warn("dayDate error: ", dayDate.error.messagev)
+  }
+}
+
+const removeDatingDates = async ({ variables, client }) => {
+  await client.mutate({
+    mutation: DELETE_DATES_FROM_DATING,
+    variables,
+  })
+}
+
 class DatingList extends Component {
   state = {
     visibleForm: false,
@@ -321,17 +254,13 @@ class DatingList extends Component {
       endTabs: '1',
       datingRange: 'SINGLE'
     },
-    visibleDetails: [],
   };
 
-  createItemEvent = this.props.createItemEvent
-  removeItemEvent = this.props.removeItemEvent
 
   handleCancel = () => {
     this.setState({ visibleForm: false });
     this.formRef.props.form.resetFields();
   }
-
 
   cleanupValues = (values) => {
     ['single', 'start', 'end'].forEach(type => {
@@ -347,6 +276,127 @@ class DatingList extends Component {
     return values
   }
 
+
+  createDate = async (datingid, dateInfo, client) => {
+    console.log("Start creating date")
+
+    const yearQuery = await client.query({
+      query: GET_YEAR,
+      variables: { value: dateInfo.year }
+    })
+    const year = await yearQuery.data.Year[0]
+
+    // Create date and add year
+    const date = {
+      id: dateInfo.dateid || createGUID(),
+      datingid: datingid,
+      type: dateInfo.datetype,
+      approximate: dateInfo.approximate,
+      uncertain: dateInfo.uncertain,
+      century: dateInfo.century,
+      quarter: dateInfo.quarter,
+      decade: dateInfo.decade,
+      year: {
+        id: year.id,
+        value: year.value
+      }
+    }
+    console.log("Created date: ", date)
+    // register saveDate
+    this.props.addUpdater({
+      id: datingid,
+      func: saveDate,
+      variables: {
+        variables: {
+          ...date,
+          dateid: date.id,
+          yearid: date.year.id
+        },
+        client: this.props.client
+      }
+    })
+
+    // Month and day creation and registration if applicable.
+    if (dateInfo.month !== undefined) {
+      let month
+      let day
+      const months = year.months
+      if (months === undefined || !months.find(x => x.value === dateInfo.month)) {
+        month = {
+          id: createGUID(),
+          yearid: year.id,
+          value: dateInfo.month
+        }
+        // REGISTER saveMonth
+        this.props.addUpdater({
+          id: datingid,
+          func: saveMonth,
+          variables: {
+            variables: month,
+            client: this.props.client
+          }
+        })
+      } else {
+        // find month
+        month = months.find(x => x.value === dateInfo.month)
+      }
+      // REGISTER saveMonthDate
+      this.props.addUpdater({
+        id: datingid,
+        func: saveMonthDate,
+        variables: {
+          variables: {
+            dateid: date.id,
+            monthid: month.id
+          },
+          client: this.props.client
+        }
+      })
+      // Add the month to the date
+      date.month = month
+
+      if (dateInfo.day !== undefined) {
+        const days = month && month.days ? month.days : undefined
+        if (days === undefined || !days.find(x => x.value === dateInfo.day)) {
+          day = {
+            id: createGUID(),
+            monthid: month.id,
+            value: dateInfo.day
+          }
+          // REGISTER saveDay
+          this.props.addUpdater({
+            id: datingid,
+            func: saveDay,
+            variables: {
+              variables: day,
+              client: this.props.client
+            }
+          })
+        } else {
+          // find day
+          day = days.find(x => x.value === dateInfo.day)
+        }
+
+        // REGISTER saveDayDate
+        this.props.addUpdater({
+          id: datingid,
+          func: saveDayDate,
+          variables: {
+            variables: {
+              dateid: date.id,
+              dayid: day.id
+            },
+            client: this.props.client
+          }
+        })
+        // Add the day to the date
+        date.day = day
+      }
+    }
+    // Close the big map by returning the date object
+    return date
+  }
+
   handleCreateUpdate = async () => {
     const form = this.formRef.props.form;
     let values = form.getFieldsValue()
@@ -358,31 +408,71 @@ class DatingList extends Component {
         }
       }
     }
+    console.log("values:", values)
 
     // Get event ID
-    values.eventid = getEventId(this.props.item, this.props.type)
-    if (values.eventid === undefined) {
-      values.eventid = await this.createItemEvent(this.props.type)
+    const event = this.props.event
+
+    // Create or update dating data
+    const newDating = {
+      id: values.datingid || createGUID(),
+      source: values.source,
+      note: values.note,
+      type: values.datingType,
     }
 
-    // First, find dating and remove existing dates if it has any (meaning this is an update)
-    let datingid = values.datingid || undefined
-    if (datingid) {
-      const { error } = await this.props.client.mutate({
-        mutation: DELETE_DATES_FROM_DATING,
-        variables: { datingid: datingid }
-      });
-      if (error) {
-        console.warn("Error in deleting dates: ")
-        console.warn(error.message)
+    if (values.datingid) {
+      console.log("Update to dating")
+      // First, if this is an update, remove existing data
+      if (this.props.isDrafted(values.datingid)) {
+        console.log("Is drafted, remove those updaters")
+        // If it is not commited to the DB, remove existing updaters
+        this.props.removeUpdater(values.datingid)
+      } else {
+        console.log("Is committed, register deleting updaters")
+        // If it is commited to DB, remove all Date records
+        this.props.addUpdater({
+          id: values.datingid,
+          func: removeDatingDates,
+          variables: {
+            variables: { datingid: values.datingid },
+            client: this.props.client
+          }
+        })
       }
-      updateDating(values, this.props.client)
+      // And add updater to update the dating itself
+      this.props.addUpdater({
+        id: values.datingid,
+        func: updateDating,
+        variables: {
+          variables: {
+            datingid: newDating.id,
+            datingtype: newDating.type,
+            note: newDating.note,
+            source: newDating.source
+          },
+          client: this.props.client
+        }
+      })
     } else {
-      // Create a new dating
-      datingid = createGUID()
-      createDating(datingid, values, this.props.client)
+      // This is not an update, so add updater to create it.
+      this.props.addUpdater({
+        id: newDating.id,
+        func: createDating,
+        variables: {
+          variables: {
+            datingid: newDating.id,
+            eventid: event.id,
+            datingtype: newDating.type,
+            note: newDating.note,
+            source: newDating.source
+          },
+          client: this.props.client
+        }
+      })
     }
 
+    // PUT THIS IN SEPARATE FUNCTION
     // Create date details list of objects to create details from
     let dateDetails = []
 
@@ -462,10 +552,22 @@ class DatingList extends Component {
       }
     }
 
-    // Handle each date details item
-    dateDetails.forEach(date => {
-      createDate(datingid, date, this.props.client, this.props.refetchQueries)
-    })
+
+    console.log("new/updated dating:", newDating)
+    newDating.dates = await Promise.all(dateDetails.map(date => this.createDate(
+      newDating.id, date, this.props.client))
+    )
+    event.datings = event.datings || []
+    const datingIndex = event.datings.findIndex(x => x.id === newDating.id)
+    if (datingIndex > -1) {
+      event.datings.splice(datingIndex, 1, newDating)
+    } else {
+      event.datings.push(newDating)
+    }
+
+    // Push up the updates up into the event in parent state
+    this.props.handleDatingUpdate(event)
+
 
     form.resetFields();
     this.setState()
@@ -494,11 +596,6 @@ class DatingList extends Component {
     if (error) {
       message.error(error.message)
     }
-    const event = getEvent(this.props.item, this.props.type)
-    if (event && event.datings.length === 1) {
-      // This is the last dating on the event, so we remove it.
-      this.removeItemEvent(event.id)
-    }
   }
 
   normDateType = (type) => {
@@ -519,19 +616,6 @@ class DatingList extends Component {
       visibleForm: true,
     });
   }
-
-  displayDetails = (id, e) => {
-    const contentList = this.state.visibleDetails
-    const idx = contentList.indexOf(id)
-    if (idx === -1) {
-      contentList.push(id)
-    } else {
-      contentList.splice(idx)
-    }
-    this.setState(contentList)
-  }
-
-  displayingDetails = (id) => this.state.visibleDetails.includes(id)
 
   updateModal = (dating) => {
     const shared = {
@@ -609,6 +693,10 @@ class DatingList extends Component {
 
     return (
       <div>
+        <h4>
+          Datings
+          {<Button onClick={this.showModal} shape="circle" size="small" icon="plus" style={{ marginLeft: '1ex' }} />}
+        </h4>
         <List
           itemLayout="vertical"
           dataSource={datings}
@@ -642,7 +730,6 @@ class DatingList extends Component {
               onCreate={this.handleCreateUpdate}
               tabsPositions={this.state.tabsPositions}
             />
-            <Button type="primary" onClick={this.showModal}>New dating</Button>
           </div>
         }
 

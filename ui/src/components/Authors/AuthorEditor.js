@@ -31,7 +31,28 @@ class AuthorEditor extends Component {
     updaters: {
       propertyUpdater: undefined,
       relationUpdaters: undefined
+    },
+    drafts: []
+  }
+
+  addDraft = (id) => {
+    if (!this.isDrafted(id)) {
+      this.setState(prev => ({
+        drafts: [...prev.drafts, id]
+      }))
     }
+  }
+
+  removeDraft = (id) => {
+    if (this.isDrafted(id)) {
+      this.setState(prev => ({
+        drafts: prev.drafts.filter(x => x !== id)
+      }))
+    }
+  }
+
+  isDrafted = (id) => {
+    return this.state.drafts.includes(id)
   }
 
   removeUpdater = (id) => {
@@ -54,25 +75,41 @@ class AuthorEditor extends Component {
   }
 
   addUpdater = (updater) => {
-    console.log("adding ", updater)
-    let curUpdaters = this.state.updaters.relationUpdaters || []
-    console.log("current updaters", curUpdaters)
-    const updaterIndex = curUpdaters.findIndex(x => x.id === updater.id)
-    console.log("index", updaterIndex)
-    if (updaterIndex > -1) {
-      curUpdaters.splice(updaterIndex, 1, {
-        ...updater
-      })
-    } else {
-      curUpdaters.push(updater)
-    }
-    console.log("updated, new updaters:", curUpdaters)
-    this.setState((prev) => ({
-      updaters: {
-        ...prev.updaters,
-        relationUpdaters: curUpdaters
+    console.log("adding updater", updater)
+    this.setState((prev) => {
+      let curUpdaters = prev.updaters.relationUpdaters || []
+      console.log("current updaters", curUpdaters)
+      const updaterIndex = curUpdaters.findIndex(x => x.id === updater.id)
+      console.log("index", updaterIndex)
+      if (updaterIndex > -1) {
+        const curFuncs = curUpdaters[updaterIndex].funcs
+        // Same id and same function, then replace.
+        curUpdaters.splice(updaterIndex, 1, {
+          id: updater.id,
+          funcs: [...curFuncs, {
+            func: updater.func,
+            variables: updater.variables
+          }]
+        })
+      } else {
+        curUpdaters.push({
+          id: updater.id,
+          funcs: [{
+            func: updater.func,
+            variables: updater.variables
+          }]
+        })
       }
-    }))
+      console.log("returning new updaters:", curUpdaters)
+
+      return ({
+        updaters: {
+          ...prev.updaters,
+          relationUpdaters: curUpdaters
+        }
+      })
+    })
+    this.addDraft(updater.id)
   }
 
   handleRelationUpdate = ({ relation, data }) => {
@@ -122,6 +159,7 @@ class AuthorEditor extends Component {
   }
 
   handleSave = () => {
+    console.log("Starting save to DB")
     const { relationUpdaters, propertyUpdater } = this.state.updaters
     if (propertyUpdater) {
       console.log("Prop udpater", propertyUpdater)
@@ -129,7 +167,12 @@ class AuthorEditor extends Component {
     }
     if (relationUpdaters) {
       console.log("Relation udpater", relationUpdaters)
-      relationUpdaters.map(({ func, variables }) => func(variables))
+      relationUpdaters.forEach(updater => {
+        updater.funcs.forEach(({ func, variables }) => {
+          console.log("Running: ", func, variables)
+          func(variables)
+        })
+      })
     }
   }
 
@@ -163,6 +206,7 @@ class AuthorEditor extends Component {
             client={client}
             id={author.id}
             data={author.events}
+            isDrafted={this.isDrafted}
             handleUpdate={this.handleRelationUpdate}
             addUpdater={this.addUpdater}
             removeUpdater={this.removeUpdater}
