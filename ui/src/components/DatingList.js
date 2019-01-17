@@ -699,7 +699,11 @@ class DatingList extends Component {
       <div>
         <h4>
           Datings
-          {<Button onClick={this.showModal} shape="circle" size="small" icon="plus" style={{ marginLeft: '1ex' }} />}
+          {
+            editable
+              ? <Button onClick={this.showModal} shape="circle" size="small" icon="plus" style={{ marginLeft: '1ex' }} />
+              : ''
+          }
         </h4>
         <List
           itemLayout="vertical"

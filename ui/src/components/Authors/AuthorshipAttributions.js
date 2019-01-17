@@ -94,17 +94,13 @@ const DELETE_NAME = gql`
 `
 
 const deleteName = async ({ nameid, client }) => {
-  const { error, data } = await client.mutate({
+  await client.mutate({
     mutation: DELETE_NAME,
     variables: {
       nameid: nameid,
     },
     refetchQueries: ['allPersons']
-  });
-  if (error) {
-    console.warn(error.message)
-  }
-  return data.DeleteName.id
+  })
 }
 
 const EditableRow = ({ form, index, ...props }) => (
@@ -175,13 +171,20 @@ class AuthorshipAttributions extends Component {
     editingKey: '',
   }
 
+  isEditing = (record) => {
+    return record.key === this.state.editingKey;
+  };
+
+  edit(key) {
+    this.setState({ editingKey: key });
+  }
+
   add = () => {
     const newData = this.props.data;
     const newItem = {
       value: '',
       language: Defaults.language,
       id: createGUID(),
-      draft: true,
     }
     newData.push(newItem)
     // Send up the state
@@ -194,7 +197,7 @@ class AuthorshipAttributions extends Component {
     const index = newData.findIndex(item => item.id === record.id);
     newData.splice(index, 1);
     this.props.handleUpdate({ relation: 'names', data: newData })
-    if (record.draft) {
+    if (this.props.isDrafted(record.id)) {
       this.props.removeUpdater(record.id)
     } else {
       this.props.addUpdater({
@@ -203,16 +206,15 @@ class AuthorshipAttributions extends Component {
         variables: { nameid: record.id, client: this.props.client }
       })
     }
-
   }
 
-  isEditing = (record) => {
-    return record.key === this.state.editingKey;
+  cancel = (record) => {
+    const newData = [...this.props.data];
+    const index = newData.findIndex(item => item.id === record.id);
+    newData.splice(index, 1);
+    this.props.handleUpdate({ relation: 'names', data: newData })
+    this.setState({ editingKey: '' });
   };
-
-  edit(key) {
-    this.setState({ editingKey: key });
-  }
 
   save(form, record) {
     form.validateFields((error, values) => {
@@ -236,7 +238,7 @@ class AuthorshipAttributions extends Component {
       this.props.handleUpdate({ relation: 'names', data: newData })
 
       // Save the mutation functions in the updater registry
-      if (record.draft) {
+      if (this.props.isDrafted(record.key)) {
         this.props.addUpdater({
           id: record.key,
           func: updateName,
@@ -255,17 +257,14 @@ class AuthorshipAttributions extends Component {
           }
         })
       }
-
     });
   }
-
-  cancel = () => {
-    this.setState({ editingKey: '' });
-  };
 
   showPagination = (records) => records.length > 10
 
   render() {
+    const { editable } = this.props
+
     const columns = [
       {
         title: 'Name',
@@ -312,7 +311,7 @@ class AuthorshipAttributions extends Component {
                     )}
                   </EditableContext.Consumer>
                   <Divider type="vertical" />
-                  <a onClick={() => this.cancel(record.key)}>Cancel</a>
+                  <a onClick={() => this.cancel(record)}>Cancel</a>
                 </span>
               ) : (
                   <React.Fragment>
@@ -363,7 +362,15 @@ class AuthorshipAttributions extends Component {
     }))
 
     return (
-      <div>
+      <React.Fragment>
+        <h2>
+          {this.props.heading}
+          {
+            editable
+              ? <Button onClick={this.add} shape="circle" size="small" icon="plus" style={{ marginLeft: '1ex' }} />
+              : ''
+          }
+        </h2>
         <Table
           components={components}
           size={'small'}
@@ -373,10 +380,7 @@ class AuthorshipAttributions extends Component {
           rowClassName="editable-row"
           pagination={this.showPagination(this.props.data)}
         />
-        <Button onClick={this.add} style={{ margin: '8px 0 16px' }}>
-          New name
-        </Button>
-      </div>
+      </React.Fragment>
 
     );
   }

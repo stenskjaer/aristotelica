@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { Mutation, Query } from "react-apollo";
 import gql from "graphql-tag";
-import { Link } from "react-router-dom";
 import { Formik } from 'formik';
 import { Form, Input, Button } from 'antd';
 import FormItem from "antd/lib/form/FormItem";

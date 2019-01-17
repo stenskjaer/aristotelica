@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import gql from "graphql-tag";
 import { List, Button, Form, Modal, Input, message } from "antd";
-import { createGUID, itemEventDatings } from '../utils';
+import { createGUID } from '../utils';
 import DatingList from "../DatingList";
 
 const CREATE_PERSON_EVENT = gql`
@@ -90,6 +90,7 @@ export const CreateUpdateEvent = Form.create()(
       return (
         <Modal
           visible={visible}
+          onCancel={onCancel}
           title="Create new event"
           okText="Save"
           footer={[
@@ -343,9 +344,17 @@ class AuthorEvents extends Component {
 
     return (
       <React.Fragment>
+        <h2>
+          {this.props.heading}
+          {
+            editable
+              ? <Button onClick={this.toggleModal} shape="circle" size="small" icon="plus" style={{ marginLeft: '1ex' }} />
+              : ''
+          }
+        </h2>
         <List
+          bordered={true}
           itemLayout="vertical"
-          size="small"
           dataSource={eventsList}
           renderItem={item => (
             <List.Item key={item.id}>
@@ -366,7 +375,6 @@ class AuthorEvents extends Component {
           onCancel={this.handleCancel}
           onCreate={this.save}
         />
-        <Button onClick={this.toggleModal}>New event</Button>
       </React.Fragment>
     );
 

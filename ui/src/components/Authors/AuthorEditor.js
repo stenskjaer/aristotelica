@@ -72,6 +72,7 @@ class AuthorEditor extends Component {
         relationUpdaters: curUpdaters
       }
     }))
+    this.removeDraft(id)
   }
 
   addUpdater = (updater) => {
@@ -188,24 +189,25 @@ class AuthorEditor extends Component {
       <React.Fragment key={author.id}>
         <h1>{defaultName(author)}</h1>
         <section>
-          <h2>Names</h2>
           <AuthorshipAttributions
             editable={editable}
+            id={author.id}
             client={client}
+            data={author.names}
+            heading={'Names'}
+            isDrafted={this.isDrafted}
             handleUpdate={this.handleRelationUpdate}
             addUpdater={this.addUpdater}
             removeUpdater={this.removeUpdater}
-            data={author.names}
-            id={author.id}
           />
         </section>
         <section>
-          <h2>Events</h2>
           <AuthorEvents
             editable={editable}
-            client={client}
             id={author.id}
+            client={client}
             data={author.events}
+            heading={'Events'}
             isDrafted={this.isDrafted}
             handleUpdate={this.handleRelationUpdate}
             addUpdater={this.addUpdater}
