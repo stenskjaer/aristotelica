@@ -5,7 +5,7 @@ import AuthorshipAttributions from "./AuthorshipAttributions";
 import AuthorTexts from "./AuthorTexts";
 import AuthorEvents from "./AuthorEvents";
 import EditableTextArea from "../EditableTextArea";
-import { Button } from "antd";
+import { Button, message } from "antd";
 
 const UPDATE_PERSON = gql`
   mutation UpdatePerson(
@@ -33,6 +33,7 @@ class AuthorEditor extends Component {
       relationUpdaters: undefined
     },
     drafts: []
+    saving: false,
   }
 
   addDraft = (id) => {
@@ -159,22 +160,31 @@ class AuthorEditor extends Component {
     return data.UpdatePerson.id
   }
 
+  saving = (func) => {
+    this.setState({ saving: true }, func)
+    setTimeout(() => { this.setState({ saving: false }) }, 200)
+  }
+
   handleSave = () => {
-    console.log("Starting save to DB")
-    const { relationUpdaters, propertyUpdater } = this.state.updaters
-    if (propertyUpdater) {
-      console.log("Prop udpater", propertyUpdater)
-      propertyUpdater.func(propertyUpdater.variables)
-    }
-    if (relationUpdaters) {
-      console.log("Relation udpater", relationUpdaters)
-      relationUpdaters.forEach(updater => {
-        updater.funcs.forEach(({ func, variables }) => {
-          console.log("Running: ", func, variables)
-          func(variables)
-        })
-      })
-    }
+    const { updaters } = this.state
+    this.saving(() => {
+      try {
+        if (updaters) {
+          updaters.forEach(updater => {
+            updater.funcs.forEach(({ func, variables }) => {
+              func(variables)
+            })
+          })
+        }
+      } catch (error) {
+        message.error(
+          `An error occurred during saving. 
+          If the problem persists, please file a bug report.`
+        )
+        console.warn("Error during saving:", error)
+      }
+      message.success("Saved!")
+    })
   }
 
 
@@ -257,7 +267,13 @@ class AuthorEditor extends Component {
         <section>
           <h2>Literature</h2>
         </section>
-        <Button onClick={this.handleSave}>Save</Button>
+        <Button
+          type='primary'
+          onClick={this.handleSave}
+          loading={this.state.saving}
+        >
+          Save
+        </Button>
       </React.Fragment>
     );
   }
