@@ -32,7 +32,6 @@ const ADD_NAME = gql`
 `
 
 const addPersonName = async ({ values, client }) => {
-  console.log(values, client)
   const { error, data } = await client.mutate({
     mutation: ADD_NAME,
     variables: {

@@ -205,28 +205,33 @@ class AuthorEvents extends Component {
 
     // Register delete functions on event, datings, and dates
     const event = newData.find(x => x.id === values.id)
-    if (event.datings && event.datings.length > 0) {
-      event.datings.forEach(dating => {
-        this.props.addUpdater({
-          id: dating.id,
-          func: this.deleteDates,
-          variables: { datingid: dating.id }
+    if (this.isDrafted(event.id)) {
+      this.removeUpdater(event.id)
+    } else {
+      if (event.datings && event.datings.length > 0) {
+        event.datings.forEach(dating => {
+          this.props.addUpdater({
+            id: dating.id,
+            func: this.deleteDates,
+            variables: { datingid: dating.id }
+          })
+          this.props.addUpdater({
+            id: dating.id,
+            func: this.deleteDating,
+            variables: { dateid: dating.id }
+          })
         })
-        this.props.addUpdater({
-          id: dating.id,
-          func: this.deleteDating,
-          variables: { dateid: dating.id }
-        })
+      }
+      this.props.addUpdater({
+        id: event.id,
+        func: this.deleteEvent,
+        variables: {
+          eventid: event.id,
+          personid: this.props.id
+        }
       })
     }
-    this.props.addUpdater({
-      id: event.id,
-      func: this.deleteEvent,
-      variables: {
-        eventid: event.id,
-        personid: this.props.id
-      }
-    })
+
 
     // Remove the event from the state
     const eventIndex = newData.findIndex(x => x.id === values.id)
