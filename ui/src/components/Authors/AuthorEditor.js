@@ -28,11 +28,8 @@ const UPDATE_PERSON = gql`
 class AuthorEditor extends Component {
   state = {
     author: this.props.data,
-    updaters: {
-      propertyUpdater: undefined,
-      relationUpdaters: undefined
-    },
-    drafts: []
+    updaters: undefined,
+    drafts: [],
     saving: false,
   }
 
@@ -57,35 +54,25 @@ class AuthorEditor extends Component {
   }
 
   removeUpdater = (id) => {
-    console.log("removing", id)
-    let curUpdaters = this.state.updaters.relationUpdaters || []
-    console.log("curren", curUpdaters)
+    let curUpdaters = this.state.updaters || []
     const updaterIndex = curUpdaters.findIndex(x => x.id === id)
-    if (updaterIndex > -1) {
+    try {
       curUpdaters.splice(updaterIndex, 1)
-    } else {
-      console.warn("Updater not found in updater registry during deletion: ", id)
+    } catch (e) {
+      console.log("Updater not found in updater registry during deletion: ", id, e)
     }
-    console.log("updated:", curUpdaters)
     this.setState((prev) => ({
-      updaters: {
-        ...prev.updaters,
-        relationUpdaters: curUpdaters
-      }
+      updaters: curUpdaters
     }))
     this.removeDraft(id)
   }
 
   addUpdater = (updater) => {
-    console.log("adding updater", updater)
     this.setState((prev) => {
-      let curUpdaters = prev.updaters.relationUpdaters || []
-      console.log("current updaters", curUpdaters)
+      let curUpdaters = prev.updaters || []
       const updaterIndex = curUpdaters.findIndex(x => x.id === updater.id)
-      console.log("index", updaterIndex)
       if (updaterIndex > -1) {
         const curFuncs = curUpdaters[updaterIndex].funcs
-        // Same id and same function, then replace.
         curUpdaters.splice(updaterIndex, 1, {
           id: updater.id,
           funcs: [...curFuncs, {
@@ -102,19 +89,42 @@ class AuthorEditor extends Component {
           }]
         })
       }
-      console.log("returning new updaters:", curUpdaters)
-
       return ({
-        updaters: {
-          ...prev.updaters,
-          relationUpdaters: curUpdaters
-        }
+        updaters: curUpdaters
       })
     })
     this.addDraft(updater.id)
   }
 
-  handleRelationUpdate = ({ relation, data }) => {
+  addFlatUpdater = (updater) => {
+    this.setState((prev) => {
+      let curUpdaters = prev.updaters || []
+      const updaterIndex = curUpdaters.findIndex(x => x.id === updater.id)
+      if (updaterIndex > -1) {
+        curUpdaters.splice(updaterIndex, 1, {
+          id: updater.id,
+          funcs: [{
+            func: updater.func,
+            variables: updater.variables
+          }]
+        })
+      } else {
+        curUpdaters.push({
+          id: updater.id,
+          funcs: [{
+            func: updater.func,
+            variables: updater.variables
+          }]
+        })
+      }
+      return ({
+        updaters: curUpdaters
+      })
+    })
+    this.addDraft(updater.id)
+  }
+
+  updateNestedProperties = ({ relation, data }) => {
     const newAuthor = this.state.author
     newAuthor[relation] = data
     this.setState({
@@ -122,18 +132,14 @@ class AuthorEditor extends Component {
     })
   }
 
-  handlePropertyState = ({ field, content }) => {
+  updateFlatProperties = ({ field, content }) => {
     const newAuthor = this.state.author
     newAuthor[field] = content
     this.setState({
       author: newAuthor,
     })
-    this.propertyUpdater()
-  }
-
-  propertyUpdater = () => {
-    const newUpdaters = this.state.updaters
-    newUpdaters.propertyUpdater = {
+    this.addFlatUpdater({
+      id: this.props.data.id,
       func: this.updatePerson,
       variables: {
         id: this.state.author.id,
@@ -142,14 +148,10 @@ class AuthorEditor extends Component {
         biography: this.state.author.biography,
         modified: new Date()
       }
-    }
-    this.setState({
-      updaters: newUpdaters
     })
   }
 
   updatePerson = async (variables) => {
-    console.log("Running person update")
     const { error, data } = await this.props.client.mutate({
       mutation: UPDATE_PERSON,
       variables: variables,
@@ -206,7 +208,7 @@ class AuthorEditor extends Component {
             data={author.names}
             heading={'Names'}
             isDrafted={this.isDrafted}
-            handleUpdate={this.handleRelationUpdate}
+            handleUpdate={this.updateNestedProperties}
             addUpdater={this.addUpdater}
             removeUpdater={this.removeUpdater}
           />
@@ -219,7 +221,7 @@ class AuthorEditor extends Component {
             data={author.events}
             heading={'Events'}
             isDrafted={this.isDrafted}
-            handleUpdate={this.handleRelationUpdate}
+            handleUpdate={this.updateNestedProperties}
             addUpdater={this.addUpdater}
             removeUpdater={this.removeUpdater}
           />
@@ -230,7 +232,7 @@ class AuthorEditor extends Component {
             heading={'Description'}
             data={author}
             field={'description'}
-            handleUpdate={this.handlePropertyState}
+            handleUpdate={this.updateFlatProperties}
           />
         </section>
         <section>
@@ -239,7 +241,7 @@ class AuthorEditor extends Component {
             heading={'Note'}
             data={author}
             field={'note'}
-            handleUpdate={this.handlePropertyState}
+            handleUpdate={this.updateFlatProperties}
           />
         </section>
         <section>
@@ -248,7 +250,7 @@ class AuthorEditor extends Component {
             heading={'Biography'}
             data={author}
             field={'biography'}
-            handleUpdate={this.handlePropertyState}
+            handleUpdate={this.updateFlatProperties}
           />
         </section>
         <section>
