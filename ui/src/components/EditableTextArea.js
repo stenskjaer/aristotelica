@@ -45,6 +45,7 @@ class EditableTextArea extends React.Component {
   save = () => {
     this.form.validateFields((error, values) => {
       if (error) {
+        console.warn("Error during saving:", error)
         return;
       }
       this.toggleEdit();
