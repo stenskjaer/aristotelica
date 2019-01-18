@@ -84,7 +84,7 @@ export const CreateUpdateEvent = Form.create()(
   class extends Component {
 
     render() {
-      const { visible, onCancel, onCreate, handleDelete, form } = this.props;
+      const { visible, onCancel, onCreate, handleDelete, updating, form } = this.props;
       const { getFieldDecorator } = form
 
       return (
@@ -98,9 +98,13 @@ export const CreateUpdateEvent = Form.create()(
             <Button key="submit" type="primary" onClick={onCreate}>
               Submit
             </Button>,
-            <Button key="remove" type="danger" onClick={() => handleDelete()}>
-              Delete
+            (
+              updating &&
+              <Button key="remove" type="danger" onClick={() => handleDelete()}>
+                Delete
             </Button>
+            )
+
           ]}
         >
           <Form>
@@ -230,6 +234,7 @@ class AuthorEvents extends Component {
     this.handleUpdate({ relation: 'events', data: newData })
 
     this.toggleModal()
+    this.setState({ updating: false })
     this.formRef.props.form.resetFields();
   }
 
@@ -269,11 +274,13 @@ class AuthorEvents extends Component {
     }
 
     this.toggleModal()
+    this.setState({ updating: false })
     this.formRef.props.form.resetFields();
   }
 
   handleCancel = () => {
     this.toggleModal();
+    this.setState({ updating: false })
     this.formRef.props.form.resetFields();
   }
 
@@ -303,6 +310,7 @@ class AuthorEvents extends Component {
       type: event.type,
       description: event.description
     })
+    this.setState({ updating: true })
     this.toggleModal()
   }
 
@@ -370,6 +378,7 @@ class AuthorEvents extends Component {
           client={client}
           wrappedComponentRef={this.saveFormRef}
           visible={this.state.visibleForm}
+          updating={this.state.updating}
           handleUpdate={this.props.handleUpdate}
           handleDelete={this.delete}
           onCancel={this.handleCancel}
