@@ -179,15 +179,21 @@ class AuthorshipAttributions extends Component {
   }
 
   add = () => {
-    const newData = this.props.data;
+    const newData = [...this.props.data];
     const newItem = {
       value: '',
       language: Defaults.language,
       id: createGUID(),
+      draft: true,
     }
     newData.push(newItem)
     // Send up the state
-    this.props.handleUpdate({ relation: 'names', data: newData })
+    this.props.handleUpdate({
+      relation: 'names',
+      data: newData,
+      updaters: [],
+      operation: 'add'
+    })
     this.edit(newItem.id)
   }
 
@@ -195,23 +201,32 @@ class AuthorshipAttributions extends Component {
     const newData = [...this.props.data];
     const index = newData.findIndex(item => item.id === record.id);
     newData.splice(index, 1);
-    this.props.handleUpdate({ relation: 'names', data: newData })
-    if (this.props.isDrafted(record.id)) {
-      this.props.removeUpdater(record.id)
-    } else {
-      this.props.addUpdater({
+    let updaters = []
+    if (!this.props.isDrafted(record.id)) {
+      updaters.push({
         id: record.id,
         func: deleteName,
         variables: { nameid: record.id, client: this.props.client }
       })
     }
+    this.props.handleUpdate({
+      relation: 'names',
+      data: newData,
+      operation: 'remove',
+      updaters
+    })
   }
 
   cancel = (record) => {
     const newData = [...this.props.data];
     const index = newData.findIndex(item => item.id === record.id);
     newData.splice(index, 1);
-    this.props.handleUpdate({ relation: 'names', data: newData })
+    this.props.handleUpdate({
+      relation: 'names',
+      data: newData,
+      operation: 'remove',
+      updaters: []
+    })
     this.setState({ editingKey: '' });
   };
 
@@ -229,33 +244,43 @@ class AuthorshipAttributions extends Component {
         ...item,
         ...values,
       });
-      this.setState({
-        editingKey: ''
-      });
 
-      // Send up the state
-      this.props.handleUpdate({ relation: 'names', data: newData })
-
+      let updaters = []
       // Save the mutation functions in the updater registry
-      if (this.props.isDrafted(record.key)) {
-        this.props.addUpdater({
+      if (!record.draft) {
+        updaters.push({
           id: record.key,
           func: updateName,
           variables: {
             values: newData[index],
             client: this.props.client
-          }
+          },
+          accumulate: false
         })
       } else {
-        this.props.addUpdater({
+        updaters.push({
           id: record.key,
           func: addPersonName,
           variables: {
             values: { ...newData[index], personid: this.props.id },
             client: this.props.client
-          }
+          },
+          accumulate: false
         })
       }
+      this.props.addDraft(record.key)
+
+      // Send up the state
+      this.props.handleUpdate({
+        relation: 'names',
+        data: newData,
+        updaters,
+        operation: 'update'
+      })
+      this.setState({
+        editingKey: ''
+      });
+
     });
   }
 

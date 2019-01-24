@@ -5,7 +5,7 @@ import AuthorshipAttributions from "./AuthorshipAttributions";
 import AuthorTexts from "./AuthorTexts";
 import AuthorEvents from "./AuthorEvents";
 import EditableTextArea from "../EditableTextArea";
-import { Button, message } from "antd";
+import { Alert, Button, message } from "antd";
 
 const UPDATE_PERSON = gql`
   mutation UpdatePerson(
@@ -28,7 +28,8 @@ const UPDATE_PERSON = gql`
 class AuthorEditor extends Component {
   state = {
     author: this.props.data,
-    updaters: undefined,
+    previous: [],
+    updaters: [],
     drafts: [],
     saving: false,
   }
@@ -67,13 +68,74 @@ class AuthorEditor extends Component {
     this.removeDraft(id)
   }
 
-  addUpdater = (updater) => {
-    this.setState((prev) => {
-      let curUpdaters = prev.updaters || []
-      const updaterIndex = curUpdaters.findIndex(x => x.id === updater.id)
+  // addUpdater = (updater) => {
+  //   console.log("Adding upater:", updater)
+  //   this.setState((prev) => {
+  //     let curUpdaters = prev.updaters
+  //     const updaterIndex = curUpdaters.findIndex(x => x.id === updater.id)
+  //     if (updaterIndex > -1) {
+  //       const curFuncs = curUpdaters[updaterIndex].funcs
+  //       curUpdaters.splice(updaterIndex, 1, {
+  //         id: updater.id,
+  //         funcs: [...curFuncs, {
+  //           func: updater.func,
+  //           variables: updater.variables
+  //         }]
+  //       })
+  //     } else {
+  //       curUpdaters.push({
+  //         id: updater.id,
+  //         funcs: [{
+  //           func: updater.func,
+  //           variables: updater.variables
+  //         }]
+  //       })
+  //     }
+  //     return ({
+  //       draftUpdaters: curUpdaters
+  //     })
+  //   })
+  //   this.addDraft(updater.id)
+  // }
+
+  // addFlatUpdater = (updater) => {
+  //   this.setState((prev) => {
+  //     let curUpdaters = prev.updaters || []
+  //     const updaterIndex = curUpdaters.findIndex(x => x.id === updater.id)
+  //     if (updaterIndex > -1) {
+  //       curUpdaters.splice(updaterIndex, 1, {
+  //         id: updater.id,
+  //         funcs: [{
+  //           func: updater.func,
+  //           variables: updater.variables
+  //         }]
+  //       })
+  //     } else {
+  //       curUpdaters.push({
+  //         id: updater.id,
+  //         funcs: [{
+  //           func: updater.func,
+  //           variables: updater.variables
+  //         }]
+  //       })
+  //     }
+  //     return ({
+  //       draftUpdaters: curUpdaters
+  //     })
+  //   })
+  //   this.addDraft(updater.id)
+  // }
+
+  mergeUpdaters = ({ updaters, previous }) => {
+    console.log("Merging updaters", updaters, previous)
+    const updated = updaters.reduce((previous, updater) => {
+      console.log("Reducing, previous:", previous)
+      console.log("Reducing, updater:", updater)
+      const updaterIndex = previous.findIndex(x => x.id === updater.id)
+      console.log("index:", updaterIndex)
       if (updaterIndex > -1) {
-        const curFuncs = curUpdaters[updaterIndex].funcs
-        curUpdaters.splice(updaterIndex, 1, {
+        const curFuncs = updater.accumulate ? previous[updaterIndex].funcs : []
+        previous.splice(updaterIndex, 1, {
           id: updater.id,
           funcs: [...curFuncs, {
             func: updater.func,
@@ -81,7 +143,7 @@ class AuthorEditor extends Component {
           }]
         })
       } else {
-        curUpdaters.push({
+        previous.push({
           id: updater.id,
           funcs: [{
             func: updater.func,
@@ -89,67 +151,49 @@ class AuthorEditor extends Component {
           }]
         })
       }
-      return ({
-        updaters: curUpdaters
-      })
-    })
-    this.addDraft(updater.id)
+      console.log("Created accumlator:", previous)
+      return previous
+    }, [...previous])
+    console.log("Created updated updaters:", updated)
+    return updated
   }
 
-  addFlatUpdater = (updater) => {
-    this.setState((prev) => {
-      let curUpdaters = prev.updaters || []
-      const updaterIndex = curUpdaters.findIndex(x => x.id === updater.id)
-      if (updaterIndex > -1) {
-        curUpdaters.splice(updaterIndex, 1, {
-          id: updater.id,
-          funcs: [{
-            func: updater.func,
-            variables: updater.variables
-          }]
-        })
-      } else {
-        curUpdaters.push({
-          id: updater.id,
-          funcs: [{
-            func: updater.func,
-            variables: updater.variables
-          }]
-        })
-      }
-      return ({
-        updaters: curUpdaters
-      })
-    })
-    this.addDraft(updater.id)
+  update = ({ relation, data, updaters, operation }) => {
+    console.log("Received data: ", data)
+    console.log("Received operation:", operation)
+    let newUpdaters
+    if (operation === 'update' || operation === 'add') {
+      console.log("Updating or adding")
+      newUpdaters = this.mergeUpdaters({ updaters, previous: this.state.updaters })
+    } else if (operation === 'remove') {
+      console.log("Remove old updaters for ID and add new ones.")
+      newUpdaters = this.mergeUpdaters({ updaters, previous: this.state.updaters.filter(x => x.id !== data.id) })
+    }
+
+    this.setState(state => ({
+      author: {
+        ...state.author,
+        [relation]: data
+      },
+      updaters: newUpdaters,
+      previous: [...state.previous, state]
+    }), () => console.log("After state update:", this.state))
   }
 
-  updateNestedProperties = ({ relation, data }) => {
-    const newAuthor = this.state.author
-    newAuthor[relation] = data
-    this.setState({
-      author: newAuthor,
-    })
-  }
-
-  updateFlatProperties = ({ field, content }) => {
-    const newAuthor = this.state.author
-    newAuthor[field] = content
-    this.setState({
-      author: newAuthor,
-    })
-    this.addFlatUpdater({
-      id: this.props.data.id,
-      func: this.updatePerson,
-      variables: {
-        id: this.state.author.id,
-        description: this.state.author.description,
-        note: this.state.author.note,
-        biography: this.state.author.biography,
-        modified: new Date()
-      }
-    })
-  }
+  // updateFlatProperties = ({ field, content }) => {
+  //   this.update({ relation: field, data: content })
+  //   this.addFlatUpdater({
+  //     id: this.state.author.id,
+  //     func: this.updatePerson,
+  //     variables: {
+  //       id: this.state.author.id,
+  //       description: this.state.author.description,
+  //       note: this.state.author.note,
+  //       biography: this.state.author.biography,
+  //       modified: new Date()
+  //     }
+  //   })
+  // }
 
   updatePerson = async (variables) => {
     const { error, data } = await this.props.client.mutate({
@@ -170,27 +214,34 @@ class AuthorEditor extends Component {
   handleSave = () => {
     const { updaters } = this.state
     this.saving(() => {
-      try {
-        if (updaters) {
-          updaters.forEach(updater => {
-            updater.funcs.forEach(({ func, variables }) => {
-              func(variables)
-            })
+      if (updaters) {
+        updaters.forEach(updater => {
+          console.log("Saving:", updater)
+          updater.funcs.forEach(({ func, variables }) => {
+            console.log("Saving:", func, variables)
+            func(variables)
           })
-        }
-      } catch (error) {
-        message.error(
-          `An error occurred during saving. 
-          If the problem persists, please file a bug report.`
-        )
-        console.warn("Error during saving:", error)
+        })
       }
       message.success("Saved!")
     })
+    this.setState({
+      updaters: [],
+      drafts: [],
+      previous: []
+    })
   }
 
+  handleUndo = () => {
+    this.setState(this.state.previous[this.state.previous.length - 1])
+  }
+
+  handleCancel = () => {
+    this.setState(this.state.previous[0])
+  }
 
   render() {
+    console.log("state: ", this.state)
 
     const { auth, client } = this.props
     const { author } = this.state
@@ -198,17 +249,21 @@ class AuthorEditor extends Component {
     const editable = isAuthenticated()
 
     return (
-      <React.Fragment key={author.id}>
+      <React.Fragment key={this.props.id}>
+        {this.state.updaters.length > 0 &&
+          <Alert message="There are unsaved changes for this item." type="info" showIcon />
+        }
         <h1>{defaultName(author)}</h1>
         <section>
           <AuthorshipAttributions
             editable={editable}
             id={author.id}
             client={client}
-            data={author.names}
+            data={this.state.author.names}
             heading={'Names'}
             isDrafted={this.isDrafted}
-            handleUpdate={this.updateNestedProperties}
+            addDraft={this.addDraft}
+            handleUpdate={this.update}
             addUpdater={this.addUpdater}
             removeUpdater={this.removeUpdater}
           />
@@ -218,10 +273,10 @@ class AuthorEditor extends Component {
             editable={editable}
             id={author.id}
             client={client}
-            data={author.events}
+            data={this.state.author.events}
             heading={'Events'}
             isDrafted={this.isDrafted}
-            handleUpdate={this.updateNestedProperties}
+            handleUpdate={this.update}
             addUpdater={this.addUpdater}
             removeUpdater={this.removeUpdater}
           />
@@ -230,7 +285,7 @@ class AuthorEditor extends Component {
           <EditableTextArea
             editable={editable}
             heading={'Description'}
-            data={author}
+            data={this.state.author}
             field={'description'}
             handleUpdate={this.updateFlatProperties}
           />
@@ -239,7 +294,7 @@ class AuthorEditor extends Component {
           <EditableTextArea
             editable={editable}
             heading={'Note'}
-            data={author}
+            data={this.state.author}
             field={'note'}
             handleUpdate={this.updateFlatProperties}
           />
@@ -248,7 +303,7 @@ class AuthorEditor extends Component {
           <EditableTextArea
             editable={editable}
             heading={'Biography'}
-            data={author}
+            data={this.state.author}
             field={'biography'}
             handleUpdate={this.updateFlatProperties}
           />
@@ -275,6 +330,16 @@ class AuthorEditor extends Component {
           loading={this.state.saving}
         >
           Save
+        </Button>
+        <Button
+          onClick={this.handleUndo}
+        >
+          Undo
+        </Button>
+        <Button
+          onClick={this.handleCancel}
+        >
+          Cancel all
         </Button>
       </React.Fragment>
     );
