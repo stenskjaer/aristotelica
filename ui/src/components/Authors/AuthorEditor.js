@@ -54,19 +54,19 @@ class AuthorEditor extends Component {
     return this.state.drafts.includes(id)
   }
 
-  removeUpdater = (id) => {
-    let curUpdaters = this.state.updaters || []
-    const updaterIndex = curUpdaters.findIndex(x => x.id === id)
-    try {
-      curUpdaters.splice(updaterIndex, 1)
-    } catch (e) {
-      console.log("Updater not found in updater registry during deletion: ", id, e)
-    }
-    this.setState((prev) => ({
-      updaters: curUpdaters
-    }))
-    this.removeDraft(id)
-  }
+  // removeUpdater = (id) => {
+  //   let curUpdaters = this.state.updaters || []
+  //   const updaterIndex = curUpdaters.findIndex(x => x.id === id)
+  //   try {
+  //     curUpdaters.splice(updaterIndex, 1)
+  //   } catch (e) {
+  //     console.log("Updater not found in updater registry during deletion: ", id, e)
+  //   }
+  //   this.setState((prev) => ({
+  //     updaters: curUpdaters
+  //   }))
+  //   this.removeDraft(id)
+  // }
 
   // addUpdater = (updater) => {
   //   console.log("Adding upater:", updater)
@@ -132,14 +132,21 @@ class AuthorEditor extends Component {
       console.log("Reducing, previous:", previous)
       console.log("Reducing, updater:", updater)
       const updaterIndex = previous.findIndex(x => x.id === updater.id)
-      console.log("index:", updaterIndex)
       if (updaterIndex > -1) {
-        const curFuncs = updater.accumulate ? previous[updaterIndex].funcs : []
+        const curFuncs = updater.strategy === 'accumulate'
+          ? previous[updaterIndex].funcs
+          : []
+        const curVars = updater.strategy === 'merge'
+          ? previous[updaterIndex].funcs[0].variables
+          : {}
         previous.splice(updaterIndex, 1, {
           id: updater.id,
           funcs: [...curFuncs, {
             func: updater.func,
-            variables: updater.variables
+            variables: {
+              ...curVars,
+              ...updater.variables
+            }
           }]
         })
       } else {
@@ -287,7 +294,8 @@ class AuthorEditor extends Component {
             heading={'Description'}
             data={this.state.author}
             field={'description'}
-            handleUpdate={this.updateFlatProperties}
+            updater={this.updatePerson}
+            handleUpdate={this.update}
           />
         </section>
         <section>
@@ -296,7 +304,8 @@ class AuthorEditor extends Component {
             heading={'Note'}
             data={this.state.author}
             field={'note'}
-            handleUpdate={this.updateFlatProperties}
+            updater={this.updatePerson}
+            handleUpdate={this.update}
           />
         </section>
         <section>
@@ -305,7 +314,8 @@ class AuthorEditor extends Component {
             heading={'Biography'}
             data={this.state.author}
             field={'biography'}
-            handleUpdate={this.updateFlatProperties}
+            updater={this.updatePerson}
+            handleUpdate={this.update}
           />
         </section>
         <section>

@@ -49,7 +49,20 @@ class EditableTextArea extends React.Component {
         return;
       }
       this.toggleEdit();
-      this.handleUpdate({ field: this.props.field, content: values.content })
+      this.handleUpdate({
+        relation: this.props.field,
+        data: values.content,
+        operation: 'update',
+        updaters: [{
+          id: this.props.data.id,
+          func: this.props.updater,
+          variables: {
+            id: this.props.data.id,
+            [this.props.field]: values.content
+          },
+          strategy: 'merge',
+        }]
+      })
     });
   }
 
