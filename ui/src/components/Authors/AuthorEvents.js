@@ -175,11 +175,10 @@ class AuthorEvents extends Component {
     return data.RemovePersonEvents.id
   }
 
-  deleteDating = async (datings) => {
-    const datingId = datings.id
+  deleteDating = async (datingid) => {
     const { error } = await this.props.client.mutate({
       mutation: DELETE_DATING,
-      variables: { datingid: datingId },
+      variables: { datingid: datingid },
       refetchQueries: this.props.refetchQueries,
     });
     if (error) {
@@ -187,13 +186,13 @@ class AuthorEvents extends Component {
     }
   }
 
-  deleteDates = async (dating) => {
+  deleteDates = async (datingid) => {
     const { error } = await this.props.client.mutate({
       mutation: DELETE_RELATED_DATES,
-      variables: { datingid: dating.id }
+      variables: { datingid }
     });
     if (error) {
-      console.warn("Error in deleting Dates on Dating " + dating.id)
+      console.warn("Error in deleting Dates on Dating " + datingid)
       console.warn(error.message)
     }
   }
@@ -201,82 +200,53 @@ class AuthorEvents extends Component {
   delete = () => {
     const form = this.formRef.props.form;
     let values = form.getFieldsValue()
-    const newData = this.props.data
+    const newData = [...this.props.data]
 
-    // Register delete functions on event, datings, and dates
     const event = newData.find(x => x.id === values.id)
-    if (this.isDrafted(event.id)) {
-      this.removeUpdater(event.id)
-    } else {
+    // If event is saved in DB (not only drafted), register remove updaters
+    let updaters = []
+    if (!this.isDrafted(event.id)) {
+      // Remove datings
       if (event.datings && event.datings.length > 0) {
         event.datings.forEach(dating => {
-          this.props.addUpdater({
+          // Remove dates
+          updaters.push({
             id: dating.id,
             func: this.deleteDates,
-            variables: { datingid: dating.id }
+            variables: { datingid: dating.id },
+            strategy: 'accumulate'
           })
-          this.props.addUpdater({
+          // Remove dating
+          updaters.push({
             id: dating.id,
             func: this.deleteDating,
-            variables: { dateid: dating.id }
+            variables: { datingid: dating.id },
+            strategy: 'accumulate'
           })
         })
       }
-      this.props.addUpdater({
+      // Remove event
+      updaters.push({
         id: event.id,
         func: this.deleteEvent,
         variables: {
           eventid: event.id,
           personid: this.props.id
-        }
+        },
+        strategy: 'accumulate'
       })
     }
-
 
     // Remove the event from the state
     const eventIndex = newData.findIndex(x => x.id === values.id)
     newData.splice(eventIndex, 1)
-    this.handleUpdate({ relation: 'events', data: newData })
-
-    this.toggleModal()
-    this.setState({ updating: false })
-    this.formRef.props.form.resetFields();
-  }
-
-  save = () => {
-    const form = this.formRef.props.form;
-    let values = form.getFieldsValue()
-    const newData = this.props.data
-    const newItem = {
-      ...values,
-      id: values.id || createGUID(),
-      draft: values.id ? false : true
-    }
-    const itemIndex = newData.findIndex(x => x.id === newItem.id)
-    if (itemIndex > -1) {
-      newData.splice(itemIndex, 1, {
-        ...newData[itemIndex],
-        ...values
-      })
-    } else {
-      newData.push(newItem)
-    }
-    this.handleUpdate({ relation: 'events', data: newData })
-
-    // Save the mutation functions
-    if (newItem.draft) {
-      this.props.addUpdater({
-        id: newItem.id,
-        func: this.createEvent,
-        variables: newItem
-      })
-    } else {
-      this.props.addUpdater({
-        id: newItem.id,
-        func: this.updateEvent,
-        variables: newItem
-      })
-    }
+    this.handleUpdate({
+      id: event.id,
+      relation: 'events',
+      data: newData,
+      operation: 'remove',
+      updaters,
+    })
 
     this.toggleModal()
     this.setState({ updating: false })
@@ -289,9 +259,56 @@ class AuthorEvents extends Component {
     this.formRef.props.form.resetFields();
   }
 
+  save = () => {
+    const form = this.formRef.props.form;
+    let values = form.getFieldsValue()
+    const newData = [...this.props.data]
+    const newItem = {
+      ...values,
+      id: values.id || createGUID(),
+    }
+    const itemIndex = newData.findIndex(x => x.id === newItem.id)
+    if (itemIndex > -1) {
+      newData.splice(itemIndex, 1, {
+        ...newData[itemIndex],
+        ...values
+      })
+    } else {
+      newData.push(newItem)
+    }
+
+    // Save the mutation functions
+    let updaters = []
+    if (this.isDrafted(newItem.id)) {
+      updaters.push({
+        id: newItem.id,
+        func: this.createEvent,
+        variables: newItem
+      })
+    } else {
+      updaters.push({
+        id: newItem.id,
+        func: this.updateEvent,
+        variables: newItem
+      })
+    }
+
+    this.handleUpdate({
+      id: newItem.id,
+      relation: 'events',
+      data: newData,
+      operation: 'update',
+      updaters: updaters
+    })
+
+    this.toggleModal()
+    this.setState({ updating: false })
+    this.formRef.props.form.resetFields();
+  }
+
   handleDatingUpdate = (event) => {
     // Push the dating updates from the child to the parent state
-    const newData = this.props.data
+    const newData = [...this.props.data]
     const eventIndex = newData.findIndex(x => x.id === event.id)
     if (eventIndex > -1) {
       newData.splice(eventIndex, 1, event)
@@ -342,7 +359,6 @@ class AuthorEvents extends Component {
         description: event.description,
         content: <DatingList
           datings={event.datings}
-          type={event.type}
           event={event}
           client={this.props.client}
           editable={this.props.editable}
