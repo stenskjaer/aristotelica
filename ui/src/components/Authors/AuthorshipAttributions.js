@@ -189,6 +189,7 @@ class AuthorshipAttributions extends Component {
     newData.push(newItem)
     // Send up the state
     this.props.handleUpdate({
+      id: newItem.id,
       relation: 'names',
       data: newData,
       updaters: [],
@@ -210,6 +211,7 @@ class AuthorshipAttributions extends Component {
       })
     }
     this.props.handleUpdate({
+      id: record.id,
       relation: 'names',
       data: newData,
       operation: 'remove',
@@ -218,15 +220,7 @@ class AuthorshipAttributions extends Component {
   }
 
   cancel = (record) => {
-    const newData = [...this.props.data];
-    const index = newData.findIndex(item => item.id === record.id);
-    newData.splice(index, 1);
-    this.props.handleUpdate({
-      relation: 'names',
-      data: newData,
-      operation: 'remove',
-      updaters: []
-    })
+    this.delete(record)
     this.setState({ editingKey: '' });
   };
 
@@ -246,7 +240,7 @@ class AuthorshipAttributions extends Component {
       });
 
       let updaters = []
-      // Save the mutation functions in the updater registry
+      // Create the mutation functions for the updater registry
       if (!record.draft) {
         updaters.push({
           id: record.key,
@@ -255,7 +249,7 @@ class AuthorshipAttributions extends Component {
             values: newData[index],
             client: this.props.client
           },
-          accumulate: false
+          strategy: 'accumulate'
         })
       } else {
         updaters.push({
@@ -265,13 +259,13 @@ class AuthorshipAttributions extends Component {
             values: { ...newData[index], personid: this.props.id },
             client: this.props.client
           },
-          accumulate: false
+          strategy: 'accumulate'
         })
       }
-      this.props.addDraft(record.key)
 
       // Send up the state
       this.props.handleUpdate({
+        id: record.key,
         relation: 'names',
         data: newData,
         updaters,
