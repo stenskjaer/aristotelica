@@ -262,6 +262,7 @@ class AuthorEvents extends Component {
   save = () => {
     const form = this.formRef.props.form;
     let values = form.getFieldsValue()
+    let operation = ''
     const newData = [...this.props.data]
     const newItem = {
       ...values,
@@ -269,27 +270,31 @@ class AuthorEvents extends Component {
     }
     const itemIndex = newData.findIndex(x => x.id === newItem.id)
     if (itemIndex > -1) {
+      operation = 'update'
       newData.splice(itemIndex, 1, {
         ...newData[itemIndex],
         ...values
       })
     } else {
+      operation = 'add'
       newData.push(newItem)
     }
 
     // Save the mutation functions
     let updaters = []
-    if (this.isDrafted(newItem.id)) {
+    if (operation === 'add') {
       updaters.push({
         id: newItem.id,
         func: this.createEvent,
-        variables: newItem
+        variables: newItem,
+        strategy: 'accumulate'
       })
     } else {
       updaters.push({
         id: newItem.id,
         func: this.updateEvent,
-        variables: newItem
+        variables: newItem,
+        strategy: 'accumulate'
       })
     }
 
@@ -297,8 +302,8 @@ class AuthorEvents extends Component {
       id: newItem.id,
       relation: 'events',
       data: newData,
-      operation: 'update',
-      updaters: updaters
+      operation,
+      updaters
     })
 
     this.toggleModal()
@@ -306,7 +311,7 @@ class AuthorEvents extends Component {
     this.formRef.props.form.resetFields();
   }
 
-  handleDatingUpdate = (event) => {
+  handleDatingUpdate = ({ event, updaters, operation, id }) => {
     // Push the dating updates from the child to the parent state
     const newData = [...this.props.data]
     const eventIndex = newData.findIndex(x => x.id === event.id)
@@ -315,9 +320,13 @@ class AuthorEvents extends Component {
     } else {
       newData.push(event)
     }
+    console.log("Sending dating update:", newData, updaters, operation)
     this.handleUpdate({
+      id,
       relation: 'events',
-      data: newData
+      data: newData,
+      updaters,
+      operation,
     })
   }
 
@@ -363,8 +372,6 @@ class AuthorEvents extends Component {
           client={this.props.client}
           editable={this.props.editable}
           handleDatingUpdate={this.handleDatingUpdate}
-          addUpdater={this.addUpdater}
-          removeUpdater={this.removeUpdater}
           isDrafted={this.isDrafted}
           refetchQueries={['authorInfo']}
         />

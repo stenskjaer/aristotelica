@@ -198,6 +198,20 @@ const DELETE_DATE = gql`
  }
 `
 
+const deleteDate = async ({ dateid, client }) => {
+  await client.mutate({
+    mutation: DELETE_DATE,
+    variables: { dateid }
+  })
+}
+
+const deleteDating = async ({ datingid, client }) => {
+  await client.mutate({
+    mutation: DELETE_DATING,
+    variables: { datingid },
+  })
+}
+
 const saveDate = async ({ variables, client }) => {
   await client.mutate({
     mutation: CREATE_DATE,
@@ -285,6 +299,8 @@ class DatingList extends Component {
     })
     const year = await yearQuery.data.Year[0]
 
+    let updaters = []
+
     // Create date and add year
     const date = {
       id: dateInfo.dateid || createGUID(),
@@ -302,7 +318,7 @@ class DatingList extends Component {
     }
     console.log("Created date: ", date)
     // register saveDate
-    this.props.addUpdater({
+    updaters.push({
       id: datingid,
       func: saveDate,
       variables: {
@@ -312,7 +328,8 @@ class DatingList extends Component {
           yearid: date.year.id
         },
         client: this.props.client
-      }
+      },
+      strategy: 'accumulate'
     })
 
     // Month and day creation and registration if applicable.
@@ -327,20 +344,21 @@ class DatingList extends Component {
           value: dateInfo.month
         }
         // REGISTER saveMonth
-        this.props.addUpdater({
+        updaters.push({
           id: datingid,
           func: saveMonth,
           variables: {
             variables: month,
             client: this.props.client
-          }
+          },
+          strategy: 'accumulate'
         })
       } else {
         // find month
         month = months.find(x => x.value === dateInfo.month)
       }
       // REGISTER saveMonthDate
-      this.props.addUpdater({
+      updaters.push({
         id: datingid,
         func: saveMonthDate,
         variables: {
@@ -349,7 +367,8 @@ class DatingList extends Component {
             monthid: month.id
           },
           client: this.props.client
-        }
+        },
+        strategy: 'accumulate'
       })
       // Add the month to the date
       date.month = month
@@ -363,13 +382,14 @@ class DatingList extends Component {
             value: dateInfo.day
           }
           // REGISTER saveDay
-          this.props.addUpdater({
+          updaters.push({
             id: datingid,
             func: saveDay,
             variables: {
               variables: day,
               client: this.props.client
-            }
+            },
+            strategy: 'accumulate'
           })
         } else {
           // find day
@@ -377,7 +397,7 @@ class DatingList extends Component {
         }
 
         // REGISTER saveDayDate
-        this.props.addUpdater({
+        updaters.push({
           id: datingid,
           func: saveDayDate,
           variables: {
@@ -386,14 +406,15 @@ class DatingList extends Component {
               dayid: day.id
             },
             client: this.props.client
-          }
+          },
+          strategy: 'accumulate'
         })
         // Add the day to the date
         date.day = day
       }
     }
     // Close the big map by returning the date object
-    return date
+    return { data: date, updaters }
   }
 
   createDateDetails = (values) => {
@@ -490,10 +511,11 @@ class DatingList extends Component {
         }
       }
     }
-    console.log("values:", values)
 
-    // Get event ID
-    const event = this.props.event
+    // Deep copy of the parent event for editing
+    const event = JSON.parse(JSON.stringify(this.props.event))
+    console.log("evetn:", event)
+    console.log("props event:", this.props.event)
 
     // Create or update dating data
     const newDating = {
@@ -503,7 +525,12 @@ class DatingList extends Component {
       type: values.datingType,
     }
 
+    // Create updater registry
+    let updaters = []
+    let operation = ''
+
     if (values.datingid) {
+      operation = 'update'
       console.log("Update to dating")
       // First, if this is an update, remove existing data
       if (this.props.isDrafted(values.datingid)) {
@@ -513,17 +540,18 @@ class DatingList extends Component {
       } else {
         console.log("Is committed, register deleting updaters")
         // If it is commited to DB, remove all Date records
-        this.props.addUpdater({
+        updaters.push({
           id: values.datingid,
           func: removeDatingDates,
           variables: {
             variables: { datingid: values.datingid },
             client: this.props.client
-          }
+          },
+          strategy: 'accumulate'
         })
       }
       // And add updater to update the dating itself
-      this.props.addUpdater({
+      updaters.push({
         id: values.datingid,
         func: updateDating,
         variables: {
@@ -534,11 +562,13 @@ class DatingList extends Component {
             source: newDating.source
           },
           client: this.props.client
-        }
+        },
+        strategy: 'accumulate'
       })
     } else {
       // This is not an update, so add updater to create it.
-      this.props.addUpdater({
+      operation = 'add'
+      updaters.push({
         id: newDating.id,
         func: createDating,
         variables: {
@@ -550,17 +580,23 @@ class DatingList extends Component {
             source: newDating.source
           },
           client: this.props.client
-        }
+        },
+        strategy: 'accumulate'
       })
     }
 
-    // Create date details list of objects to create details from
+    // Create date details and updaters
     let dateDetails = this.createDateDetails(values)
-
     console.log("new/updated dating:", newDating)
-    newDating.dates = await Promise.all(dateDetails.map(date => this.registerDate(
-      newDating.id, date, this.props.client))
-    )
+    const newDates = await Promise.all(dateDetails.map(async date => {
+      const { data, updaters } = await this.registerDate(newDating.id, date, this.props.client)
+      return ({ date: data, updaters })
+    }))
+    console.log(newDates)
+    newDating.dates = newDates.map(date => date.date)
+    updaters.push(...newDates.reduce((acc, item) => [...acc, ...item.updaters], []))
+
+    // Update or add the complete dating data to the event
     event.datings = event.datings || []
     const datingIndex = event.datings.findIndex(x => x.id === newDating.id)
     if (datingIndex > -1) {
@@ -570,36 +606,51 @@ class DatingList extends Component {
     }
 
     // Push up the updates up into the event in parent state
-    this.props.handleDatingUpdate(event)
-
+    this.props.handleDatingUpdate({
+      id: event.id,
+      event,
+      updaters,
+      operation
+    })
 
     form.resetFields();
-    this.setState()
     this.setState({ visibleForm: false });
 
   }
 
-  handleDelete = async (datingsObj) => {
-    const datingId = datingsObj.id
-    const dates = datingsObj.dates
-    dates.map(async d => {
-      const { error } = await this.props.client.mutate({
-        mutation: DELETE_DATE,
-        variables: { dateid: d.id }
-      });
-      if (error) {
-        console.warn("Error in deleting Date: " + d.id)
-        console.warn(error.message)
-      }
+  handleDelete = async (dating) => {
+    const event = JSON.parse(JSON.stringify(this.props.event))
+    const datingId = dating.id
+    const dates = dating.dates
+    let updaters = []
+    updaters.push(...dates.map(d => ({
+      id: datingId,
+      func: deleteDate,
+      variables: {
+        dateid: d.id,
+        client: this.props.client
+      },
+      strategy: 'accumulate'
+    })))
+    updaters.push({
+      id: datingId,
+      func: deleteDating,
+      variables: {
+        datingid: datingId,
+        client: this.props.client
+      },
+      strategy: 'accumulate'
     })
-    const { error } = await this.props.client.mutate({
-      mutation: DELETE_DATING,
-      variables: { datingid: datingId },
-      refetchQueries: this.props.refetchQueries,
-    });
-    if (error) {
-      message.error(error.message)
-    }
+
+    this.props.handleDatingUpdate({
+      id: event.id,
+      event: {
+        ...event,
+        datings: event.datings.filter(d => d.id !== datingId)
+      },
+      operation: 'remove',
+      updaters,
+    })
   }
 
   normDateType = (type) => {
