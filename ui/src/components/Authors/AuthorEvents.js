@@ -1,6 +1,5 @@
 import React, { Component } from "react";
-import gql from "graphql-tag";
-import { List, Button, Form, Modal, Input, message } from "antd";
+import { List, Button, Form, Modal, Input } from "antd";
 import { createGUID } from '../utils';
 import DatingList from "../DatingList";
 import {
@@ -68,7 +67,7 @@ class AuthorEvents extends Component {
   isDrafted = this.props.isDrafted
 
   createEvent = async ({ id, type, description }) => {
-    const { error, data } = await this.props.client.mutate({
+    await this.props.client.mutate({
       mutation: CREATE_PERSON_EVENT,
       variables: {
         eventid: id,
@@ -76,15 +75,11 @@ class AuthorEvents extends Component {
         description,
         type
       },
-    });
-    if (error) {
-      console.warn(error.message)
-    }
-    return data.CreateEvent.id
+    })
   }
 
   updateEvent = async ({ id, type, description }) => {
-    const { error, data } = await this.props.client.mutate({
+    await this.props.client.mutate({
       mutation: UPDATE_PERSON_EVENT,
       variables: {
         eventid: id,
@@ -92,43 +87,41 @@ class AuthorEvents extends Component {
         type
       },
     });
-    if (error) {
-      console.warn(error.message)
-    }
-    return data.UpdateEvent.id
   }
 
   deleteEvent = async (variables) => {
-    const { error, data } = await this.props.client.mutate({
+    await this.props.client.mutate({
       mutation: REMOVE_PERSON_EVENT,
       variables: variables,
     });
-    if (error) {
-      console.warn(error.message)
-    }
-    return data.RemovePersonEvents.id
   }
 
   deleteDating = async (datingid) => {
-    const { error } = await this.props.client.mutate({
+    await this.props.client.mutate({
       mutation: DELETE_DATING,
-      variables: { datingid: datingid },
-      refetchQueries: this.props.refetchQueries,
-    });
-    if (error) {
-      message.error(error.message)
-    }
+      variables: { datingid },
+    })
   }
 
-  deleteDates = async (datingid) => {
-    const { error } = await this.props.client.mutate({
-      mutation: DELETE_RELATED_DATES,
-      variables: { datingid }
-    });
-    if (error) {
-      console.warn("Error in deleting Dates on Dating " + datingid)
-      console.warn(error.message)
-    }
+  deleteDatingDate = async (variables) => {
+    await this.props.client.mutate({
+      mutation: REMOVE_DATING_DATE,
+      variables: variables,
+    })
+  }
+
+  deleteDatingEvent = async (variables) => {
+    await this.props.client.mutate({
+      mutation: REMOVE_DATING_EVENT,
+      variables: variables,
+    })
+  }
+
+  deleteDate = async ({ dateid }) => {
+    await this.props.client.mutate({
+      mutation: DELETE_DATE,
+      variables: { dateid }
+    })
   }
 
   delete = () => {
@@ -140,21 +133,32 @@ class AuthorEvents extends Component {
     // If event is saved in DB (not only drafted), register remove updaters
     let updaters = []
     if (!this.isDrafted(event.id)) {
+      console.log("Not drafted")
       // Remove datings
       if (event.datings && event.datings.length > 0) {
+        console.log("Datings for removal")
         event.datings.forEach(dating => {
           // Remove dates
-          updaters.push({
-            id: dating.id,
-            func: this.deleteDates,
-            variables: { datingid: dating.id },
+          updaters.push(...dating.dates.map(date => ({
+            id: date.id,
+            func: this.deleteDatingDate,
+            variables: {
+              datingid: dating.id,
+              dateid: date.id
+            },
             strategy: 'accumulate'
-          })
+          })))
           // Remove dating
+          // TODO: REMOVE DATING EVENT AND DATES FIRST??? 
+          // maybe it doesn't delete because there are still relations to it.
+          console.log("Dating, ", dating)
           updaters.push({
             id: dating.id,
-            func: this.deleteDating,
-            variables: { datingid: dating.id },
+            func: this.deleteDatingEvent,
+            variables: {
+              datingid: dating.id,
+              eventid: event.id
+            },
             strategy: 'accumulate'
           })
         })
