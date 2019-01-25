@@ -3,6 +3,7 @@ import gql from "graphql-tag";
 import { createGUID, formatDates } from './utils';
 import { List, Button, Divider, message } from 'antd';
 import { CreateUpdateDating } from './CreateUpdateDating';
+import { DELETE_DATING, DELETE_DATE, DELETE_DATES_FROM_DATING } from './GQL/Mutations';
 
 const CREATE_DATING = gql`
   mutation createDating(
@@ -168,34 +169,6 @@ const GET_YEAR = gql`
       }
     }
   }
-`
-
-const DELETE_DATING = gql`
-  mutation deleteDating(
-    $datingid: ID!
-  ) {
-    DeleteDating(
-      id:$datingid
-    ) {id}
-  }
-`
-
-const DELETE_DATES_FROM_DATING = gql`
-  mutation deleteDatingFromDating($datingid: ID!) {
-    DeleteRelatedDates(datingid: $datingid) {
-      id
-    }
-  }
-`
-
-const DELETE_DATE = gql`
- mutation deleteDate(
-   $dateid: ID!
- ) {
-  DeleteDate(
-    id:$dateid
-  ) {id}
- }
 `
 
 const deleteDate = async ({ dateid, client }) => {

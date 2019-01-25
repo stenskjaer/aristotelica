@@ -3,82 +3,16 @@ import gql from "graphql-tag";
 import { List, Button, Form, Modal, Input, message } from "antd";
 import { createGUID } from '../utils';
 import DatingList from "../DatingList";
+import {
+  DELETE_DATING,
+  DELETE_DATE,
+  CREATE_PERSON_EVENT,
+  UPDATE_PERSON_EVENT,
+  REMOVE_PERSON_EVENT,
+  REMOVE_DATING_DATE,
+  REMOVE_DATING_EVENT
+} from '../GQL/Mutations';
 
-const CREATE_PERSON_EVENT = gql`
-  mutation createPersonEvent(
-    $eventid: ID!
-    $personid: ID!
-    $type: String!
-    $description: String
-  ) {
-    CreateEvent(
-      id: $eventid
-      type: $type
-      description: $description
-    ) {
-      id
-    }
-    AddPersonEvents(
-      personid: $personid
-      eventid: $eventid
-    ) {
-      id
-    }
-  }
-`
-
-const UPDATE_PERSON_EVENT = gql`
-  mutation updatePersonEvent(
-    $eventid: ID!
-    $type: String!
-    $description: String
-  ) {
-    UpdateEvent(
-      id: $eventid
-      type: $type
-      description: $description
-    ) {
-      id
-    }
-  }
-`
-
-const REMOVE_PERSON_EVENT = gql`
-  mutation removePersonEvents(
-    $personid: ID!
-    $eventid: ID!
-  ) {
-    RemovePersonEvents(
-      personid: $personid
-      eventid: $eventid
-    ) {
-      id
-    }
-    DeleteEvent(
-      id: $eventid
-    ) {
-      id
-    }
-  }
-`
-
-const DELETE_DATING = gql`
-  mutation deleteDating(
-    $datingid: ID!
-  ) {
-    DeleteDating(
-      id:$datingid
-    ) {id}
-  }
-`
-
-const DELETE_RELATED_DATES = gql`
-  mutation deleteDatingFromDating($datingid: ID!) {
-    DeleteRelatedDates(datingid: $datingid) {
-      id
-    }
-  }
-`
 
 export const CreateUpdateEvent = Form.create()(
   class extends Component {
