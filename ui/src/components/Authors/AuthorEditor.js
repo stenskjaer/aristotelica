@@ -52,78 +52,6 @@ class AuthorEditor extends Component {
     return this.state.drafts.includes(id)
   }
 
-  // removeUpdater = (id) => {
-  //   let curUpdaters = this.state.updaters || []
-  //   const updaterIndex = curUpdaters.findIndex(x => x.id === id)
-  //   try {
-  //     curUpdaters.splice(updaterIndex, 1)
-  //   } catch (e) {
-  //     console.log("Updater not found in updater registry during deletion: ", id, e)
-  //   }
-  //   this.setState((prev) => ({
-  //     updaters: curUpdaters
-  //   }))
-  //   this.removeDraft(id)
-  // }
-
-  // addUpdater = (updater) => {
-  //   console.log("Adding upater:", updater)
-  //   this.setState((prev) => {
-  //     let curUpdaters = prev.updaters
-  //     const updaterIndex = curUpdaters.findIndex(x => x.id === updater.id)
-  //     if (updaterIndex > -1) {
-  //       const curFuncs = curUpdaters[updaterIndex].funcs
-  //       curUpdaters.splice(updaterIndex, 1, {
-  //         id: updater.id,
-  //         funcs: [...curFuncs, {
-  //           func: updater.func,
-  //           variables: updater.variables
-  //         }]
-  //       })
-  //     } else {
-  //       curUpdaters.push({
-  //         id: updater.id,
-  //         funcs: [{
-  //           func: updater.func,
-  //           variables: updater.variables
-  //         }]
-  //       })
-  //     }
-  //     return ({
-  //       draftUpdaters: curUpdaters
-  //     })
-  //   })
-  //   this.addDraft(updater.id)
-  // }
-
-  // addFlatUpdater = (updater) => {
-  //   this.setState((prev) => {
-  //     let curUpdaters = prev.updaters || []
-  //     const updaterIndex = curUpdaters.findIndex(x => x.id === updater.id)
-  //     if (updaterIndex > -1) {
-  //       curUpdaters.splice(updaterIndex, 1, {
-  //         id: updater.id,
-  //         funcs: [{
-  //           func: updater.func,
-  //           variables: updater.variables
-  //         }]
-  //       })
-  //     } else {
-  //       curUpdaters.push({
-  //         id: updater.id,
-  //         funcs: [{
-  //           func: updater.func,
-  //           variables: updater.variables
-  //         }]
-  //       })
-  //     }
-  //     return ({
-  //       draftUpdaters: curUpdaters
-  //     })
-  //   })
-  //   this.addDraft(updater.id)
-  // }
-
   mergeUpdaters = ({ updaters, previous }) => {
     console.log("Merging updaters", updaters, previous)
     const updated = updaters.reduce((previous, updater) => {
@@ -189,21 +117,6 @@ class AuthorEditor extends Component {
       previous: [...state.previous, state]
     }), () => console.log("After state update:", this.state))
   }
-
-  // updateFlatProperties = ({ field, content }) => {
-  //   this.update({ relation: field, data: content })
-  //   this.addFlatUpdater({
-  //     id: this.state.author.id,
-  //     func: this.updatePerson,
-  //     variables: {
-  //       id: this.state.author.id,
-  //       description: this.state.author.description,
-  //       note: this.state.author.note,
-  //       biography: this.state.author.biography,
-  //       modified: new Date()
-  //     }
-  //   })
-  // }
 
   updatePerson = async (variables) => {
     const { error, data } = await this.props.client.mutate({
