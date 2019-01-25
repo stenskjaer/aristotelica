@@ -36,18 +36,16 @@ class AuthorEditor extends Component {
 
   addDraft = (id) => {
     if (!this.isDrafted(id)) {
-      this.setState(prev => ({
-        drafts: [...prev.drafts, id]
-      }))
+      return [...this.state.drafts, id]
     }
+    return this.state.drafts
   }
 
   removeDraft = (id) => {
-    if (this.isDrafted(id)) {
-      this.setState(prev => ({
-        drafts: prev.drafts.filter(x => x !== id)
-      }))
+    if (!this.isDrafted(id)) {
+      return this.state.drafts.filter(x => x !== id)
     }
+    return this.state.drafts
   }
 
   isDrafted = (id) => {
@@ -165,16 +163,20 @@ class AuthorEditor extends Component {
     return updated
   }
 
-  update = ({ relation, data, updaters, operation }) => {
+  update = ({ relation, data, updaters, operation, id }) => {
     console.log("Received data: ", data)
+    console.log("Received id:", id)
     console.log("Received operation:", operation)
     let newUpdaters
+    let newDrafts
     if (operation === 'update' || operation === 'add') {
       console.log("Updating or adding")
+      newDrafts = !this.state.drafts.includes(id) ? [...this.state.drafts, id] : this.state.drafts
       newUpdaters = this.mergeUpdaters({ updaters, previous: this.state.updaters })
     } else if (operation === 'remove') {
       console.log("Remove old updaters for ID and add new ones.")
-      newUpdaters = this.mergeUpdaters({ updaters, previous: this.state.updaters.filter(x => x.id !== data.id) })
+      newDrafts = this.state.drafts.filter(x => x !== id)
+      newUpdaters = this.mergeUpdaters({ updaters, previous: this.state.updaters.filter(x => x.id !== id) })
     }
 
     this.setState(state => ({
@@ -183,6 +185,7 @@ class AuthorEditor extends Component {
         [relation]: data
       },
       updaters: newUpdaters,
+      drafts: newDrafts,
       previous: [...state.previous, state]
     }), () => console.log("After state update:", this.state))
   }
