@@ -37,6 +37,13 @@ p {
 .form-group {
   margin-bottom: 32px;
 }
+.header, .ant-layout-header {
+  height: auto;
+  line-height: inherit;
+}
+.header, .ant-layout-header h1 {
+  color: white;
+}
 
 .ant-collapse>.ant-collapse-item>.ant-collapse-header {
   padding: 6px 0 6px 40px;
