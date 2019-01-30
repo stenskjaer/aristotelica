@@ -222,7 +222,7 @@ class AuthorEditor extends Component {
             editable={editable}
             id={author.id}
             client={client}
-            data={this.state.author.names}
+            data={this.state.author.attributions}
             heading={'Names'}
             isDrafted={this.isDrafted}
             handleUpdate={this.update}

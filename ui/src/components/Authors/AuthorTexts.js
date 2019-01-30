@@ -7,6 +7,31 @@ import { Link } from 'react-router-dom';
 import { TEXTS } from "../GQL/Queries";
 import { CREATE_ATTRIBUTION, DELETE_ATTRIBUTION } from "../GQL/Mutations";
 
+const mutations = {
+  createAttribution: async ({ variables, client }) => {
+    await client.mutate({
+      mutation: CREATE_ATTRIBUTION,
+      variables: variables,
+      refetchQueries: ['allTexts'],
+    });
+  },
+  deleteAttribution: async ({ id, client }) => {
+    await client.mutate({
+      mutation: DELETE_ATTRIBUTION,
+      variables: { id },
+      optimisticResponse: {
+        "DeleteAttribution": {
+          __typename: "Attribution",
+          id: id
+        }
+      }
+    });
+  },
+  updateAttribution: async ({ variables, client }) => {
+    mutations.deleteAttribution({ id: variables.id, client })
+    mutations.createAttribution({ variables, client })
+  },
+}
 
 const prefetchTexts = async (client) => {
   const { error, data } = await client.query({
@@ -23,14 +48,16 @@ const prefetchTexts = async (client) => {
 const AuthorTextForm = Form.create()(
   class extends Component {
     state = {
-      data: [],
-    }
-
-    componentDidMount() {
-      prefetchTexts(this.props.client)
-        .then(e => {
-          this.setState({ data: e })
+      texts: this.props.allTexts.map(d => {
+        const authorNames = d.authors.map(a => a.names[0].value).join(', ')
+        return ({
+          id: d.id,
+          title: d.title,
+          authorNames: authorNames,
+          filterValues: [d.title, authorNames].join(';')
         })
+      })
+
     }
 
     handleChange = (value) => {
@@ -58,7 +85,6 @@ const AuthorTextForm = Form.create()(
                 <Select
                   showSearch
                   placeholder="Search for text"
-                  optionFilterProp="title"
                   defaultActiveFirstOption={false}
                   showArrow={true}
                   filterOption={
@@ -68,15 +94,12 @@ const AuthorTextForm = Form.create()(
                   }
                 >
 
-                  {this.state.data.map(d => {
-                    const authorNames = d.authors.map(a => a.names[0].value).join(', ')
-                    const filterValues = [d.title, authorNames].join(';')
-                    return (
-                      <Select.Option key={d.id} value={d.id} title={d.title} values={filterValues}>
-                        {d.title} ({authorNames})
-                      </Select.Option>
-                    )
-                  })}
+                  {this.state.texts.map(d => (
+                    <Select.Option key={d.id} value={d.id} title={d.title} values={d.filterValues}>
+                      {d.title} ({d.authorNames})
+                    </Select.Option>
+                  )
+                  )}
                 </Select>
               )}
             </Form.Item>
@@ -109,94 +132,105 @@ const AuthorTextForm = Form.create()(
 class AuthorTexts extends Component {
   state = {
     visibleForm: false,
-    attributions: this.props.author.attributions
+    allTexts: [],
   };
+  handleUpdate = this.props.handleUpdate
+
+  componentDidMount() {
+    prefetchTexts(this.props.client)
+      .then(e => {
+        this.setState({ allTexts: e })
+      })
+  }
 
   handleCancel = () => {
     this.setState({ visibleForm: false });
     this.formRef.props.form.resetFields();
   }
 
-  handleCreateUpdate = async () => {
+  save = async () => {
     const form = this.formRef.props.form;
 
     form.validateFields(async (err, values) => {
       if (err) {
         return;
       }
-      let updating = false;
+      let operation = ''
+      values.personid = this.props.id
+      values.text = this.state.allTexts.find(x => x.id === values.textid)
 
-      if (values.id === undefined) {
-        values.id = createGUID();
+      const newData = [...this.props.data]
+      const newItem = {
+        ...values,
+        id: values.id || createGUID(),
+      }
+      const itemIndex = newData.findIndex(x => x.id === newItem.id)
+
+      if (itemIndex > -1) {
+        operation = 'update'
+        newData.splice(itemIndex, 1, {
+          ...newData[itemIndex],
+          ...values
+        })
       } else {
-        updating = true;
-        this.deleteAttribution(values.id);
+        operation = 'add'
+        newData.push(newItem)
       }
 
-      values.personid = this.props.author.id
-
-      // Create/update logic
-      const { error, data } = await this.props.client.mutate({
-        mutation: CREATE_ATTRIBUTION,
-        variables: values,
-        refetchQueries: ['allTexts'],
-      });
-      if (error) {
-        message.error(error.message)
-      }
-      if (data.CreateTextAttribution === null) {
-        message.error("Text attribution was not created.")
-      }
-      if (data.UpdateAttribution === null) {
-        message.error("Properties were not given to the attribution.")
-      }
-
-      // Update the state
-      const updateAttributions = [...this.state.attributions];
-      if (updating) {
-        const index = updateAttributions.findIndex(item => item.id === values.id);
-        updateAttributions.splice(index, 1, {
-          ...data.CreateTextAttribution,
-          ...data.UpdateAttribution
-        });
+      // Save the mutation functions
+      let updaters = []
+      if (operation === 'update') {
+        updaters.push({
+          id: newItem.id,
+          func: mutations.updateAttribution,
+          variables: {
+            variables: newItem,
+            client: this.props.client
+          },
+        })
       } else {
-        updateAttributions.push({
-          ...data.CreateTextAttribution,
-          ...data.UpdateAttribution
-        });
+        updaters.push({
+          id: newItem.id,
+          func: mutations.createAttribution,
+          variables: {
+            variables: newItem,
+            client: this.props.client
+          },
+        })
       }
 
-      this.setState({
-        attributions: updateAttributions,
-        visibleForm: false,
-      });
+      this.handleUpdate({
+        id: newItem.id,
+        relation: 'attributions',
+        data: newData,
+        operation,
+        updaters
+      })
+
+      this.setState({ visibleForm: false });
       form.resetFields();
     })
   }
 
-  deleteAttribution = async id => {
-    const { error } = await this.props.client.mutate({
-      mutation: DELETE_ATTRIBUTION,
-      variables: { id: id },
-      optimisticResponse: {
-        "DeleteAttribution": {
-          __typename: "Attribution",
-          id: id
-        }
-      }
-    });
-    if (error) {
-      console.warn(error.message)
-    }
-  }
-
   handleDelete = (id) => {
-    this.deleteAttribution(id)
-
-    const newData = [...this.state.attributions];
+    const newData = [...this.props.data];
     const index = newData.findIndex(item => item.id === id);
     newData.splice(index, 1);
-    this.setState({ attributions: newData })
+
+    this.handleUpdate({
+      id,
+      relation: 'attributions',
+      data: newData,
+      operation: 'remove',
+      updaters: [{
+        id,
+        func: mutations.deleteAttribution,
+        variables: {
+          id,
+          client: this.props.client
+        },
+      }]
+    })
   }
 
   saveFormRef = (formRef) => {
@@ -260,7 +294,7 @@ class AuthorTexts extends Component {
         <Table
           columns={columns.filter(c => c.enabled)}
           dataSource={
-            this.state.attributions.map(attribution => ({
+            this.props.data.map(attribution => ({
               key: attribution.id,
               attributionId: attribution.id,
               title: attribution.text.title,
@@ -305,8 +339,9 @@ class AuthorTexts extends Component {
               client={this.props.client}
               wrappedComponentRef={this.saveFormRef}
               visible={this.state.visibleForm}
+              allTexts={this.state.allTexts}
               onCancel={this.handleCancel}
-              onCreate={this.handleCreateUpdate}
+              onCreate={this.save}
               author={author}
             />
             <Button type="primary" onClick={this.showModal}>New attribution</Button>
