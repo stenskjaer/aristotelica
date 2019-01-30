@@ -121,23 +121,29 @@ class AuthorEditor extends Component {
 
   handleSave = () => {
     const { updaters } = this.state
-    this.saving(() => {
-      if (updaters) {
-        updaters.forEach(updater => {
-          console.log("Saving:", updater)
-          updater.funcs.forEach(({ func, variables }) => {
-            console.log("Saving:", func, variables)
-            func(variables)
+    this.setState({ saving: true })
+    if (updaters) {
+      const flat = updaters.reduce((acc, item) => {
+        return acc.concat(...item.funcs.map(x => x.func(x.variables)))
+      }, [])
+      Promise.all(flat)
+        .then((res) => {
+          message.success("Saved!")
+          this.setState({
+            saving: false,
+            updaters: [],
+            drafts: [],
+            previous: []
           })
         })
-      }
-      message.success("Saved!")
-    })
-    this.setState({
-      updaters: [],
-      drafts: [],
-      previous: []
-    })
+        .catch((error) => {
+          message.error("An error occurred. If it persists, please contact the administrator.")
+          console.warn("There was an error during saving. ", error)
+          this.setState({
+            saving: false,
+          })
+        })
+    }
   }
 
   handleUndo = () => {
