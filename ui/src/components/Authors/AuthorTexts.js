@@ -4,71 +4,9 @@ import { Form, Input, Modal, Radio, Select, Button, Table, Divider, message } fr
 import { createGUID } from '../utils'
 import DescriptionList from "../DescriptionList";
 import { Link } from 'react-router-dom';
+import { TEXTS } from "../GQL/Queries";
+import { CREATE_ATTRIBUTION, DELETE_ATTRIBUTION } from "../GQL/Mutations";
 
-const TEXTS = gql`
-query allTexts {
-  Text(orderBy: title_asc) {
-    id
-    title
-    authors {
-      names {
-        value
-      }
-    }
-  }
-}
-`
-
-const CREATE_ATTRIBUTION = gql`
-  mutation CreateTextAttribution(
-    $id: ID!,
-    $textid: ID!,
-    $personid: ID!,
-    $note: String,
-    $source: String,
-    $certainty: AttributionCertainty
-  ) {
-    CreateTextAttribution(
-      id: $id,
-      textid: $textid,
-      personid: $personid,
-    ) {
-      __typename
-      id
-      person {
-        id
-      }
-      text {
-        id
-        title
-      }
-    }
-    UpdateAttribution(
-      id: $id
-      note: $note,
-      source: $source,
-      certainty: $certainty
-    ) {
-      __typename
-      id
-      note
-      source
-      certainty
-    }
-  }
-`
-
-const DELETE_ATTRIBUTION = gql`
-  mutation deleteAttribution(
-    $id: ID!
-  ) {
-    DeleteAttribution(
-      id: $id
-    ) {
-      id
-    }
-  }
-`
 
 const prefetchTexts = async (client) => {
   const { error, data } = await client.query({
