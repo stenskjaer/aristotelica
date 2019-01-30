@@ -250,23 +250,22 @@ class AuthorEditor extends Component {
         <section>
           <h2>Literature</h2>
         </section>
-        <Button
-          type='primary'
-          onClick={this.handleSave}
-          loading={this.state.saving}
-        >
-          Save
-        </Button>
-        <Button
-          onClick={this.handleUndo}
-        >
-          Undo
-        </Button>
-        <Button
-          onClick={this.handleCancel}
-        >
-          Cancel all
-        </Button>
+        {editable &&
+          <section>
+            <Button type='primary'
+              onClick={this.handleSave}
+              loading={this.state.saving}>
+              Save
+            </Button>
+            <Button onClick={this.handleUndo}>
+              Undo
+            </Button>
+            <Button onClick={this.handleCancel}>
+              Cancel all
+            </Button>
+          </section>
+        }
+
       </React.Fragment>
     );
   }
