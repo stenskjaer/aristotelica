@@ -497,25 +497,20 @@ class DatingList extends Component {
     // Create updater registry
     let updaters = []
     let operation = ''
-
-    if (values.datingid) {
+    if (values.datingid && !this.props.isDrafted(values.datingid)) {
       operation = 'update'
-      // First, if this is an update, remove existing data
-      if (this.props.isDrafted(values.datingid)) {
-        // If it is not commited to the DB, remove existing updaters
-        this.props.removeUpdater(values.datingid)
-      } else {
-        // If it is commited to DB, remove all Date records
-        updaters.push({
-          id: values.datingid,
-          func: removeDatingDates,
-          variables: {
-            variables: { datingid: values.datingid },
-            client: this.props.client
-          },
-          strategy: 'accumulate'
-        })
-      }
+
+      // This is commited to DB, so remove all Date records
+      updaters.push({
+        id: values.datingid,
+        func: removeDatingDates,
+        variables: {
+          variables: { datingid: values.datingid },
+          client: this.props.client
+        },
+        strategy: 'accumulate'
+      })
+
       // And add updater to update the dating itself
       updaters.push({
         id: values.datingid,
@@ -547,7 +542,6 @@ class DatingList extends Component {
           },
           client: this.props.client
         },
-        strategy: 'accumulate'
       })
     }
 
@@ -571,7 +565,7 @@ class DatingList extends Component {
 
     // Push up the updates up into the event in parent state
     this.props.handleDatingUpdate({
-      id: event.id,
+      id: newDating.id,
       event,
       updaters,
       operation
