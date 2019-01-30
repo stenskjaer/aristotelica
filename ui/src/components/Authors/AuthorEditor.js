@@ -7,8 +7,8 @@ import EditableTextArea from "../EditableTextArea";
 import { Alert, Button, message } from "antd";
 import { UPDATE_PERSON } from "../GQL/Mutations";
 
-const updatePerson = async (variables) => {
-  const { error, data } = await this.props.client.mutate({
+const updatePerson = async ({ variables, client }) => {
+  const { error, data } = await client.mutate({
     mutation: UPDATE_PERSON,
     variables: variables,
   })
@@ -63,8 +63,11 @@ class AuthorEditor extends Component {
           funcs: [...curFuncs, {
             func: updater.func,
             variables: {
-              ...curVars,
-              ...updater.variables
+              client: updater.variables.client,
+              variables: {
+                ...curVars.variables,
+                ...updater.variables.variables
+              }
             }
           }]
         })
@@ -79,7 +82,7 @@ class AuthorEditor extends Component {
       }
       console.log("Created accumlator:", previous)
       return previous
-    }, [...previous])
+    }, previous)
     console.log("Created updated updaters:", updated)
     return updated
   }
@@ -186,6 +189,7 @@ class AuthorEditor extends Component {
             editable={editable}
             heading={'Description'}
             data={this.state.author}
+            client={client}
             field={'description'}
             updater={updatePerson}
             handleUpdate={this.update}
@@ -196,6 +200,7 @@ class AuthorEditor extends Component {
             editable={editable}
             heading={'Note'}
             data={this.state.author}
+            client={client}
             field={'note'}
             updater={updatePerson}
             handleUpdate={this.update}
@@ -206,6 +211,7 @@ class AuthorEditor extends Component {
             editable={editable}
             heading={'Biography'}
             data={this.state.author}
+            client={client}
             field={'biography'}
             updater={updatePerson}
             handleUpdate={this.update}

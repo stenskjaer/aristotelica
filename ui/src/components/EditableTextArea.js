@@ -50,6 +50,7 @@ class EditableTextArea extends React.Component {
       }
       this.toggleEdit();
       this.handleUpdate({
+        id: this.props.data.id,
         relation: this.props.field,
         data: values.content,
         operation: 'update',
@@ -57,8 +58,11 @@ class EditableTextArea extends React.Component {
           id: this.props.data.id,
           func: this.props.updater,
           variables: {
-            id: this.props.data.id,
-            [this.props.field]: values.content
+            variables: {
+              id: this.props.data.id,
+              [this.props.field]: values.content
+            },
+            client: this.props.client
           },
           strategy: 'merge',
         }]
