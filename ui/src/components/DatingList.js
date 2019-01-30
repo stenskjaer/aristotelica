@@ -171,17 +171,17 @@ const GET_YEAR = gql`
   }
 `
 
-const deleteDate = async ({ dateid, client }) => {
+const deleteDate = async ({ variables, client }) => {
   await client.mutate({
     mutation: DELETE_DATE,
-    variables: { dateid }
+    variables: { ...variables }
   })
 }
 
-const deleteDating = async ({ datingid, client }) => {
+const deleteDating = async ({ variables, client }) => {
   await client.mutate({
     mutation: DELETE_DATING,
-    variables: { datingid },
+    variables: { ...variables },
   })
 }
 
@@ -591,7 +591,9 @@ class DatingList extends Component {
       id: datingId,
       func: deleteDate,
       variables: {
-        dateid: d.id,
+        variables: {
+          dateid: d.id,
+        },
         client: this.props.client
       },
       strategy: 'accumulate'
@@ -600,7 +602,9 @@ class DatingList extends Component {
       id: datingId,
       func: deleteDating,
       variables: {
-        datingid: datingId,
+        variables: {
+          datingid: datingId,
+        },
         client: this.props.client
       },
       strategy: 'accumulate'
