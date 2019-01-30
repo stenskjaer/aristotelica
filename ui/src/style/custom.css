@@ -49,6 +49,11 @@ p {
   padding: 6px 0 6px 40px;
 }
 
+button + button {
+  margin-left: 8px;
+  margin-bottom: 0px;
+}
+
 .custom-filter-dropdown {
   padding: 8px;
   border-radius: 6px;
