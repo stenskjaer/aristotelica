@@ -66,6 +66,24 @@ export const UPDATE_PERSON_EVENT = gql`
   }
 `
 
+export const UPDATE_PERSON = gql`
+  mutation UpdatePerson(
+      $id: ID!, 
+      $description: String,
+      $biography: String,
+      $note: String,
+    ) {
+    UpdatePerson(
+        id: $id, 
+        description: $description,
+        biography: $biography,
+        note: $note,
+      ) {
+      id
+    }
+  }
+`
+
 export const REMOVE_PERSON_EVENT = gql`
   mutation removePersonEvents(
     $personid: ID!

@@ -62,8 +62,6 @@ class AuthorEvents extends Component {
     visibleForm: false
   }
   handleUpdate = this.props.handleUpdate
-  addUpdater = this.props.addUpdater
-  removeUpdater = this.props.removeUpdater
   isDrafted = this.props.isDrafted
 
   createEvent = async ({ id, type, description }) => {
@@ -133,10 +131,8 @@ class AuthorEvents extends Component {
     // If event is saved in DB (not only drafted), register remove updaters
     let updaters = []
     if (!this.isDrafted(event.id)) {
-      console.log("Not drafted")
       // Remove datings
       if (event.datings && event.datings.length > 0) {
-        console.log("Datings for removal")
         event.datings.forEach(dating => {
           // Remove dates
           updaters.push(...dating.dates.map(date => ({
@@ -149,9 +145,6 @@ class AuthorEvents extends Component {
             strategy: 'accumulate'
           })))
           // Remove dating
-          // TODO: REMOVE DATING EVENT AND DATES FIRST??? 
-          // maybe it doesn't delete because there are still relations to it.
-          console.log("Dating, ", dating)
           updaters.push({
             id: dating.id,
             func: this.deleteDatingEvent,
@@ -258,7 +251,6 @@ class AuthorEvents extends Component {
     } else {
       newData.push(event)
     }
-    console.log("Sending dating update:", newData, updaters, operation)
     this.handleUpdate({
       id,
       relation: 'events',

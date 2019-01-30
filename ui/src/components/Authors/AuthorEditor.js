@@ -1,29 +1,22 @@
 import React, { Component } from "react";
-import gql from "graphql-tag";
 import { defaultName } from "../utils";
 import AuthorshipAttributions from "./AuthorshipAttributions";
 import AuthorTexts from "./AuthorTexts";
 import AuthorEvents from "./AuthorEvents";
 import EditableTextArea from "../EditableTextArea";
 import { Alert, Button, message } from "antd";
+import { UPDATE_PERSON } from "../GQL/Mutations";
 
-const UPDATE_PERSON = gql`
-  mutation UpdatePerson(
-      $id: ID!, 
-      $description: String,
-      $biography: String,
-      $note: String,
-    ) {
-    UpdatePerson(
-        id: $id, 
-        description: $description,
-        biography: $biography,
-        note: $note,
-      ) {
-      id
-    }
+const updatePerson = async (variables) => {
+  const { error, data } = await this.props.client.mutate({
+    mutation: UPDATE_PERSON,
+    variables: variables,
+  })
+  if (error) {
+    console.warn(error.message)
   }
-`
+  return data.UpdatePerson.id
+}
 
 class AuthorEditor extends Component {
   state = {
@@ -118,17 +111,6 @@ class AuthorEditor extends Component {
     }), () => console.log("After state update:", this.state))
   }
 
-  updatePerson = async (variables) => {
-    const { error, data } = await this.props.client.mutate({
-      mutation: UPDATE_PERSON,
-      variables: variables,
-    })
-    if (error) {
-      console.warn(error.message)
-    }
-    return data.UpdatePerson.id
-  }
-
   saving = (func) => {
     this.setState({ saving: true }, func)
     setTimeout(() => { this.setState({ saving: false }) }, 200)
@@ -185,10 +167,7 @@ class AuthorEditor extends Component {
             data={this.state.author.names}
             heading={'Names'}
             isDrafted={this.isDrafted}
-            addDraft={this.addDraft}
             handleUpdate={this.update}
-            addUpdater={this.addUpdater}
-            removeUpdater={this.removeUpdater}
           />
         </section>
         <section>
@@ -200,8 +179,6 @@ class AuthorEditor extends Component {
             heading={'Events'}
             isDrafted={this.isDrafted}
             handleUpdate={this.update}
-            addUpdater={this.addUpdater}
-            removeUpdater={this.removeUpdater}
           />
         </section>
         <section>
@@ -210,7 +187,7 @@ class AuthorEditor extends Component {
             heading={'Description'}
             data={this.state.author}
             field={'description'}
-            updater={this.updatePerson}
+            updater={updatePerson}
             handleUpdate={this.update}
           />
         </section>
@@ -220,7 +197,7 @@ class AuthorEditor extends Component {
             heading={'Note'}
             data={this.state.author}
             field={'note'}
-            updater={this.updatePerson}
+            updater={updatePerson}
             handleUpdate={this.update}
           />
         </section>
@@ -230,7 +207,7 @@ class AuthorEditor extends Component {
             heading={'Biography'}
             data={this.state.author}
             field={'biography'}
-            updater={this.updatePerson}
+            updater={updatePerson}
             handleUpdate={this.update}
           />
         </section>
@@ -239,9 +216,18 @@ class AuthorEditor extends Component {
           {editable &&
             <p>
               Editing or deleting an attribution will not change the text, only the connection between the author and the text. To edit the text, click the text title and edit it from the detailed view.
-                  </p>
+            </p>
           }
-          <AuthorTexts editable={editable} client={client} author={author} />
+          <AuthorTexts
+            editable={editable}
+            id={author.id}
+            client={client}
+            data={this.state.author.names}
+            heading={'Names'}
+            isDrafted={this.isDrafted}
+            handleUpdate={this.update}
+            author={author}
+          />
         </section>
         <h3>TODOS</h3>
         <section>

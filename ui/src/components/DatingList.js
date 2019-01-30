@@ -264,7 +264,6 @@ class DatingList extends Component {
   }
 
   registerDate = async (datingid, dateInfo, client) => {
-    console.log("Start creating date")
 
     const yearQuery = await client.query({
       query: GET_YEAR,
@@ -289,7 +288,6 @@ class DatingList extends Component {
         value: year.value
       }
     }
-    console.log("Created date: ", date)
     // register saveDate
     updaters.push({
       id: datingid,
@@ -487,8 +485,6 @@ class DatingList extends Component {
 
     // Deep copy of the parent event for editing
     const event = JSON.parse(JSON.stringify(this.props.event))
-    console.log("evetn:", event)
-    console.log("props event:", this.props.event)
 
     // Create or update dating data
     const newDating = {
@@ -504,14 +500,11 @@ class DatingList extends Component {
 
     if (values.datingid) {
       operation = 'update'
-      console.log("Update to dating")
       // First, if this is an update, remove existing data
       if (this.props.isDrafted(values.datingid)) {
-        console.log("Is drafted, remove those updaters")
         // If it is not commited to the DB, remove existing updaters
         this.props.removeUpdater(values.datingid)
       } else {
-        console.log("Is committed, register deleting updaters")
         // If it is commited to DB, remove all Date records
         updaters.push({
           id: values.datingid,
@@ -560,12 +553,10 @@ class DatingList extends Component {
 
     // Create date details and updaters
     let dateDetails = this.createDateDetails(values)
-    console.log("new/updated dating:", newDating)
     const newDates = await Promise.all(dateDetails.map(async date => {
       const { data, updaters } = await this.registerDate(newDating.id, date, this.props.client)
       return ({ date: data, updaters })
     }))
-    console.log(newDates)
     newDating.dates = newDates.map(date => date.date)
     updaters.push(...newDates.reduce((acc, item) => [...acc, ...item.updaters], []))
 
