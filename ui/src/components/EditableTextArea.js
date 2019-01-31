@@ -104,11 +104,10 @@ class EditableTextArea extends React.Component {
       <React.Fragment>
         <h2>{heading}
           {
-            editable
-              ? editing
-                ? <Button onClick={this.save} shape="circle" size="small" icon="check" style={{ marginLeft: '1ex' }} />
-                : <Button onClick={this.toggleEdit} shape="circle" size="small" icon="edit" style={{ marginLeft: '1ex' }} />
-              : ''
+            editable &&
+              editing
+              ? <Button onClick={this.save} shape="circle" size="small" icon="check" style={{ marginLeft: '1ex' }} />
+              : <Button onClick={this.toggleEdit} shape="circle" size="small" icon="edit" style={{ marginLeft: '1ex' }} />
           }
         </h2>
 

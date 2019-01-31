@@ -384,9 +384,8 @@ class AuthorshipAttributions extends Component {
         <h2>
           {this.props.heading}
           {
-            editable
-              ? <Button onClick={this.add} shape="circle" size="small" icon="plus" style={{ marginLeft: '1ex' }} />
-              : ''
+            editable &&
+            <Button onClick={this.add} shape="circle" size="small" icon="plus" style={{ marginLeft: '1ex' }} />
           }
         </h2>
         <Table

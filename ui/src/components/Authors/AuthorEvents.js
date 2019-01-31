@@ -288,9 +288,8 @@ class AuthorEvents extends Component {
         <span>
           {event.type}
           {
-            editable
-              ? <Button onClick={() => this.updateModal(event)} shape="circle" size="small" icon="edit" style={{ marginLeft: '1ex' }} />
-              : ''
+            editable &&
+            <Button onClick={() => this.updateModal(event)} shape="circle" size="small" icon="edit" style={{ marginLeft: '1ex' }} />
           }
         </span>
       return ({
