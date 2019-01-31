@@ -345,18 +345,15 @@ class AuthorTexts extends Component {
           pagination={this.showPagination(this.props.author.names)}
         />
         {editable &&
-          <div style={{ margin: '10px 0 0 0' }}>
-            <AuthorTextForm
-              client={this.props.client}
-              wrappedComponentRef={this.saveFormRef}
-              visible={this.state.visibleForm}
-              allTexts={this.state.allTexts}
-              onCancel={this.handleCancel}
-              onCreate={this.save}
-              author={author}
-            />
-            <Button type="primary" onClick={this.showModal}>New attribution</Button>
-          </div>
+          <AuthorTextForm
+            client={this.props.client}
+            wrappedComponentRef={this.saveFormRef}
+            visible={this.state.visibleForm}
+            allTexts={this.state.allTexts}
+            onCancel={this.handleCancel}
+            onCreate={this.save}
+            author={author}
+          />
         }
 
       </div>
