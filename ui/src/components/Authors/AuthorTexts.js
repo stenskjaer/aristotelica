@@ -291,6 +291,17 @@ class AuthorTexts extends Component {
 
     return (
       <div>
+        <h2>{this.props.heading}
+          {
+            editable &&
+            <Button onClick={this.showModal} shape="circle" size="small" icon="plus" style={{ marginLeft: '1ex' }} />
+          }
+        </h2>
+        {editable &&
+          <p>
+            Editing or deleting an attribution will not change the text, only the connection between the author and the text. To edit the text, click the text title and edit it from the detailed view.
+          </p>
+        }
         <Table
           columns={columns.filter(c => c.enabled)}
           dataSource={

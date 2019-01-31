@@ -224,16 +224,11 @@ class AuthorEditor extends Component {
           />
         </section>
         <section>
-          <h2>Attributed texts</h2>
-          {editable &&
-            <p>
-              Editing or deleting an attribution will not change the text, only the connection between the author and the text. To edit the text, click the text title and edit it from the detailed view.
-            </p>
-          }
           <AuthorTexts
             editable={editable}
             id={author.id}
             client={client}
+            heading={'Attributed texts'}
             data={this.state.author.attributions}
             heading={'Names'}
             isDrafted={this.isDrafted}
