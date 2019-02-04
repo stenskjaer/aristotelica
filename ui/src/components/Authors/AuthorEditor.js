@@ -230,7 +230,6 @@ class AuthorEditor extends Component {
             client={client}
             heading={'Attributed texts'}
             data={this.state.author.attributions}
-            heading={'Names'}
             isDrafted={this.isDrafted}
             handleUpdate={this.update}
             author={author}
