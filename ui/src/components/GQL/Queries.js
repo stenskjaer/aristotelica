@@ -13,3 +13,30 @@ export const TEXTS = gql`
     }
 }
 `
+
+export const ALL_MANUSCRIPTS = gql`
+  query allManuscripts {
+    Manuscript {
+      id
+      shelfmark
+      number
+      olim
+      date
+      date_earliest
+      date_latest
+      saeculo
+      library {
+        id
+        name
+        city {
+          id
+          name
+          country {
+            id
+            name
+          }
+        }
+      }
+    }
+  }
+`

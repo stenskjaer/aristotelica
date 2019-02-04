@@ -22,6 +22,11 @@ export function SideMenu() {
           Authors
         </Link>
       </Item>
+      <Item key="manuscripts">
+        <Link to="/manuscripts">
+          Manuscripts
+        </Link>
+      </Item>
     </Menu>
   );
 }
