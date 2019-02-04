@@ -121,12 +121,15 @@ class AuthorEditor extends Component {
 
   handleSave = () => {
     const { updaters } = this.state
+
+    const flattenUpdaters = updaters => updaters.reduce((acc, item) => (
+      acc.concat(...item.funcs.map(x => x.func(x.variables)))),
+      []
+    )
+
     this.setState({ saving: true })
     if (updaters) {
-      const flat = updaters.reduce((acc, item) => {
-        return acc.concat(...item.funcs.map(x => x.func(x.variables)))
-      }, [])
-      Promise.all(flat)
+      Promise.all(flattenUpdaters(updaters))
         .then((res) => {
           message.success("Saved!")
           this.setState({
