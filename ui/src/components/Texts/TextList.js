@@ -100,7 +100,11 @@ class TextList extends React.Component {
               title: 'Attributions',
               dataIndex: 'attributions',
               defaultSortOrder: 'ascend',
-              sorter: (a, b) => defaultName(a.attributions[0].person).localeCompare(defaultName(b.attributions[0].person)),
+              sorter: (a, b) => {
+                if (a.attributions[0] && b.attributions[0]) {
+                  return defaultName(a.attributions[0].person).localeCompare(defaultName(b.attributions[0].person))
+                }
+              },
               filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
                 <div className="custom-filter-dropdown">
                   <Input
@@ -132,7 +136,7 @@ class TextList extends React.Component {
                       ({normCertainty(attribution.certainty)})
                     </React.Fragment>
                   ))
-                  .reduce((accu, elem) => [accu, ', ', elem])
+                  .reduce((accu, elem) => accu.length > 0 ? [accu, ', ', elem] : [elem], [])
               )
             },
             {
