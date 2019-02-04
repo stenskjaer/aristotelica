@@ -21,6 +21,54 @@ type TextType {
   children: [TextType] @relation(name: "HAS_CHILD", direction: "OUT")
 }
 
+type Manuscript {
+  id: ID!
+  created: DateTime!
+  modified: DateTime
+  shelfmark: String,
+  number: String,
+  olim: String,
+  date: String,
+  date_earliest: String,
+  date_latest: String,
+  saeculo: String,
+  width: String,
+  height: String,
+  material: String,
+  layout: String,
+  annotation: String,
+  script: String,
+  note: String,
+  literature: String,
+  library: Library! @relation(name: "ARCHIVED_IN", direction: "OUT")
+}
+
+type Library {
+  id: ID!
+  created: DateTime!
+  modified: DateTime
+  name: String
+  short_name: String
+  note: String
+  manuscripts: [Manuscript!]! @relation(name: "ARCHIVED_IN", direction: "IN")
+  city: City! @relation(name: "IN_CITY", direction: "OUT")
+}
+
+type City {
+  id: ID!
+  created: DateTime!
+  modified: DateTime
+  name: String!
+  country: Country! @relation(name: "IN_COUNTRY", direction: "OUT")
+}
+
+type Country {
+  id: ID!
+  name: String!
+  code: String!
+  cities: [City!]! @relation(name: "IN_COUNTRY", direction: "IN")
+}
+
 type Person {
   id: ID!
   description: String
