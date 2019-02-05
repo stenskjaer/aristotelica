@@ -75,7 +75,6 @@ class EditableTextArea extends React.Component {
     const { editing } = this.state;
     const { editable, data, field, heading } = this.props;
     const content = data[field]
-
     const editableContent = () => {
       return (
         editing ? (
@@ -100,14 +99,16 @@ class EditableTextArea extends React.Component {
           )
       );
     }
+
     return (
       <React.Fragment>
         <h2>{heading}
           {
-            editable &&
+            editable ?
               editing
-              ? <Button onClick={this.save} shape="circle" size="small" icon="check" style={{ marginLeft: '1ex' }} />
-              : <Button onClick={this.toggleEdit} shape="circle" size="small" icon="edit" style={{ marginLeft: '1ex' }} />
+                ? <Button onClick={this.save} shape="circle" size="small" icon="check" style={{ marginLeft: '1ex' }} />
+                : <Button onClick={this.toggleEdit} shape="circle" size="small" icon="edit" style={{ marginLeft: '1ex' }} />
+              : ''
           }
         </h2>
 
