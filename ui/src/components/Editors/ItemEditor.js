@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Alert, Button, message } from "antd";
 
-class ManuscriptEditor extends Component {
+class ItemEditor extends Component {
   state = {
     data: this.props.data,
     previous: [],
@@ -122,8 +122,6 @@ class ManuscriptEditor extends Component {
   }
 
   render() {
-    console.log("state: ", this.state)
-    console.log("props: ", this.props)
 
     const { auth, client } = this.props
     const { data } = this.state
@@ -133,7 +131,8 @@ class ManuscriptEditor extends Component {
       editable,
       data,
       client,
-      handleUpdate: this.update
+      handleUpdate: this.update,
+      isDrafted: this.isDrafted
     }
 
     const makeChildrenWithProps = (children) => {
@@ -170,4 +169,4 @@ class ManuscriptEditor extends Component {
   }
 }
 
-export default ManuscriptEditor;
+export default ItemEditor;
