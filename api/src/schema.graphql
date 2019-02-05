@@ -41,6 +41,7 @@ type Manuscript {
   note: String,
   literature: String,
   library: Library! @relation(name: "ARCHIVED_IN", direction: "OUT")
+  events: [Event!]! @relation(name: "HAS_EVENT", direction: "OUT")
 }
 
 type Library {
