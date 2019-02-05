@@ -8,6 +8,7 @@ import AuthorDetails from './Authors/AuthorDetails';
 import TextDetails from './Texts/TextDetails';
 import TextList from './Texts/TextList';
 import ManuscriptList from './Manuscripts/ManuscriptList';
+import ManuscriptDetails from './Manuscripts/ManuscriptDetails';
 import Login from './Login';
 import { SideMenu } from './Menu';
 
@@ -42,6 +43,7 @@ function App(props) {
                   <Route exact path="/author/:id" render={props => <AuthorDetails auth={auth} {...props} />} />
                   <Route exact path="/text/:id" component={TextDetails} />
                   <Route exact path="/manuscripts" component={ManuscriptList} />
+                  <Route exact path="/manuscript/:id" render={props => <ManuscriptDetails auth={auth} {...props} />} />
                 </Switch>
               </div>
             </Content>
