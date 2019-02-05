@@ -190,3 +190,45 @@ export const REMOVE_PERSON_EVENT = gql`
     }
   }
 `
+
+export const UPDATE_MANUSCRIPT = gql`
+  mutation UpdateManuscript(
+    $id: ID!
+    $shelfmark: String
+    $number: String
+    $olim: String
+    $date: String
+    $date_earliest: String
+    $date_latest: String
+    $saeculo: String
+    $width: String
+    $height: String
+    $material: String
+    $layout: String
+    $annotation: String
+    $script: String
+    $note: String
+    $literature: String
+  ) {
+    UpdateManuscript(
+      id: $id
+      shelfmark: $shelfmark
+      number: $number
+      olim: $olim
+      date: $date
+      date_earliest: $date_earliest
+      date_latest: $date_latest
+      saeculo: $saeculo
+      width: $width
+      height: $height
+      material: $material
+      layout: $layout
+      annotation: $annotation
+      script: $script
+      note: $note
+      literature: $literature
+    ) {
+      id
+    }
+  }
+`

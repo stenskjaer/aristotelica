@@ -40,3 +40,61 @@ export const ALL_MANUSCRIPTS = gql`
     }
   }
 `
+
+export const MANUSCRIPT_DETAILS = gql`
+  query manuscriptDetails($id: ID!) {
+    Manuscript(id: $id) {
+      id
+      shelfmark
+      number
+      olim
+      date
+      date_earliest
+      date_latest
+      saeculo
+      library {
+        id
+        name
+        city {
+          id
+          name
+          country {
+            id
+            name
+          }
+        }
+      }
+      events {
+        id
+        type
+        datings {
+          id
+          source
+          note
+          type
+          dates {
+            id
+            type
+            approximate
+            uncertain
+            decade
+            quarter
+            century
+            year {
+              id
+              value
+            }
+            month {
+              id
+              value
+            }
+            day {
+              id
+              value
+            }
+          }
+        }
+      }
+    }
+  }
+`
