@@ -4,6 +4,7 @@ import { createGUID, formatDates } from './utils';
 import { List, Button, Divider, message } from 'antd';
 import { CreateUpdateDating } from './CreateUpdateDating';
 import { DELETE_DATING, DELETE_DATE, DELETE_DATES_FROM_DATING } from './GQL/Mutations';
+import { DATING } from './GQL/Queries';
 
 const CREATE_DATING = gql`
   mutation createDating(
@@ -471,6 +472,14 @@ class DatingList extends Component {
     return dateDetails
   }
 
+  datingExists = async (datingid) => {
+    const { data } = await this.props.client.query({
+      query: DATING,
+      variables: { id: datingid }
+    })
+    return data.Dating.length > 0
+  }
+
   handleCreateUpdate = async () => {
     const form = this.formRef.props.form;
     let values = form.getFieldsValue()
@@ -496,54 +505,42 @@ class DatingList extends Component {
 
     // Create updater registry
     let updaters = []
-    let operation = ''
-    if (values.datingid && !this.props.isDrafted(values.datingid)) {
-      operation = 'update'
 
+    // Determine the operation type
+    let operation = ''
+    if (await this.datingExists(newDating.id)) {
+      operation = 'update'
+    } else {
+      operation = 'add'
+    }
+
+
+    if (operation === 'update') {
       // This is commited to DB, so remove all Date records
       updaters.push({
-        id: values.datingid,
+        id: event.id,
         func: removeDatingDates,
         variables: {
           variables: { datingid: values.datingid },
           client: this.props.client
         },
-        strategy: 'accumulate'
-      })
-
-      // And add updater to update the dating itself
-      updaters.push({
-        id: values.datingid,
-        func: updateDating,
-        variables: {
-          variables: {
-            datingid: newDating.id,
-            datingtype: newDating.type,
-            note: newDating.note,
-            source: newDating.source
-          },
-          client: this.props.client
-        },
-        strategy: 'accumulate'
-      })
-    } else {
-      // This is not an update, so add updater to create it.
-      operation = 'add'
-      updaters.push({
-        id: newDating.id,
-        func: createDating,
-        variables: {
-          variables: {
-            datingid: newDating.id,
-            eventid: event.id,
-            datingtype: newDating.type,
-            note: newDating.note,
-            source: newDating.source
-          },
-          client: this.props.client
-        },
       })
     }
+
+    updaters.push({
+      id: newDating.id,
+      func: operation === 'update' ? updateDating : createDating,
+      variables: {
+        variables: {
+          datingid: newDating.id,
+          eventid: event.id,
+          datingtype: newDating.type,
+          note: newDating.note,
+          source: newDating.source
+        },
+        client: this.props.client
+      },
+    })
 
     // Create date details and updaters
     let dateDetails = this.createDateDetails(values)

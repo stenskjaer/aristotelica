@@ -14,6 +14,14 @@ export const TEXTS = gql`
 }
 `
 
+export const DATING = gql`
+  query dating($id: ID!) {
+    Dating(id: $id) {
+      id
+    }
+  }
+`
+
 export const ALL_MANUSCRIPTS = gql`
   query allManuscripts {
     Manuscript {
