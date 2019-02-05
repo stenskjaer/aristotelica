@@ -1,7 +1,7 @@
 import React from "react";
 import { Query } from "react-apollo";
 import { Link } from "react-router-dom";
-import { Table, Input, Button, Icon } from "antd";
+import { Table } from "antd";
 import { ALL_MANUSCRIPTS } from "../GQL/Queries";
 import { formatDates } from '../utils'
 
@@ -36,7 +36,6 @@ class ManuscriptList extends React.Component {
           ).sort()
 
           const manuscripts = data.Manuscript.map(manuscript => ({ ...manuscript }))
-          const identifier = record => `${record.shelfmark} ${record.number}`
 
           const columns = [
             {

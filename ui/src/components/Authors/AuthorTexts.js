@@ -1,6 +1,5 @@
 import React, { Component } from "react";
-import gql from "graphql-tag";
-import { Form, Input, Modal, Radio, Select, Button, Table, Divider, message } from 'antd';
+import { Form, Input, Modal, Radio, Select, Button, Table, Divider } from 'antd';
 import { createGUID } from '../utils'
 import DescriptionList from "../DescriptionList";
 import { Link } from 'react-router-dom';
