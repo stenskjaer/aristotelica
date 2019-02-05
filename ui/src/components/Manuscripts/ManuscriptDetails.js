@@ -2,8 +2,14 @@ import React, { Component } from "react";
 import { Query } from "react-apollo";
 import { MANUSCRIPT_DETAILS } from "../GQL/Queries";
 import { UPDATE_MANUSCRIPT } from "../GQL/Mutations";
-import ManuscriptEditor from "./ManuscriptEditor";
+import {
+  CREATE_MANUSCRIPT_EVENT,
+  UPDATE_MANUSCRIPT_EVENT,
+  REMOVE_MANUSCRIPT_EVENT,
+} from '../GQL/Mutations';
+import ItemEditor from "../Editors/ItemEditor";
 import EditableTextArea from "../EditableTextArea";
+import EventsEditor from "../Editors/EventsEditor";
 
 const updateManuscript = async ({ variables, client }) => {
   const { error, data } = await client.mutate({
@@ -14,6 +20,32 @@ const updateManuscript = async ({ variables, client }) => {
     console.warn(error.message)
   }
   return data.UpdateManuscript.id
+}
+
+const eventMutations = {
+  createItemEvent: async ({ variables, client }) => {
+    await client.mutate({
+      mutation: CREATE_MANUSCRIPT_EVENT,
+      variables: {
+        eventid: variables.eventid,
+        manuscriptid: variables.itemid,
+        type: variables.type,
+        description: variables.description
+      },
+    })
+  },
+  updateItemEvent: async ({ variables, client }) => {
+    await client.mutate({
+      mutation: UPDATE_MANUSCRIPT_EVENT,
+      variables: variables,
+    });
+  },
+  deleteItemEvent: async ({ variables, client }) => {
+    await client.mutate({
+      mutation: REMOVE_MANUSCRIPT_EVENT,
+      variables: variables,
+    });
+  }
 }
 
 class ManuscriptDetails extends Component {
@@ -36,7 +68,12 @@ class ManuscriptDetails extends Component {
           return (
             <React.Fragment>
               <h1>{createMsTitle()}</h1>
-              <ManuscriptEditor data={manuscript} client={client} {...this.props}>
+              <ItemEditor data={manuscript} client={client} {...this.props}>
+                <EventsEditor
+                  key={createKey('events')}
+                  heading={'Events'}
+                  {...eventMutations}
+                />
                 <EditableTextArea
                   key={createKey('shelfmark')}
                   heading={'Shelfmark'}
@@ -47,33 +84,39 @@ class ManuscriptDetails extends Component {
                   key={createKey('identifier')}
                   heading={'Identifier'}
                   field={'number'}
+                  updater={updateManuscript}
                 />
                 <EditableTextArea
                   key={createKey('olim')}
                   heading={'Olim'}
                   field={'olim'}
+                  updater={updateManuscript}
                 />
                 <EditableTextArea
                   key={createKey('date')}
                   heading={'Date'}
                   field={'date'}
+                  updater={updateManuscript}
                 />
                 <EditableTextArea
                   key={createKey('date_earliest')}
                   heading={'Date_earliest'}
                   field={'date_earliest'}
+                  updater={updateManuscript}
                 />
                 <EditableTextArea
                   key={createKey('date_latest')}
                   heading={'Date_latest'}
                   field={'date_latest'}
+                  updater={updateManuscript}
                 />
                 <EditableTextArea
                   key={createKey('saeculo')}
                   heading={'Saeculo'}
                   field={'saeculo'}
+                  updater={updateManuscript}
                 />
-              </ManuscriptEditor>
+              </ItemEditor>
             </React.Fragment>
           )
         }}

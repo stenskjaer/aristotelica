@@ -232,3 +232,61 @@ export const UPDATE_MANUSCRIPT = gql`
     }
   }
 `
+
+export const CREATE_MANUSCRIPT_EVENT = gql`
+  mutation createManuscriptEvent(
+    $eventid: ID!
+    $manuscriptid: ID!
+    $type: String!
+    $description: String
+  ) {
+    CreateEvent(
+      id: $eventid
+      type: $type
+      description: $description
+    ) {
+      id
+    }
+    AddManuscriptEvents(
+      manuscriptid: $manuscriptid
+      eventid: $eventid
+    ) {
+      id
+    }
+  }
+`
+
+export const UPDATE_MANUSCRIPT_EVENT = gql`
+  mutation updatePersonEvent(
+    $eventid: ID!
+    $type: String!
+    $description: String
+  ) {
+    UpdateEvent(
+      id: $eventid
+      type: $type
+      description: $description
+    ) {
+      id
+    }
+  }
+`
+
+export const REMOVE_MANUSCRIPT_EVENT = gql`
+  mutation removePersonEvents(
+    $personid: ID!
+    $eventid: ID!
+  ) {
+    RemovePersonEvents(
+      personid: $personid
+      eventid: $eventid
+    ) {
+      id
+    }
+    DeleteEvent(
+      id: $eventid
+    ) {
+      id
+    }
+  }
+`
