@@ -27,20 +27,6 @@ class AuthorEditor extends Component {
     saving: false,
   }
 
-  addDraft = (id) => {
-    if (!this.isDrafted(id)) {
-      return [...this.state.drafts, id]
-    }
-    return this.state.drafts
-  }
-
-  removeDraft = (id) => {
-    if (!this.isDrafted(id)) {
-      return this.state.drafts.filter(x => x !== id)
-    }
-    return this.state.drafts
-  }
-
   isDrafted = (id) => {
     return this.state.drafts.includes(id)
   }
@@ -95,7 +81,7 @@ class AuthorEditor extends Component {
     let newDrafts
     if (operation === 'update' || operation === 'add') {
       console.log("Updating or adding")
-      newDrafts = !this.state.drafts.includes(id) ? [...this.state.drafts, id] : this.state.drafts
+      newDrafts = this.isDrafted(id) ? this.state.drafts : [...this.state.drafts, id]
       newUpdaters = this.mergeUpdaters({ updaters, previous: this.state.updaters })
     } else if (operation === 'remove') {
       console.log("Remove old updaters for ID and add new ones.")
