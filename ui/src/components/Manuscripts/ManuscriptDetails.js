@@ -15,6 +15,7 @@ const updateManuscript = async ({ variables, client }) => {
   const { error, data } = await client.mutate({
     mutation: UPDATE_MANUSCRIPT,
     variables: variables,
+    refetchQueries: ['manuscriptDetails', 'allManuscripts']
   })
   if (error) {
     console.warn(error.message)
@@ -32,6 +33,7 @@ const eventMutations = {
         type: variables.type,
         description: variables.description
       },
+      refetchQueries: ['manuscriptDetails', 'allManuscripts']
     })
   },
   updateItemEvent: async ({ variables, client }) => {
@@ -43,6 +45,7 @@ const eventMutations = {
         type: variables.type,
         description: variables.description
       },
+      refetchQueries: ['manuscriptDetails', 'allManuscripts']
     });
   },
   deleteItemEvent: async ({ variables, client }) => {
@@ -52,6 +55,7 @@ const eventMutations = {
         eventid: variables.eventid,
         manuscriptid: variables.itemid,
       },
+      refetchQueries: ['manuscriptDetails', 'allManuscripts']
     });
   }
 }
