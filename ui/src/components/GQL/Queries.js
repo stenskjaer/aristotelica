@@ -77,6 +77,27 @@ export const ALL_MANUSCRIPTS = gql`
           }
         }
       }
+      manifestations {
+        id 
+        incipit
+        explicit
+        folios
+        text {
+          id
+          title
+          attributions {
+            id
+            person {
+              id
+              names {
+                id
+                value
+                language
+              }
+            }
+          }
+        }
+      }
     }
   }
 `
