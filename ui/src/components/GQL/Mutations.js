@@ -273,12 +273,12 @@ export const UPDATE_MANUSCRIPT_EVENT = gql`
 `
 
 export const REMOVE_MANUSCRIPT_EVENT = gql`
-  mutation removePersonEvents(
-    $personid: ID!
+  mutation removeManuscriptEvents(
+    $manuscriptid: ID!
     $eventid: ID!
   ) {
-    RemovePersonEvents(
-      personid: $personid
+    RemoveManuscriptEvents(
+      manuscriptid: $manuscriptid
       eventid: $eventid
     ) {
       id
