@@ -71,10 +71,14 @@ class EventsEditor extends Component {
     visibleForm: false
   }
   handleUpdate = this.props.handleUpdate
-  isDrafted = this.props.isDrafted
   createEvent = this.props.createItemEvent
   updateEvent = this.props.updateItemEvent
   deleteEvent = this.props.deleteItemEvent
+
+  eventInDB = (id) => {
+    const event = this.props.data.events.find(x => x.id === id)
+    return event.hasOwnProperty('__typename')
+  }
 
   save = () => {
     const form = this.formRef.props.form;
@@ -128,8 +132,8 @@ class EventsEditor extends Component {
 
     const event = newData.find(x => x.id === values.id)
     let updaters = []
-    // If event is saved in DB (not only drafted), register remove updaters
-    if (!this.isDrafted(event.id)) {
+    // If event is saved in DB, register remove updaters
+    if (this.eventInDB(event.id)) {
       // Remove datings
       if (event.datings && event.datings.length > 0) {
         event.datings.forEach(dating => {
@@ -251,7 +255,6 @@ class EventsEditor extends Component {
           client={this.props.client}
           editable={this.props.editable}
           handleDatingUpdate={this.handleDatingUpdate}
-          isDrafted={this.isDrafted}
           refetchQueries={['authorInfo']}
         />
       })
