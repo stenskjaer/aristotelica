@@ -102,7 +102,7 @@ class EditableTextArea extends React.Component {
 
     return (
       <React.Fragment>
-        <h2>{heading}
+        <h3>{heading}
           {
             editable ?
               editing
@@ -110,7 +110,7 @@ class EditableTextArea extends React.Component {
                 : <Button onClick={this.toggleEdit} shape="circle" size="small" icon="edit" style={{ marginLeft: '1ex' }} />
               : ''
           }
-        </h2>
+        </h3>
 
         <div ref={node => (this.field = node)}>
           {editable
