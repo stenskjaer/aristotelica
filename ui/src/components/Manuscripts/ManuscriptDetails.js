@@ -105,30 +105,6 @@ class ManuscriptDetails extends Component {
                   updater={updateManuscript}
                 />
                 <EditableTextArea
-                  key={createKey('date')}
-                  heading={'Date'}
-                  field={'date'}
-                  updater={updateManuscript}
-                />
-                <EditableTextArea
-                  key={createKey('date_earliest')}
-                  heading={'Date_earliest'}
-                  field={'date_earliest'}
-                  updater={updateManuscript}
-                />
-                <EditableTextArea
-                  key={createKey('date_latest')}
-                  heading={'Date_latest'}
-                  field={'date_latest'}
-                  updater={updateManuscript}
-                />
-                <EditableTextArea
-                  key={createKey('saeculo')}
-                  heading={'Saeculo'}
-                  field={'saeculo'}
-                  updater={updateManuscript}
-                />
-                <EditableTextArea
                   key={createKey('note')}
                   heading={'Note'}
                   field={'note'}

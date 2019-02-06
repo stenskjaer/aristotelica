@@ -29,10 +29,6 @@ export const ALL_MANUSCRIPTS = gql`
       shelfmark
       number
       olim
-      date
-      date_earliest
-      date_latest
-      saeculo
       layout
       annotation
       script
@@ -92,10 +88,6 @@ export const MANUSCRIPT_DETAILS = gql`
       shelfmark
       number
       olim
-      date
-      date_earliest
-      date_latest
-      saeculo
       library {
         id
         name
