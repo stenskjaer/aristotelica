@@ -128,6 +128,18 @@ class ManuscriptDetails extends Component {
                   field={'saeculo'}
                   updater={updateManuscript}
                 />
+                <EditableTextArea
+                  key={createKey('note')}
+                  heading={'Note'}
+                  field={'note'}
+                  updater={updateManuscript}
+                />
+                <EditableTextArea
+                  key={createKey('literature')}
+                  heading={'Literature'}
+                  field={'literature'}
+                  updater={updateManuscript}
+                />
               </ItemEditor>
             </React.Fragment>
           )
