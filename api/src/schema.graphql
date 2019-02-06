@@ -73,9 +73,6 @@ type Person {
   created: DateTime!
   modified: DateTime
   note: String 
-  name_en: Name @cypher(statement: 
-    "(this)-[:HAS_NAME]->(n:Name {language: 'en'}) RETURN n"
-  )
   names: [Name!]! @relation(name: "HAS_NAME", direction: "OUT")
   attributions: [Attribution!]! @relation(name: "TO", direction: "IN")
   events: [Event!]! @relation(name: "HAS_EVENT", direction: "OUT")
