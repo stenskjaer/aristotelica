@@ -244,6 +244,10 @@ class DatingList extends Component {
     },
   };
 
+  datingInDB = (id) => {
+    const dating = this.props.datings.find(x => x.id === id) || {}
+    return dating.hasOwnProperty('__typename')
+  }
 
   handleCancel = () => {
     this.setState({ visibleForm: false });
@@ -472,14 +476,6 @@ class DatingList extends Component {
     return dateDetails
   }
 
-  datingExists = async (datingid) => {
-    const { data } = await this.props.client.query({
-      query: DATING,
-      variables: { id: datingid }
-    })
-    return data.Dating.length > 0
-  }
-
   handleCreateUpdate = async () => {
     const form = this.formRef.props.form;
     let values = form.getFieldsValue()
@@ -508,7 +504,7 @@ class DatingList extends Component {
 
     // Determine the operation type
     let operation = ''
-    if (await this.datingExists(newDating.id)) {
+    if (this.datingInDB(newDating.id)) {
       operation = 'update'
     } else {
       operation = 'add'
@@ -577,7 +573,7 @@ class DatingList extends Component {
     const event = JSON.parse(JSON.stringify(this.props.event))
     const dates = dating.dates
     let updaters = []
-    if (await this.datingExists(dating.id)) {
+    if (this.datingInDB(dating.id)) {
       updaters.push(...dates.map(d => ({
         id: dating.id,
         func: deleteDate,
