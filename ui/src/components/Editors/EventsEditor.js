@@ -170,8 +170,11 @@ class EventsEditor extends Component {
         id: event.id,
         func: this.deleteEvent,
         variables: {
-          eventid: event.id,
-          personid: this.props.id
+          variables: {
+            eventid: event.id,
+            itemid: this.props.data.id
+          },
+          client: this.props.client
         },
         strategy: 'accumulate'
       })
