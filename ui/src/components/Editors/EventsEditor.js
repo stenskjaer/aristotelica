@@ -187,11 +187,8 @@ class EventsEditor extends Component {
     // Push the dating updates from the child to the parent state
     const newData = [...this.props.data.events]
     const eventIndex = newData.findIndex(x => x.id === event.id)
-    if (eventIndex > -1) {
-      newData.splice(eventIndex, 1, event)
-    } else {
-      newData.push(event)
-    }
+    newData.splice(eventIndex, 1, event)
+
     this.handleUpdate({
       id,
       relation: 'events',

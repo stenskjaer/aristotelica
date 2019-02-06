@@ -575,37 +575,38 @@ class DatingList extends Component {
 
   handleDelete = async (dating) => {
     const event = JSON.parse(JSON.stringify(this.props.event))
-    const datingId = dating.id
     const dates = dating.dates
     let updaters = []
-    updaters.push(...dates.map(d => ({
-      id: datingId,
-      func: deleteDate,
-      variables: {
+    if (await this.datingExists(dating.id)) {
+      updaters.push(...dates.map(d => ({
+        id: dating.id,
+        func: deleteDate,
         variables: {
-          dateid: d.id,
+          variables: {
+            dateid: d.id,
+          },
+          client: this.props.client
         },
-        client: this.props.client
-      },
-      strategy: 'accumulate'
-    })))
-    updaters.push({
-      id: datingId,
-      func: deleteDating,
-      variables: {
+        strategy: 'accumulate'
+      })))
+      updaters.push({
+        id: dating.id,
+        func: deleteDating,
         variables: {
-          datingid: datingId,
+          variables: {
+            datingid: dating.id,
+          },
+          client: this.props.client
         },
-        client: this.props.client
-      },
-      strategy: 'accumulate'
-    })
+        strategy: 'accumulate'
+      })
+    }
 
     this.props.handleDatingUpdate({
-      id: event.id,
+      id: dating.id,
       event: {
         ...event,
-        datings: event.datings.filter(d => d.id !== datingId)
+        datings: event.datings.filter(d => d.id !== dating.id)
       },
       operation: 'remove',
       updaters,
