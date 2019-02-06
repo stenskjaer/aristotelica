@@ -12,6 +12,7 @@ type Text {
   explicit: String
   events: [Event!]! @relation(name: "HAS_EVENT", direction: "OUT")
   types: [TextType]! @relation(name: "Type", direction: "OUT")
+  manifestations: [Manifestation!]! @relation(name: "MANIFESTED_IN", direction: "OUT")
 }
 
 type TextType {
@@ -19,6 +20,17 @@ type TextType {
   name: String!
   parent: TextType @relation(name: "HAS_CHILD", direction: "IN")
   children: [TextType] @relation(name: "HAS_CHILD", direction: "OUT")
+}
+
+type Manifestation {
+  id: ID!
+  created: DateTime!
+  modified: DateTime
+  folios: String
+  explicit: String
+  incipit: String
+  text: Text! @relation(name: "MANIFESTED_IN", direction: "IN")
+  manuscript: Manuscript! @relation(name: "HAS_MANIFESTATION", direction: "IN")
 }
 
 type Manuscript {
@@ -38,6 +50,7 @@ type Manuscript {
   literature: String,
   library: Library! @relation(name: "ARCHIVED_IN", direction: "OUT")
   events: [Event!]! @relation(name: "HAS_EVENT", direction: "OUT")
+  manifestations: [Manifestation!]! @relation(name: "HAS_MANIFESTATION", direction: "OUT")
 }
 
 type Library {
