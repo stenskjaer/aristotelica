@@ -257,7 +257,7 @@ export const CREATE_MANUSCRIPT_EVENT = gql`
 `
 
 export const UPDATE_MANUSCRIPT_EVENT = gql`
-  mutation updatePersonEvent(
+  mutation updateManuscriptEvent(
     $eventid: ID!
     $type: String!
     $description: String

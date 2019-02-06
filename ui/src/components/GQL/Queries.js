@@ -111,6 +111,7 @@ export const MANUSCRIPT_DETAILS = gql`
       events {
         id
         type
+        description
         datings {
           id
           source
