@@ -37,13 +37,21 @@ const eventMutations = {
   updateItemEvent: async ({ variables, client }) => {
     await client.mutate({
       mutation: UPDATE_MANUSCRIPT_EVENT,
-      variables: variables,
+      variables: {
+        eventid: variables.eventid,
+        manuscriptid: variables.itemid,
+        type: variables.type,
+        description: variables.description
+      },
     });
   },
   deleteItemEvent: async ({ variables, client }) => {
     await client.mutate({
       mutation: REMOVE_MANUSCRIPT_EVENT,
-      variables: variables,
+      variables: {
+        eventid: variables.eventid,
+        manuscriptid: variables.itemid,
+      },
     });
   }
 }
