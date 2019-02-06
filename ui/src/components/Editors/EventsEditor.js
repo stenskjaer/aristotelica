@@ -233,7 +233,13 @@ class EventsEditor extends Component {
           {event.type}
           {
             editable &&
-            <Button onClick={() => this.updateModal(event)} shape="circle" size="small" icon="edit" style={{ marginLeft: '1ex' }} />
+            <Button
+              onClick={() => this.updateModal(event)}
+              shape="circle"
+              size="small"
+              icon="edit"
+              style={{ marginLeft: '1ex' }}
+            />
           }
         </span>
       return ({
@@ -257,7 +263,13 @@ class EventsEditor extends Component {
           {this.props.heading}
           {
             editable
-              ? <Button onClick={this.toggleModal} shape="circle" size="small" icon="plus" style={{ marginLeft: '1ex' }} />
+              ? <Button
+                onClick={this.toggleModal}
+                shape="circle"
+                size="small"
+                icon="plus"
+                style={{ marginLeft: '1ex' }}
+              />
               : ''
           }
         </h2>
