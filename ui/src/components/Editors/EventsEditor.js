@@ -52,14 +52,14 @@ export const CreateUpdateEvent = Form.create()(
 );
 
 const mutations = {
-  deleteDatingDate: async (variables) => {
-    await this.props.client.mutate({
+  deleteDatingDate: async ({ variables, client }) => {
+    await client.mutate({
       mutation: REMOVE_DATING_DATE,
       variables: variables,
     })
   },
-  deleteDatingEvent: async (variables) => {
-    await this.props.client.mutate({
+  deleteDatingEvent: async ({ variables, client }) => {
+    await client.mutate({
       mutation: REMOVE_DATING_EVENT,
       variables: variables,
     })
@@ -142,8 +142,11 @@ class EventsEditor extends Component {
             id: date.id,
             func: mutations.deleteDatingDate,
             variables: {
-              datingid: dating.id,
-              dateid: date.id
+              variables: {
+                datingid: dating.id,
+                dateid: date.id
+              },
+              client: this.props.client
             },
             strategy: 'accumulate'
           })))
@@ -152,8 +155,11 @@ class EventsEditor extends Component {
             id: dating.id,
             func: mutations.deleteDatingEvent,
             variables: {
-              datingid: dating.id,
-              eventid: event.id
+              variables: {
+                datingid: dating.id,
+                eventid: event.id
+              },
+              client: this.props.client
             },
             strategy: 'accumulate'
           })
