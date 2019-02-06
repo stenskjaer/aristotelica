@@ -4,7 +4,6 @@ import { createGUID, formatDates } from './utils';
 import { List, Button, Divider, message } from 'antd';
 import { CreateUpdateDating } from './CreateUpdateDating';
 import { DELETE_DATING, DELETE_DATE, DELETE_DATES_FROM_DATING } from './GQL/Mutations';
-import { DATING } from './GQL/Queries';
 
 const CREATE_DATING = gql`
   mutation createDating(
@@ -245,8 +244,11 @@ class DatingList extends Component {
   };
 
   datingInDB = (id) => {
-    const dating = this.props.datings.find(x => x.id === id) || {}
-    return dating.hasOwnProperty('__typename')
+    if (this.props.datings) {
+      const dating = this.props.datings.find(x => x.id === id) || {}
+      return dating.hasOwnProperty('__typename')
+    }
+    return false
   }
 
   handleCancel = () => {
