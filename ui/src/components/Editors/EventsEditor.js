@@ -76,8 +76,12 @@ class EventsEditor extends Component {
   deleteEvent = this.props.deleteItemEvent
 
   eventInDB = (id) => {
-    const event = this.props.data.events.find(x => x.id === id)
-    return event.hasOwnProperty('__typename')
+    const events = this.props.data.events
+    if (events) {
+      const event = events.find(x => x.id === id) || {}
+      return event.hasOwnProperty('__typename')
+    }
+    return false
   }
 
   save = () => {
@@ -91,14 +95,18 @@ class EventsEditor extends Component {
     }
     const itemIndex = newData.findIndex(x => x.id === newItem.id)
     if (itemIndex > -1) {
-      operation = 'update'
       newData.splice(itemIndex, 1, {
         ...newData[itemIndex],
         ...values
       })
     } else {
-      operation = 'add'
       newData.push(newItem)
+    }
+
+    if (this.eventInDB(newItem.id)) {
+      operation = 'update'
+    } else {
+      operation = 'add'
     }
 
     this.handleUpdate({
