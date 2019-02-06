@@ -81,41 +81,103 @@ class ManuscriptDetails extends Component {
             <React.Fragment>
               <h1>{createMsTitle()}</h1>
               <ItemEditor data={manuscript} client={client} {...this.props}>
-                <EventsEditor
-                  key={createKey('events')}
-                  heading={'Events'}
-                  {...eventMutations}
-                />
-                <EditableTextArea
-                  key={createKey('shelfmark')}
-                  heading={'Shelfmark'}
-                  field={'shelfmark'}
-                  updater={updateManuscript}
-                />
-                <EditableTextArea
-                  key={createKey('identifier')}
-                  heading={'Identifier'}
-                  field={'number'}
-                  updater={updateManuscript}
-                />
-                <EditableTextArea
-                  key={createKey('olim')}
-                  heading={'Olim'}
-                  field={'olim'}
-                  updater={updateManuscript}
-                />
-                <EditableTextArea
-                  key={createKey('note')}
-                  heading={'Note'}
-                  field={'note'}
-                  updater={updateManuscript}
-                />
-                <EditableTextArea
-                  key={createKey('literature')}
-                  heading={'Literature'}
-                  field={'literature'}
-                  updater={updateManuscript}
-                />
+                <section key="events-section">
+                  <EventsEditor
+                    editableField={true}
+                    key={createKey('events')}
+                    heading={'Events'}
+                    {...eventMutations}
+                  />
+                </section>
+                <section key="location-section">
+                  <h2 key="location">Location</h2>
+                  <EditableTextArea
+                    editableField={true}
+                    key={createKey('shelfmark')}
+                    heading={'Shelfmark'}
+                    field={'shelfmark'}
+                    updater={updateManuscript}
+                  />
+                  <EditableTextArea
+                    editableField={true}
+                    key={createKey('identifier')}
+                    heading={'Identifier'}
+                    field={'number'}
+                    updater={updateManuscript}
+                  />
+                  <EditableTextArea
+                    editableField={true}
+                    key={createKey('olim')}
+                    heading={'Olim'}
+                    field={'olim'}
+                    updater={updateManuscript}
+                  />
+                </section>
+                <section key="physique-section">
+                  <h2 key="physique">Physique</h2>
+                  <EditableTextArea
+                    editableField={true}
+                    key={createKey('width')}
+                    heading={'Width'}
+                    field={'width'}
+                    updater={updateManuscript}
+                  />
+                  <EditableTextArea
+                    editableField={true}
+                    key={createKey('height')}
+                    heading={'Height'}
+                    field={'height'}
+                    updater={updateManuscript}
+                  />
+                  <EditableTextArea
+                    editableField={true}
+                    key={createKey('material')}
+                    heading={'Material'}
+                    field={'material'}
+                    updater={updateManuscript}
+                  />
+                </section>
+                <section key="surface-section">
+                  <h2 key="appearance">Surface appearance</h2>
+                  <EditableTextArea
+                    editableField={true}
+                    key={createKey('layout')}
+                    heading={'Layout'}
+                    field={'layout'}
+                    updater={updateManuscript}
+                  />
+                  <EditableTextArea
+                    editableField={true}
+                    key={createKey('annotation')}
+                    heading={'Annotation'}
+                    field={'annotation'}
+                    updater={updateManuscript}
+                  />
+                  <EditableTextArea
+                    editableField={true}
+                    key={createKey('script')}
+                    heading={'Script'}
+                    field={'script'}
+                    updater={updateManuscript}
+                  />
+                </section>
+                <section key="notes-section">
+                  <h2 key='notes-header'>Notes and resources</h2>
+                  <EditableTextArea
+                    editableField={true}
+                    key={createKey('note')}
+                    heading={'Note'}
+                    field={'note'}
+                    updater={updateManuscript}
+                  />
+                  <EditableTextArea
+                    editableField={true}
+                    key={createKey('literature')}
+                    heading={'Literature'}
+                    field={'literature'}
+                    updater={updateManuscript}
+                  />
+                </section>
               </ItemEditor>
             </React.Fragment>
           )
