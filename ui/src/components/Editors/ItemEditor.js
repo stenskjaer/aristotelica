@@ -136,11 +136,21 @@ class ItemEditor extends Component {
     }
 
     const makeChildrenWithProps = (children) => {
+      /*
+      Deep copy of children. 
+      If they have the pop "editableField" they will get the editor props
+      */
       if (Array.isArray(children)) {
-        return children.map(child => React.cloneElement(child, { ...editorProps }))
-      } else {
-        return React.cloneElement(children, { ...editorProps })
+        return children.map(child => {
+          if (child.props.children) {
+            return React.cloneElement(child, child.props, makeChildrenWithProps(child.props.children))
+          }
+          return React.cloneElement(child, child.props.editableField && editorProps)
+        })
+      } else if (typeof children === 'string') {
+        return children
       }
+      return React.cloneElement(children, { ...editorProps })
     }
 
     return (
