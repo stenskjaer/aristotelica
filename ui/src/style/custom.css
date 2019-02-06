@@ -30,6 +30,10 @@ h6 {
   margin-bottom: 0.6ex;
 }
 
+section {
+  padding-bottom: 10px;
+}
+
 p {
   margin-bottom: 0.6em;
 }
