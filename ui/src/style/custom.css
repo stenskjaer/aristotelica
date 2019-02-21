@@ -105,6 +105,15 @@ img.bordered {
   margin-top: 12px;
 }
 
+.footer {
+  text-align: left;
+}
+
+.footer .github-logo {
+  margin: 0 4px;
+  height: 16px;
+}
+
 button + button {
   margin-left: 8px;
   margin-bottom: 0px;

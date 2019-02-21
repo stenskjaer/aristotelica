@@ -2,7 +2,7 @@ import React from 'react';
 import ApolloClient from 'apollo-boost';
 import { ApolloProvider } from 'react-apollo';
 import { Switch, Route } from 'react-router-dom'
-import { Layout } from 'antd';
+import { Layout, Row, Col } from 'antd';
 import AuthorList from './Authors/AuthorList';
 import AuthorDetails from './Authors/AuthorDetails';
 import Home from './Home';
@@ -56,7 +56,24 @@ function App(props) {
             </Content>
           </Layout>
         </Content>
-        <Footer>Footer content</Footer>
+        <Footer className="footer">
+          <Row>
+            <Col span={12}>
+              <p>
+                © Michael Stenskjær Christensen 2019, MIT Licensed,
+                <a href="https://github.com/stenskjaer/aristotelica">
+                  <img class="github-logo" src={require('../img/octocat.png')} alt="Github" />
+                  open source
+                </a>
+              </p>
+            </Col>
+            <Col span={12}>
+              <p>
+                <em>Aristotelica</em> is a part <a href="https://representationandreality.gu.se/">Representation and Reality</a>, funded by <a href="https://www.rj.se/en/">Riksbankens Jubileumsfond</a>
+              </p>
+            </Col>
+          </Row>
+        </Footer>
       </Layout>
     </ApolloProvider>
   );
