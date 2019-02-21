@@ -42,7 +42,7 @@ class ManuscriptList extends React.Component {
               sorter: (a, b) => a.shelfmark.localeCompare(b.shelfmark),
             },
             {
-              title: 'Identifier',
+              title: 'Signature',
               dataIndex: 'number',
               render: (text, record) => <Link to={`manuscript/${record.id}`}>{text}</Link>,
               sorter: (a, b) => a.number.localeCompare(b.number),
@@ -108,7 +108,7 @@ class ManuscriptList extends React.Component {
                         title: 'Title',
                         dataIndex: 'text.title',
                         render: (text, record) => <Link to={`/text/${record.text.id}`}>{text}</Link>,
-                        width: '60%',
+                        width: '50%',
                       },
                       {
                         title: 'Authorships',
@@ -120,7 +120,11 @@ class ManuscriptList extends React.Component {
                             })
                             .reduce((accu, elem) => accu.length > 0 ? [accu, ', ', elem] : [elem], [])
                         ),
-                        width: '40%',
+                        width: '30%',
+                      },
+                      {
+                        title: 'Folios',
+                        dataIndex: 'folios'
                       }
                     ]}
                   />
