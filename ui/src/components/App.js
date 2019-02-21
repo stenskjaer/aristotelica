@@ -5,6 +5,7 @@ import { Switch, Route } from 'react-router-dom'
 import { Layout } from 'antd';
 import AuthorList from './Authors/AuthorList';
 import AuthorDetails from './Authors/AuthorDetails';
+import Home from './Home';
 import TextDetails from './Texts/TextDetails';
 import TextList from './Texts/TextList';
 import ManuscriptList from './Manuscripts/ManuscriptList';
@@ -38,6 +39,7 @@ function App(props) {
             <Content>
               <div style={{ background: '#fff', padding: 12, minHeight: '100%' }}>
                 <Switch>
+                  <Route exact path="/" component={Home} />
                   <Route exact path="/texts" component={TextList} />
                   <Route exact path="/authors" component={AuthorList} />
                   <Route exact path="/author/:id" render={props => <AuthorDetails auth={auth} {...props} />} />
