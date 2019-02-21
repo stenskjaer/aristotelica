@@ -10,6 +10,7 @@ import {
 import ItemEditor from "../Editors/ItemEditor";
 import EditableTextArea from "../EditableTextArea";
 import EventsEditor from "../Editors/EventsEditor";
+import SelectLibrary from "./SelectLibrary";
 
 const updateManuscript = async ({ variables, client }) => {
   const { error, data } = await client.mutate({
@@ -91,6 +92,11 @@ class ManuscriptDetails extends Component {
                 </section>
                 <section key="location-section">
                   <h2 key="location">Location</h2>
+                  <SelectLibrary
+                    editableField={true}
+                    key={createKey('library')}
+                    heading={'Library'}
+                  />
                   <EditableTextArea
                     editableField={true}
                     key={createKey('shelfmark')}
@@ -100,8 +106,8 @@ class ManuscriptDetails extends Component {
                   />
                   <EditableTextArea
                     editableField={true}
-                    key={createKey('identifier')}
-                    heading={'Identifier'}
+                    key={createKey('signature')}
+                    heading={'Signature'}
                     field={'number'}
                     updater={updateManuscript}
                   />

@@ -14,6 +14,24 @@ export const TEXTS = gql`
 }
 `
 
+export const ALL_LIBRARIES = gql`
+  query allLibraries {
+    Library {
+    id
+    name
+    short_name
+    city {
+      id
+      name
+      country {
+        id
+        name
+      }
+    }
+  }
+}
+`
+
 export const DATING = gql`
   query dating($id: ID!) {
     Dating(id: $id) {
