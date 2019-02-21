@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
 import gql from "graphql-tag";
 import { Table, Input, InputNumber, Divider, Form, Button, Select } from 'antd';
-import { createGUID } from '../utils';
-import { Languages } from '../languages';
-import Defaults from '../defaults';
+import { createGUID } from '../../utils/functions';
+import { Languages } from '../../utils/languages';
+import Defaults from '../../utils/defaults';
 
 const FormItem = Form.Item;
 const EditableContext = React.createContext();

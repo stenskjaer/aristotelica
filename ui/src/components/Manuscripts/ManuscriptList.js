@@ -3,8 +3,8 @@ import { Query } from "react-apollo";
 import { Link } from "react-router-dom";
 import { Table } from "antd";
 import { ALL_MANUSCRIPTS } from "../GQL/Queries";
-import { formatDates } from '../utils'
-import Defaults from '../defaults';
+import { formatDates } from '../../utils/functions'
+import Defaults from '../../utils/defaults';
 
 
 class ManuscriptList extends React.Component {

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import gql from "graphql-tag";
-import { createGUID, itemEventDatings } from '../utils';
+import { createGUID, itemEventDatings } from '../../utils/functions';
 import DatingList from "../DatingList";
 
 const CREATE_TEXT_EVENT = gql`

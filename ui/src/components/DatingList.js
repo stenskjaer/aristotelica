@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import gql from "graphql-tag";
-import { createGUID, formatDates } from './utils';
+import { createGUID, formatDates } from '../utils/functions';
 import { List, Button, Divider, message } from 'antd';
 import { CreateUpdateDating } from './CreateUpdateDating';
 import { DELETE_DATING, DELETE_DATE, DELETE_DATES_FROM_DATING } from './GQL/Mutations';

@@ -2,9 +2,9 @@ import React, { Component } from "react";
 import { Query } from "react-apollo";
 import gql from "graphql-tag";
 import { Button, List, message } from 'antd';
-import { createGUID } from '../utils'
+import { createGUID } from '../../utils/functions'
 import { AuthorCreateForm } from '../CreateAttributionForm'
-import { normCertainty, defaultName } from '../utils'
+import { normCertainty, defaultName } from '../../utils/functions'
 import DescriptionList from "../DescriptionList";
 
 const ATTRIBUTIONS_QUERY = gql`

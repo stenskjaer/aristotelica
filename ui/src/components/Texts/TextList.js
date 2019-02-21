@@ -3,7 +3,7 @@ import { Query } from "react-apollo";
 import gql from "graphql-tag";
 import { Table, Divider, Input, Button, Icon } from 'antd'
 import { Link } from 'react-router-dom';
-import { normCertainty, formatDates, itemEventDatings, defaultName } from '../utils'
+import { normCertainty, formatDates, itemEventDatings, defaultName } from '../../utils/functions'
 
 const TEXTS_QUERY = gql`
   query allTexts {

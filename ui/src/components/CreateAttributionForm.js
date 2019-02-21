@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import gql from "graphql-tag";
 import { Form, Input, Modal, Radio, Select } from 'antd';
-import { defaultName } from "./utils";
+import { defaultName } from "../utils/functions";
 
 const AUTHORS = gql`
 query allAuthors {

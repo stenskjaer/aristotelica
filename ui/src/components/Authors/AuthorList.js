@@ -3,7 +3,7 @@ import { Query } from "react-apollo";
 import gql from "graphql-tag";
 import { Link } from "react-router-dom";
 import { Table, Input, Button, Icon } from "antd";
-import { defaultName } from "../utils";
+import { defaultName } from "../../utils/functions";
 
 const PERSONS_QUERY = gql`
   query allPersons {

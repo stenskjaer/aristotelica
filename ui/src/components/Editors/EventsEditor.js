@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { List, Button, Form, Modal, Input } from "antd";
-import { createGUID } from '../utils';
+import { createGUID } from '../../utils/functions';
 import DatingList from "../DatingList";
 import {
   REMOVE_DATING_DATE,

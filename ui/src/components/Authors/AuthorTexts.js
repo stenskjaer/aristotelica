@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Form, Input, Modal, Radio, Select, Button, Table, Divider } from 'antd';
-import { createGUID } from '../utils'
+import { createGUID } from '../../utils/functions'
 import DescriptionList from "../DescriptionList";
 import { Link } from 'react-router-dom';
 import { TEXTS } from "../GQL/Queries";

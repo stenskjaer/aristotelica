@@ -1,10 +1,10 @@
 import ReactDOM from 'react-dom';
 import React from 'react'
-import registerServiceWorker from './registerServiceWorker';
+import registerServiceWorker from './utils/registerServiceWorker';
 import { Route, Router } from 'react-router-dom';
 import App from './components/App';
 import Auth from './components/Auth';
-import history from './components/history';
+import history from './utils/history';
 
 
 import 'antd/dist/antd.css'

@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { defaultName } from "../utils";
+import { defaultName } from "../../utils/functions";
 import AuthorshipAttributions from "./AuthorshipAttributions";
 import AuthorTexts from "./AuthorTexts";
 import AuthorEvents from "./AuthorEvents";

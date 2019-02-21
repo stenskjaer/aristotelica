@@ -1,5 +1,5 @@
 import auth0 from 'auth0-js';
-import history from './history';
+import history from '../utils/history';
 
 export function createNonce(length) {
   const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._~'
