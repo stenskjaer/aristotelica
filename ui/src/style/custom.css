@@ -53,6 +53,29 @@ p {
   padding: 6px 0 6px 40px;
 }
 
+.header {
+  border: 1px solid #d9d9d9;
+}
+
+.header h1 {
+  color: black;
+}
+
+.lead {
+  font-size: 1.3em;
+  color: 1px solid #d9d9d9;
+}
+
+img.bordered {
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  padding: 5px;
+}
+
+.ant-row + .ant-row {
+  margin-top: 12px;
+}
+
 button + button {
   margin-left: 8px;
   margin-bottom: 0px;
