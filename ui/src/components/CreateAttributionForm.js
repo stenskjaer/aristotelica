@@ -34,11 +34,8 @@ export const AuthorCreateForm = Form.create()(
       data: [],
     }
 
-    componentDidMount() {
-      prefetchAuthors(this.props.client)
-        .then(e => {
-          this.setState({ data: e })
-        })
+    async componentDidMount() {
+      this.setState({ data: await prefetchAuthors(this.props.client) })
     }
 
     handleChange = (value) => {
