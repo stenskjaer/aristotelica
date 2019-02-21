@@ -62,7 +62,7 @@ function App(props) {
               <p>
                 © Michael Stenskjær Christensen 2019, MIT Licensed,
                 <a href="https://github.com/stenskjaer/aristotelica">
-                  <img class="github-logo" src={require('../img/octocat.png')} alt="Github" />
+                  <img className="github-logo" src={require('../img/octocat.png')} alt="Github" />
                   open source
                 </a>
               </p>

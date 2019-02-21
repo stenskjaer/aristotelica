@@ -1,5 +1,5 @@
 import React from 'react';
-import { Row, Col } from 'antd';
+import { Row, Col, Card } from 'antd';
 
 function Home() {
 
@@ -23,7 +23,7 @@ function Home() {
           </section>
         </Col>
         <Col span={12}>
-          <img className="bordered" src={require('../img/physics_ms.jpg')} width="100%" />
+          <img className="bordered" alt="Latin manuscript for Aristotle's Physics" src={require('../img/physics_ms.jpg')} width="100%" />
         </Col>
       </Row>
       <Row>
@@ -33,6 +33,29 @@ function Home() {
           </section>
         </Col>
       </Row>
+
+      <section>
+        <h1>About</h1>
+        <p>
+          The <em>Aristotelica</em> project is started by Michael Stenskjær Christensen as a framework the sources on Aristotle's <em>De anima</em> collected from existing catalogues for his PhD dissertation. This is reflected in the content of the database, as it currently almost only contains sources on <em>De anima</em>. But it is designed to be able to contain any sources from the Aristotelian Tradition.
+        </p>
+        <Row gutter={8}>
+          <Col span={8}>
+            <Card title="Context">
+              <img style={{ float: 'left', paddingRight: '10px' }} width="75px" height="60px" alt="R&R" src={require('../img/rr_logo.jpeg')} />
+              The website is part of the project <a href="https://representationandreality.gu.se/">Representation and Reality: Historical and Contemporary Perspectives on the Aristotelian Tradition</a>. The project is hosted at <a href="https://www.gu.se/">University of Gothenburg</a>.
+          </Card>
+          </Col>
+          <Col span={8}>
+            <Card title="Funding"
+              cover={<img alt="Riksbankens Jubileumsfond" src={require('../img/rj_logo.png')} />}
+            >
+              <a href="https://www.rj.se/en/">Riksbankens Jubileumsfond</a> has provided the overall funding of the project.
+          </Card>
+          </Col>
+        </Row>
+      </section>
+
     </div>
   );
 }
