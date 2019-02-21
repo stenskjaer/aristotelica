@@ -28,7 +28,12 @@ function App(props) {
     <ApolloProvider client={client}>
       <Layout>
         <Header className="header">
-          <img height="110px" alt="Aristotelica" src={require("../img/title.png")} />
+          <img height="70px" alt="Aristotelica" src={require("../img/logo.png")} />
+          <div className="title">
+            <h1>Aristotelica</h1>
+            <h2>Sources for the Aristotelian Tradition</h2>
+          </div>
+
         </Header>
         <Content style={{ padding: '0 50px' }}>
           <Layout>

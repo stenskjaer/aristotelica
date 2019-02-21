@@ -45,9 +45,6 @@ p {
   height: auto;
   line-height: inherit;
 }
-.header, .ant-layout-header h1 {
-  color: white;
-}
 
 .ant-collapse>.ant-collapse-item>.ant-collapse-header {
   padding: 6px 0 6px 40px;
@@ -55,10 +52,42 @@ p {
 
 .header {
   border: 1px solid #d9d9d9;
+  background-color:  #001333;
+  padding-top: 15px;
+  padding-bottom: 10px;
 }
 
-.header h1 {
-  color: black;
+.title {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  height: 100%
+}
+
+.title h1 {
+  color: white;
+  margin: 0;
+  text-transform: uppercase;
+  font-family: 'Crimson Bold', 'Georgia', 'Times New Roman', Times, serif;
+  font-size: 1.8em;
+  line-height: 1.2em;
+}
+
+.title h2 {
+  color: white;
+  margin: 0;
+  font-family: 'Crimson Bold', 'Georgia', 'Times New Roman', Times, serif;
+  font-size: 1.2em;
+  line-height: 1em;
+}
+
+.header img {
+  float: left;
+}
+
+.title {
+  float: left;
+  padding-left: 10px;
 }
 
 .lead {
