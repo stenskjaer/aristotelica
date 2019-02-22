@@ -42,7 +42,7 @@ function Home() {
         <Row gutter={8}>
           <Col span={8}>
             <Card title="Context">
-              <img style={{ float: 'left', paddingRight: '10px' }} width="75px" height="60px" alt="R&R" src={require('../img/rr_logo.jpeg')} />
+              <img style={{ float: 'left', paddingRight: '10px' }} width="100px" height="65px" alt="R&R" src={require('../img/rr_logo.jpeg')} />
               The website is part of the project <a href="https://representationandreality.gu.se/">Representation and Reality: Historical and Contemporary Perspectives on the Aristotelian Tradition</a>. The project is hosted at <a href="https://www.gu.se/">University of Gothenburg</a>.
           </Card>
           </Col>
