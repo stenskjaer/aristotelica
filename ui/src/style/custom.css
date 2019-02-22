@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css?family=Crimson+Text');
+
 /* Structure, full height */
 #root, .ant-layout, .ant-layout-content {
   height: 100%;
@@ -68,16 +70,16 @@ p {
   color: white;
   margin: 0;
   text-transform: uppercase;
-  font-family: 'Crimson Bold', 'Georgia', 'Times New Roman', Times, serif;
-  font-size: 1.8em;
+  font-family: 'Crimson Text', 'Georgia', 'Times New Roman', Times, serif;
+  font-size: 1.4em;
   line-height: 1.2em;
 }
 
 .title h2 {
   color: white;
   margin: 0;
-  font-family: 'Crimson Bold', 'Georgia', 'Times New Roman', Times, serif;
-  font-size: 1.2em;
+  font-family: 'Crimson Text', 'Georgia', 'Times New Roman', Times, serif;
+  font-size: 1.1em;
   line-height: 1em;
 }
 
@@ -103,6 +105,10 @@ img.bordered {
 
 .ant-row + .ant-row {
   margin-top: 12px;
+}
+
+.ant-layout-footer {
+  padding: 14px 50px 0px 50px;
 }
 
 .footer {
