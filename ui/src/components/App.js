@@ -53,27 +53,28 @@ function App(props) {
                   <Route exact path="/manuscript/:id" render={props => <ManuscriptDetails auth={auth} {...props} />} />
                 </Switch>
               </div>
+              <div className="footer">
+                <Row>
+                  <Col span={12}>
+                    <p>
+                      © Michael Stenskjær Christensen 2019, MIT Licensed, <br />
+                      <a href="https://github.com/stenskjaer/aristotelica">
+                        <img className="github-logo" src={require('../img/octocat.png')} alt="Github" />
+                        Open Source
+                      </a>
+                    </p>
+                  </Col>
+                  <Col span={12}>
+                    <p>
+                      <em>Aristotelica</em> is part of <a href="https://representationandreality.gu.se/">Representation and Reality</a>,<br /> funded by <a href="https://www.rj.se/en/">Riksbankens Jubileumsfond</a>
+                    </p>
+                  </Col>
+                </Row>
+              </div>
             </Content>
           </Layout>
         </Content>
-        <Footer className="footer">
-          <Row>
-            <Col span={12}>
-              <p>
-                © Michael Stenskjær Christensen 2019, MIT Licensed,
-                <a href="https://github.com/stenskjaer/aristotelica">
-                  <img className="github-logo" src={require('../img/octocat.png')} alt="Github" />
-                  open source
-                </a>
-              </p>
-            </Col>
-            <Col span={12}>
-              <p>
-                <em>Aristotelica</em> is a part <a href="https://representationandreality.gu.se/">Representation and Reality</a>, funded by <a href="https://www.rj.se/en/">Riksbankens Jubileumsfond</a>
-              </p>
-            </Col>
-          </Row>
-        </Footer>
+
       </Layout>
     </ApolloProvider>
   );

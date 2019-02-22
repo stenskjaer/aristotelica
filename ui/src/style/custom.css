@@ -113,10 +113,13 @@ img.bordered {
 
 .footer {
   text-align: left;
+  background: white;
+  border-top: 1px solid #d9d9d9;
+  padding: 10px;
 }
 
 .footer .github-logo {
-  margin: 0 4px;
+  margin: 0 4px 0 0;
   height: 16px;
 }
 
